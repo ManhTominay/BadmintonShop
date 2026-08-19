@@ -47,7 +47,7 @@
                     <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
                     <li><a href="{{ url('/quan-ao') }}" class="hover:text-orange-500 transition">QUẦN ÁO</a></li>
                     <li><a href="{{ url('/cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
+                    <li><a href="{{ route('phukien.index') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
                 </ul>
             </div>
         </nav>
@@ -108,11 +108,11 @@
                 <i class="fa-solid fa-shuttlecock text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">CẦU</span>
             </a>
-            <a href="#" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
+            <a href="{{ route('phukien.index', ['type' => 'bao_vot']) }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-suitcase-rolling text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">TÚI</span>
             </a>
-            <a href="#" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
+            <a href="{{ route('phukien.index') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-socks text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">PHỤ KIỆN</span>
             </a>

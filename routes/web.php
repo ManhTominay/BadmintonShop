@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CauController; // Khai báo thêm CauController
+use App\Http\Controllers\CauController; 
+use App\Http\Controllers\PhuKienController;
 
 // Trang chủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -20,6 +21,8 @@ Route::get('/quan-ao', [ProductController::class, 'quanAo'])->name('quan-ao');
 
 // Trang danh sách cầu thi đấu
 Route::get('/cau', [CauController::class, 'index'])->name('cau');
+// list phụ kiện
+Route::get('/phu-kien', [PhuKienController::class, 'index'])->name('phukien.index');
 
 // Thêm sản phẩm vào giỏ hàng
 Route::post('/gio-hang/them', [CartController::class, 'addToCart'])->name('cart.add');

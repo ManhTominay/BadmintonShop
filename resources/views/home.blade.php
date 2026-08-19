@@ -44,9 +44,9 @@
                 <ul class="flex items-center justify-center space-x-8 py-2 text-xs font-bold uppercase tracking-wider">
                     <li><a href="{{ url('/') }}" class="text-orange-500 border-b-2 border-orange-500 pb-1">TRANG CHỦ</a></li>
                     <li><a href="{{ url('/vot-cau-long') }}" class="hover:text-orange-500 transition">VỢT CẦU LÔNG</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">QUẦN ÁO</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">CẦU</a></li>
+                    <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
+                    <li><a href="{{ url('/quan-ao') }}" class="hover:text-orange-500 transition">QUẦN ÁO</a></li>
+                    <li><a href="{{ url('/cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
                     <li><a href="#" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
                 </ul>
             </div>
@@ -66,14 +66,14 @@
                              class="w-full h-[320px] sm:h-[420px] md:h-[480px] object-cover">
                     </a>
                 </div>
-               <!-- Slide 2: Banner phụ -->
-<div class="swiper-slide">
-    <a href="{{ url('/vot-cau-long') }}" class="block relative w-full">
-        <img src="{{ asset('images/banner2.jpg') }}" 
-             alt="Badminton Gear Collection" 
-             class="w-full h-[320px] sm:h-[420px] md:h-[480px] object-cover">
-    </a>
-</div>
+                <!-- Slide 2: Banner phụ -->
+                <div class="swiper-slide">
+                    <a href="{{ url('/vot-cau-long') }}" class="block relative w-full">
+                        <img src="{{ asset('images/banner2.jpg') }}" 
+                             alt="Badminton Gear Collection" 
+                             class="w-full h-[320px] sm:h-[420px] md:h-[480px] object-cover">
+                    </a>
+                </div>
 
             </div>
 
@@ -100,11 +100,11 @@
                 <i class="fa-solid fa-table-tennis-paddle-ball text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">VỢT</span>
             </a>
-            <a href="#" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
+            <a href="{{ url('/giay-cau-long') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-shoe-prints text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">GIÀY</span>
             </a>
-            <a href="#" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
+            <a href="{{ url('/cau') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-shuttlecock text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">CẦU</span>
             </a>

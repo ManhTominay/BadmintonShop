@@ -8,6 +8,67 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
+
+    <!-- Dải thông báo trên cùng giống trang Giày -->
+    <div class="bg-slate-900 text-white text-[11px] text-center py-1.5 font-medium tracking-wide">
+        Badminton Essential Equipment
+    </div>
+
+    <!-- Header chính -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <button class="text-gray-600 hover:text-orange-500">
+                <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            </button>
+
+            <!-- Logo Shop -->
+            <a href="{{ url('/') }}" class="flex items-center space-x-2">
+                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
+                <div class="leading-none">
+                    <h1 class="font-extrabold text-xl tracking-tight text-slate-900 uppercase">BADMINTON</h1>
+                    <p class="font-bold text-xs tracking-widest text-orange-500 uppercase">PRO SHOP</p>
+                </div>
+            </a>
+
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-gray-600 hover:text-orange-500">
+                    <i class="fa-regular fa-user text-xl"></i>
+                </a>
+                <a href="#" class="relative text-gray-600 hover:text-orange-500">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="border-t border-gray-100">
+            <div class="max-w-6xl mx-auto px-4">
+                <ul class="flex items-center justify-center space-x-8 py-2 text-xs font-bold uppercase tracking-wider">
+                    <li>
+                        <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">TRANG CHỦ</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/vot-cau-long') }}" class="{{ request()->is('vot-cau-long*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">VỢT CẦU LÔNG</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/giay-cau-long') }}" class="{{ request()->is('giay-cau-long*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">GIÀY CẦU LÔNG</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/quan-ao') }}" class="{{ request()->is('quan-ao*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">QUẦN ÁO</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:text-orange-500 transition">CẦU</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:text-orange-500 transition">PHỤ KIỆN</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Content Nội dung chính -->
     <div class="max-w-6xl mx-auto px-4 py-8">
         
         <!-- Header tiêu đề & số lượng -->

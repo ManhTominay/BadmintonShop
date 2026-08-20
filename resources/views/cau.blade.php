@@ -45,7 +45,7 @@
                     <li><a href="{{ url('/giay-cau-long') }}" class="{{ request()->is('giay-cau-long*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">GIÀY CẦU LÔNG</a></li>
                     <li><a href="{{ url('/quan-ao') }}" class="{{ request()->is('quan-ao*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">QUẦN ÁO</a></li>
                     <li><a href="{{ url('/cau') }}" class="{{ request()->is('cau*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">CẦU</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
+                    <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
                 </ul>
             </div>
         </nav>

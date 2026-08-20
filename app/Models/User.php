@@ -13,33 +13,39 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Bắt buộc chỉ định tên bảng trong CSDL
+     */
+    protected $table = 'nguoi_dung';
+
+    /**
+     * Tắt timestamps (created_at, updated_at) nếu bảng nguoi_dung không dùng 2 cột này
+     */
+    public $timestamps = false;
+
+    /**
+     * Các trường cho phép chèn dữ liệu hàng loạt
      */
     protected $fillable = [
-        'name',
+        'ho_ten',
         'email',
-        'password',
+        'so_dien_thoai',
+        'mat_khau_hash',
+        'vai_tro',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Bật ẩn trường nhạy cảm khi serialize
      */
     protected $hidden = [
-        'password',
+        'mat_khau_hash',
         'remember_token',
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * Chỉ định cho Laravel Auth biết cột mật khẩu mã hóa tên là mat_khau_hash
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    public function getAuthPassword()
+    {
+        return $this->mat_khau_hash;
+    }
 }

@@ -30,12 +30,39 @@
                 </div>
             </a>
 
+            <!-- Khối Tài Khoản / Giỏ Hàng / Đăng Nhập & Đăng Ký -->
             <div class="flex items-center space-x-4">
-                <a href="#" class="text-gray-600 hover:text-orange-500"><i class="fa-regular fa-user text-xl"></i></a>
-                <a href="#" class="relative text-gray-600 hover:text-orange-500">
-                    <i class="fa-solid fa-bag-shopping text-xl"></i>
-                    <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                <a href="{{ Auth::check() ? '#' : route('login') }}" class="text-gray-600 hover:text-orange-500" title="Tài khoản">
+                    <i class="fa-regular fa-user text-xl"></i>
                 </a>
+
+                <a href="#" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {{ session('cart') ? count(session('cart')) : 0 }}
+                    </span>
+                </a>
+
+                <!-- Nút Đăng nhập / Đăng ký bên phải Giỏ hàng -->
+                <div class="flex items-center space-x-2 text-xs font-semibold pl-2 border-l border-gray-200">
+                    @auth
+                        <span class="text-slate-700">
+                            Xin chào, <strong class="text-orange-500 font-bold">{{ Auth::user()->ho_ten ?? Auth::user()->full_name ?? Auth::user()->name ?? Auth::user()->username }}</strong>
+                        </span>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-500 hover:text-orange-500 transition ml-1">Đăng xuất</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-orange-500 transition py-1 px-1">
+                            Đăng nhập
+                        </a>
+                        <span class="text-gray-300">|</span>
+                        <a href="{{ route('register') }}" class="bg-orange-500 text-white px-3 py-1.5 rounded hover:bg-orange-600 transition shadow-sm">
+                            Đăng ký
+                        </a>
+                    @endauth
+                </div>
             </div>
         </div>
 
@@ -47,7 +74,7 @@
                     <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
                     <li><a href="{{ url('/quan-ao') }}" class="hover:text-orange-500 transition">QUẦN ÁO</a></li>
                     <li><a href="{{ url('/cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
-                    <li><a href="{{ route('phukien.index') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
+                    <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
                 </ul>
             </div>
         </nav>
@@ -108,11 +135,11 @@
                 <i class="fa-solid fa-shuttlecock text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">CẦU</span>
             </a>
-            <a href="{{ route('phukien.index', ['type' => 'bao_vot']) }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
+            <a href="{{ route('phukien', ['type' => 'bao_vot']) }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-suitcase-rolling text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">TÚI</span>
             </a>
-            <a href="{{ route('phukien.index') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
+            <a href="{{ route('phukien') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-socks text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">PHỤ KIỆN</span>
             </a>
@@ -154,45 +181,6 @@
                 </form>
             </div>
             @endforeach
-
-            <!-- Racket Setup Custom Widget -->
-            <div class="bg-white rounded p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
-                <form action="{{ route('cart.add') }}" method="POST">
-                    @csrf
-                    <h3 class="text-xs font-bold text-slate-900 uppercase mb-3">GET YOUR PERFECT RACKET SETUP</h3>
-                    
-                    <div class="space-y-2 text-xs">
-                        <select name="bien_the_id" class="w-full border rounded p-1.5 text-gray-600 text-[11px] bg-white" required>
-                            <option value="">Chọn Vợt & Trọng lượng</option>
-                            @foreach($sanPhams as $sp)
-                                @foreach($sp->bienThes as $bt)
-                                    <option value="{{ $bt->id }}">{{ $sp->ten_san_pham }} ({{ $bt->trong_luong_vot ?? '4U' }})</option>
-                                @endforeach
-                            @endforeach
-                        </select>
-
-                        <select name="cuoc_kem_bien_the_id" class="w-full border rounded p-1.5 text-gray-600 text-[11px] bg-white">
-                            <option value="">Chọn Loại Cước Đan</option>
-                            @foreach($danhSachCuoc as $cuoc)
-                                <option value="{{ $cuoc->id }}">{{ $cuoc->sanPham->ten_san_pham ?? 'Cước Yonex' }}</option>
-                            @endforeach
-                        </select>
-
-                        <select name="so_kg_cang" class="w-full border rounded p-1.5 text-gray-600 text-[11px] bg-white">
-                            <option value="">Mức căng (Tension)</option>
-                            <option value="10.5">10.5 kg (23 lbs)</option>
-                            <option value="11.0">11.0 kg (24 lbs)</option>
-                            <option value="11.5">11.5 kg (25 lbs)</option>
-                            <option value="12.0">12.0 kg (26 lbs)</option>
-                        </select>
-                        <input type="hidden" name="so_luong" value="1">
-                    </div>
-
-                    <button type="submit" class="w-full mt-4 bg-slate-900 text-white text-xs font-bold py-2 rounded hover:bg-orange-500 transition">
-                        Add to Cart
-                    </button>
-                </form>
-            </div>
 
         </div>
     </section>

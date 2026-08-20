@@ -8,14 +8,9 @@ use Illuminate\Support\Str;
 
 class PhuKienSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        // 1. Tạo hoặc cập nhật danh mục Phụ Kiện Cầu Lông với id = 5
+        // 1. Đảm bảo danh mục Phụ Kiện Cầu Lông có id = 5
         DB::table('danh_muc')->updateOrInsert(
             ['id' => 5],
             [
@@ -25,109 +20,154 @@ class PhuKienSeeder extends Seeder
             ]
         );
 
-        // 2. Danh sách đầy đủ các sản phẩm phụ kiện
+        // 2. Danh sách 20 sản phẩm phụ kiện gán danh_muc_id = 5
         $danhSachPhuKien = [
-            // Bao Vợt
+            // Tất / Vớ
             [
-                'ten_san_pham' => 'Bao Vợt Cầu Lông Yonex Pro Bag 6 chiếc',
-                'slug' => Str::slug('Bao Vot Cau Long Yonex Pro Bag 6 chiec'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 850000,
-                'anh_dai_dien' => 'bao-vot-yonex-pro.webp',
-            ],
-            [
-                'ten_san_pham' => 'Bao Vợt Cầu Lông Victor Rectangle Bag',
-                'slug' => Str::slug('Bao Vot Cau Long Victor Rectangle Bag'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 790000,
-                'anh_dai_dien' => 'bao-vot-victor-rect.webp',
-            ],
-
-            // Cước Vợt
-            [
-                'ten_san_pham' => 'Cước Cầu Lông Yonex BG 65 Ti',
-                'slug' => Str::slug('Cuoc Cau Long Yonex BG 65 Ti'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 130000,
-                'anh_dai_dien' => 'cuoc-yonex-bg65ti.webp',
-            ],
-            [
-                'ten_san_pham' => 'Cước Cầu Lông Yonex BG 66 Ultimax',
-                'slug' => Str::slug('Cuoc Cau Long Yonex BG 66 Ultimax'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 180000,
-                'anh_dai_dien' => 'cuoc-yonex-bg66ultimax.webp',
-            ],
-            [
-                'ten_san_pham' => 'Cước Cầu Lông Li-Ning No.1',
-                'slug' => Str::slug('Cuoc Cau Long Li Ning No 1'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 150000,
-                'anh_dai_dien' => 'cuoc-lining-no1.webp',
-            ],
-
-            // Băng Chặn Mồ Hôi Tay
-            [
-                'ten_san_pham' => 'Băng Chặn Mồ Hôi Tay Yonex AC488',
-                'slug' => Str::slug('Bang Chan Mo Hoi Tay Yonex AC488'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 65000,
-                'anh_dai_dien' => 'bang-tay-yonex.webp',
-            ],
-            [
-                'ten_san_pham' => 'Băng Chặn Mồ Hôi Tay Victor Wristband',
-                'slug' => Str::slug('Bang Chan Mo Hoi Tay Victor Wristband'),
-                'danh_muc_id' => 5,
-                'gia_co_ban' => 55000,
-                'anh_dai_dien' => 'bang-tay-victor.webp',
-            ],
-
-            // Băng Chặn Mồ Hôi Đầu / Trán
-            [
-                'ten_san_pham' => 'Băng Chặn Mồ Hôi Trán Yonex Headband',
-                'slug' => Str::slug('Bang Chan Mo Hoi Tran Yonex Headband'),
+                'ten_san_pham' => 'Tất Cầu Lông Yonex Trơn Dài',
+                'slug' => Str::slug('Tat Cau Long Yonex Tron Dai'),
                 'danh_muc_id' => 5,
                 'gia_co_ban' => 80000,
-                'anh_dai_dien' => 'bang-dau-yonex.webp',
+                'anh_dai_dien' => 'tat_yonex_trondai.webp',
             ],
             [
-                'ten_san_pham' => 'Băng Chặn Mồ Hôi Trán Li-Ning Headband',
-                'slug' => Str::slug('Bang Chan Mo Hoi Tran Li Ning Headband'),
+                'ten_san_pham' => 'Tất Cầu Lông Yonex 3D Ergo Socks',
+                'slug' => Str::slug('Tat Cau Long Yonex 3D Ergo Socks'),
                 'danh_muc_id' => 5,
-                'gia_co_ban' => 75000,
-                'anh_dai_dien' => 'bang-dau-lining.webp',
+                'gia_co_ban' => 100000,
+                'anh_dai_dien' => 'tat_yonex_3d_ergo_socks.webp',
+            ],
+            [
+                'ten_san_pham' => 'Tất Cầu Lông Yonex Lin Dan',
+                'slug' => Str::slug('Tat Cau Long Yonex Lin Dan'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 100000,
+                'anh_dai_dien' => 'tat_yonex_Lindan.webp',
+            ],
+            [
+                'ten_san_pham' => 'Tất Cầu Lông Li-Ning P AWSV155-3C',
+                'slug' => Str::slug('Tat Cau Long Li Ning P AWSV155-3C'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 174764,
+                'anh_dai_dien' => 'tat_lining_P_AWSV155-3C.webp',
+            ],
+            [
+                'ten_san_pham' => 'Tất Cầu Lông Li-Ning P AWTV009-3V',
+                'slug' => Str::slug('Tat Cau Long Li Ning P AWTV009-3V'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 196364,
+                'anh_dai_dien' => 'tat_lining_P_AWTV009-3V.webp',
+            ],
+            [
+                'ten_san_pham' => 'Tất Cầu Lông Taro Pattern TTR06-2061',
+                'slug' => Str::slug('Tat Cau Long Taro Pattern TTR06-2061'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 55000,
+                'anh_dai_dien' => 'tat_taro_pattern_TTR06-2061.webp',
             ],
 
-            // Cuốn Cán Vợt
+            // Băng Trán & Băng Chặn Mồ Hôi
             [
-                'ten_san_pham' => 'Cuốn Cán Vợt Cầu Lông Yonex AC102EX',
-                'slug' => Str::slug('Cuon Can Vot Cau Long Yonex AC102EX'),
+                'ten_san_pham' => 'Băng Trán Yonex PHB002ZHB1ZZ Navy',
+                'slug' => Str::slug('Bang Tran Yonex PHB002ZHB1ZZ Navy'),
                 'danh_muc_id' => 5,
-                'gia_co_ban' => 25000,
-                'anh_dai_dien' => 'cuon-can-yonex.webp',
+                'gia_co_ban' => 55000,
+                'anh_dai_dien' => 'bang_tran_yonex_PHB002ZHB1ZZ-navy.webp',
             ],
             [
-                'ten_san_pham' => 'Cuốn Cán Vợt Cầu Lông Victor V-GR01',
-                'slug' => Str::slug('Cuon Can Vot Cau Long Victor V-GR01'),
+                'ten_san_pham' => 'Băng Tay Yonex 08522-2',
+                'slug' => Str::slug('Bang Tay Yonex 08522-2'),
                 'danh_muc_id' => 5,
-                'gia_co_ban' => 20000,
-                'anh_dai_dien' => 'cuon-can-victor.webp',
+                'gia_co_ban' => 95000,
+                'anh_dai_dien' => 'bang_tay_yonex_08522-2.webp',
             ],
-
-            // Tất / Vớ Cầu Lông
             [
-                'ten_san_pham' => 'Tất Cầu Lông Yonex Cổ Ngắn',
-                'slug' => Str::slug('Tat Cau Long Yonex Co Ngan'),
+                'ten_san_pham' => 'Băng Chặn Mồ Hôi VS VH071',
+                'slug' => Str::slug('Bang Chan Mo Hoi VS VH071'),
                 'danh_muc_id' => 5,
                 'gia_co_ban' => 50000,
-                'anh_dai_dien' => 'tat-yonex.webp',
+                'anh_dai_dien' => 'bang_chan_vs-VH071.webp',
             ],
             [
-                'ten_san_pham' => 'Tất Cầu Lông Li-Ning Thể Thao',
-                'slug' => Str::slug('Tat Cau Long Li Ning The Thao'),
+                'ten_san_pham' => 'Băng Chặn Mồ Hôi Li-Ning AHWS029-8',
+                'slug' => Str::slug('Bang Chan Mo Hoi Li Ning AHWS029-8'),
                 'danh_muc_id' => 5,
-                'gia_co_ban' => 45000,
-                'anh_dai_dien' => 'tat-lining.webp',
+                'gia_co_ban' => 55000,
+                'anh_dai_dien' => 'bang_chan_lining-AHWS029-8.webp',
+            ],
+            [
+                'ten_san_pham' => 'Băng Chặn Mồ Hôi Li-Ning AHWR014-8',
+                'slug' => Str::slug('Bang Chan Mo Hoi Li Ning AHWR014-8'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 65000,
+                'anh_dai_dien' => 'bang_chan_lining-AHWR014-8.webp',
+            ],
+            [
+                'ten_san_pham' => 'Băng Chặn Mồ Hôi Kumpoo K31',
+                'slug' => Str::slug('Bang Chan Mo Hoi Kumpoo K31'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 75000,
+                'anh_dai_dien' => 'bang_chan_kumpoo-k31.webp',
+            ],
+
+            // Cước Vợt Cầu Lông
+            [
+                'ten_san_pham' => 'Cước Cầu Lông Hundred JP66',
+                'slug' => Str::slug('Cuoc Cau Long Hundred JP66'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 149000,
+                'anh_dai_dien' => 'cuoc_hundred-JP66.webp',
+            ],
+            [
+                'ten_san_pham' => 'Cước Cầu Lông Kizuna Z65X',
+                'slug' => Str::slug('Cuoc Cau Long Kizuna Z65X'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 150000,
+                'anh_dai_dien' => 'cuoc_kizuna-Z65X.webp',
+            ],
+            [
+                'ten_san_pham' => 'Cước Cầu Lông GOSEN Ryzonic 65 Pochaneco',
+                'slug' => Str::slug('Cuoc Cau Long GOSEN Ryzonic 65 Pochaneco'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 155000,
+                'anh_dai_dien' => 'cuoc_GOSEN-ryzonic65-pochaneco.webp',
+            ],
+            [
+                'ten_san_pham' => 'Cước Cầu Lông Yonex BG EXBOLT 65',
+                'slug' => Str::slug('Cuoc Cau Long Yonex BG EXBOLT 65'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 200000,
+                'anh_dai_dien' => 'cuoc-BGEXBOLT65.webp',
+            ],
+
+            // Bao Vợt / Túi
+            [
+                'ten_san_pham' => 'Bao Vợt Cầu Lông Victor AG-150',
+                'slug' => Str::slug('Bao Vot Cau Long Victor AG-150'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 894000,
+                'anh_dai_dien' => 'bao_victor-AG-150.webp',
+            ],
+            [
+                'ten_san_pham' => 'Bao Vợt Cầu Lông Taro TR024-BAG01',
+                'slug' => Str::slug('Bao Vot Cau Long Taro TR024-BAG01'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 599000,
+                'anh_dai_dien' => 'bao_taro-TR024-BAG01.webp',
+            ],
+            [
+                'ten_san_pham' => 'Bao Vợt Cầu Lông Li-Ning P ABLV029-3',
+                'slug' => Str::slug('Bao Vot Cau Long Li Ning P ABLV029-3'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 1150000,
+                'anh_dai_dien' => 'bao_lining-P-ABLV029-3.webp',
+            ],
+            [
+                'ten_san_pham' => 'Bao Vợt Cầu Lông Yonex BAG324B0629',
+                'slug' => Str::slug('Bao Vot Cau Long Yonex BAG324B0629'),
+                'danh_muc_id' => 5,
+                'gia_co_ban' => 889000,
+                'anh_dai_dien' => 'bao_yonex_BAG324B0629.webp',
             ],
         ];
 

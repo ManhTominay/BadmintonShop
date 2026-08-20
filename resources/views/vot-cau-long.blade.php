@@ -9,7 +9,7 @@
 </head>
 <body class="bg-gray-50">
 
-    <!-- Dải thông báo trên cùng giống trang Giày -->
+    <!-- Dải thông báo trên cùng -->
     <div class="bg-slate-900 text-white text-[11px] text-center py-1.5 font-medium tracking-wide">
         Badminton Essential Equipment
     </div>
@@ -126,8 +126,12 @@
                 <div>
                     <!-- Khung ảnh sản phẩm -->
                     <div class="h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
-                        <img src="{{ asset('images/' . ($sp->anh_dai_dien ?? 'yonex_doura10.webp')) }}" 
-                             class="h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        @php
+                            $imageName = !empty($sp->anh_dai_dien) ? $sp->anh_dai_dien : 'yonex_doura10.webp';
+                        @endphp
+                        <img src="{{ asset('images/' . $imageName) }}" 
+                             onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';"
+                             class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
                              alt="{{ $sp->ten_san_pham }}">
                     </div>
 

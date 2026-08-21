@@ -44,7 +44,7 @@
                     <li><a href="{{ url('/vot-cau-long') }}" class="hover:text-orange-500 transition">VỢT CẦU LÔNG</a></li>
                     <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
                     <li><a href="{{ url('/quan-ao') }}" class="text-orange-500 border-b-2 border-orange-500 pb-1">QUẦN ÁO</a></li>
-                    <li><a href="{{ url('/cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
+                    <li><a href="{{ route('cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
                     <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
                 </ul>
             </div>
@@ -56,13 +56,13 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
                 <h1 class="text-2xl font-extrabold text-slate-900 uppercase">QUẦN ÁO CẦU LÔNG</h1>
-                <p class="text-xs text-gray-500 mt-1">Hiển thị {{ $danhSachQuanAo->count() }} sản phẩm</p>
+                <p class="text-xs text-gray-500 mt-1">Hiển thị {{ isset($danhSachQuanAo) ? $danhSachQuanAo->count() : 0 }} sản phẩm</p>
             </div>
 
             <!-- Bộ lọc tìm kiếm & Sắp xếp -->
             <form action="{{ url('/quan-ao') }}" method="GET" class="flex flex-wrap items-center gap-3">
                 <div class="relative">
-                    <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm theo tên/thương hiệu..." class="border rounded px-3 py-1.5 text-xs focus:outline-none focus:border-orange-500 w-48 sm:w-64">
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm theo tên sản phẩm..." class="border rounded px-3 py-1.5 text-xs focus:outline-none focus:border-orange-500 w-48 sm:w-64">
                     @if(request('keyword'))
                         <a href="{{ url('/quan-ao') }}" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i></a>
                     @endif
@@ -78,39 +78,33 @@
             </form>
         </div>
 
-        <!-- Thương hiệu phổ biến -->
-        <div class="flex flex-wrap gap-2 mb-8">
-            <span class="text-xs font-bold text-gray-500 self-center mr-2">Thương hiệu:</span>
-            <a href="{{ url('/quan-ao?keyword=Yonex') }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Yonex' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Yonex</a>
-            <a href="{{ url('/quan-ao?keyword=Victor') }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Victor' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Victor</a>
-            <a href="{{ url('/quan-ao?keyword=Lining') }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Lining' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Lining</a>
-        </div>
-
         <!-- Grid Danh sách Quần Áo -->
-        @if($danhSachQuanAo->count() > 0)
+        @if(isset($danhSachQuanAo) && $danhSachQuanAo->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach($danhSachQuanAo as $sp)
                 <div class="bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
-                        <!-- Khung ảnh sản phẩm -->
-                        <div class="h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
+                        <!-- Khung ảnh sản phẩm (Click vào ảnh dẫn đến chi tiết) -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
                             @if($sp->anh_dai_dien && file_exists(public_path('images/' . $sp->anh_dai_dien)))
                                 <img src="{{ asset('images/' . $sp->anh_dai_dien) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain hover:scale-105 transition-transform duration-300">
                             @else
                                 <i class="fa-solid fa-shirt text-5xl text-gray-300"></i>
                             @endif
-                        </div>
+                        </a>
 
                         <!-- Nút XEM CHI TIẾT -->
-                        <a href="{{ url('/quan-ao/' . ($sp->slug ?? $sp->id)) }}" 
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
                            class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
                             XEM CHI TIẾT
                         </a>
 
                         <!-- Tên sản phẩm -->
-                        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2">
-                            {{ $sp->ten_san_pham }}
-                        </h3>
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                            <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
+                                {{ $sp->ten_san_pham }}
+                            </h3>
+                        </a>
                     </div>
 
                     <!-- Giá tiền -->

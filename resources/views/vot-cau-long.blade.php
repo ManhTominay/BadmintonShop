@@ -58,10 +58,10 @@
                         <a href="{{ url('/quan-ao') }}" class="{{ request()->is('quan-ao*') ? 'text-orange-500 border-b-2 border-orange-500 pb-1' : 'hover:text-orange-500 transition' }}">QUẦN ÁO</a>
                     </li>
                     <li>
-                        <a href="#" class="hover:text-orange-500 transition">CẦU</a>
+                        <a href="{{ route('cau') }}" class="hover:text-orange-500 transition">CẦU</a>
                     </li>
                     <li>
-                        <a href="#" class="hover:text-orange-500 transition">PHỤ KIỆN</a>
+                        <a href="{{ route('phukien') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a>
                     </li>
                 </ul>
             </div>
@@ -124,8 +124,8 @@
             <div class="group bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:shadow-lg hover:border-orange-500 transition-all duration-300">
                 
                 <div>
-                    <!-- Khung ảnh sản phẩm -->
-                    <div class="h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
+                    <!-- Bọc thẻ a quanh ảnh để bấm vào là xem chi tiết -->
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
                         @php
                             $imageName = !empty($sp->anh_dai_dien) ? $sp->anh_dai_dien : 'yonex_doura10.webp';
                         @endphp
@@ -133,21 +133,23 @@
                              onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';"
                              class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
                              alt="{{ $sp->ten_san_pham }}">
-                    </div>
+                    </a>
 
                     <!-- Nút Xem chi tiết khi hover -->
                     <div class="mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <a href="#" class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2 rounded transition-colors shadow">
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2 rounded transition-colors shadow">
                             XEM CHI TIẾT
                         </a>
                     </div>
                 </div>
 
-                <!-- Thông tin tên & giá -->
+                <!-- Thông tin tên & giá (Bọc thẻ a vào tên sản phẩm để click được) -->
                 <div>
-                    <h3 class="text-sm font-bold text-gray-800 line-clamp-2 h-10 leading-snug">
-                        {{ $sp->ten_san_pham }}
-                    </h3>
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                        <h3 class="text-sm font-bold text-gray-800 line-clamp-2 h-10 leading-snug hover:text-orange-500 transition-colors">
+                            {{ $sp->ten_san_pham }}
+                        </h3>
+                    </a>
                     <p class="text-sm font-bold text-orange-500 mt-2">
                         {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
                     </p>

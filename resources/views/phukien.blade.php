@@ -81,13 +81,27 @@
         <!-- Bộ Lọc Phụ Kiện -->
         <div class="flex flex-wrap items-center gap-2 mb-6">
             <span class="text-xs font-bold text-gray-500 mr-1">Loại phụ kiện:</span>
-            <a href="{{ route('phukien') }}" class="px-3 py-1 text-xs border rounded-full transition {{ !request('type') ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Tất cả</a>
-            <a href="{{ route('phukien', array_merge(request()->query(), ['type' => 'bao_vot'])) }}" class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'bao_vot' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Bao vợt</a>
-            <a href="{{ route('phukien', array_merge(request()->query(), ['type' => 'cuoc'])) }}" class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'cuoc' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Cước đan</a>
-            <a href="{{ route('phukien', array_merge(request()->query(), ['type' => 'cuon_can'])) }}" class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'cuon_can' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Cuốn cán</a>
-            <a href="{{ route('phukien', array_merge(request()->query(), ['type' => 'bang_tay'])) }}" class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'bang_tay' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Băng tay</a>
-            <a href="{{ route('phukien', array_merge(request()->query(), ['type' => 'bang_dau'])) }}" class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'bang_dau' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Băng trán/đầu</a>
-            <a href="{{ route('phukien', array_merge(request()->query(), ['type' => 'tat'])) }}" class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'tat' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Tất / Vớ</a>
+            
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'tat_ca'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ !request('type') || request('type') == 'tat_ca' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Tất cả</a>
+               
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'bao_vot'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'bao_vot' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Bao vợt</a>
+               
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'cuoc'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'cuoc' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Cước đan</a>
+               
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'cuon_can'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'cuon_can' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Cuốn cán</a>
+               
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'bang_tay'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'bang_tay' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Băng tay</a>
+               
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'bang_dau'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'bang_dau' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Băng trán/đầu</a>
+               
+            <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'tat'])) }}" 
+               class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'tat' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Tất / Vớ</a>
         </div>
 
         <!-- Danh sách Phụ Kiện -->
@@ -95,28 +109,30 @@
             @forelse($danhSachPhuKien as $item)
                 <div class="bg-white rounded-xl p-3 border border-gray-100 flex flex-col justify-between shadow-sm hover:shadow-md transition">
                     <div>
-                        <!-- Khung Ảnh -->
-                        <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center p-2 mb-3 overflow-hidden relative">
+                        <!-- Khung Ảnh (Bấm vào ảnh chuyển đến trang chi tiết) -->
+                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block h-48 bg-gray-50 rounded-lg flex items-center justify-center p-2 mb-3 overflow-hidden relative">
                             @if($item->anh_dai_dien)
                                 <img src="{{ asset('images/' . ltrim($item->anh_dai_dien, '/')) }}" 
                                      alt="{{ $item->ten_san_pham }}" 
-                                     class="max-h-full max-w-full object-contain"
+                                     class="max-h-full max-w-full object-contain hover:scale-105 transition-transform duration-300"
                                      onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                                 <span class="hidden text-xs text-gray-400 font-medium">Không tìm thấy ảnh</span>
                             @else
                                 <span class="text-xs text-gray-400 font-medium">Chưa có ảnh</span>
                             @endif
-                        </div>
+                        </a>
 
                         <!-- Nút XEM CHI TIẾT -->
-                        <a href="{{ route('phukien', $item->slug ?? $item->id) }}" class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs py-2 rounded-lg uppercase tracking-wide mb-3 transition">
+                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs py-2 rounded-lg uppercase tracking-wide mb-3 transition">
                             XEM CHI TIẾT
                         </a>
 
-                        <!-- Tên sản phẩm -->
-                        <h3 class="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px]">
-                            {{ $item->ten_san_pham }}
-                        </h3>
+                        <!-- Tên sản phẩm (Bấm vào tên chuyển đến trang chi tiết) -->
+                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
+                            <h3 class="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] hover:text-orange-500 transition-colors">
+                                {{ $item->ten_san_pham }}
+                            </h3>
+                        </a>
                     </div>
 
                     <!-- Giá sản phẩm -->

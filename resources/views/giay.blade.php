@@ -44,8 +44,8 @@
                     <li><a href="{{ url('/vot-cau-long') }}" class="hover:text-orange-500 transition">VỢT CẦU LÔNG</a></li>
                     <li><a href="{{ url('/giay-cau-long') }}" class="text-orange-500 border-b-2 border-orange-500 pb-1">GIÀY CẦU LÔNG</a></li>
                     <li><a href="{{ url('/quan-ao') }}" class="hover:text-orange-500 transition">QUẦN ÁO</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">CẦU</a></li>
-                    <li><a href="#" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
+                    <li><a href="{{ route('cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
+                    <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
                 </ul>
             </div>
         </nav>
@@ -93,25 +93,27 @@
                 @foreach($danhSachGiay as $sp)
                 <div class="bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
-                        <!-- Khung ảnh sản phẩm -->
-                        <div class="h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
+                        <!-- Khung ảnh sản phẩm (Click vào ảnh cũng dẫn đến chi tiết) -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
                             @if($sp->anh_dai_dien && file_exists(public_path('images/' . $sp->anh_dai_dien)))
                                 <img src="{{ asset('images/' . $sp->anh_dai_dien) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain hover:scale-105 transition-transform duration-300">
                             @else
                                 <i class="fa-solid fa-shoe-prints text-5xl text-gray-300"></i>
                             @endif
-                        </div>
+                        </a>
 
                         <!-- Nút XEM CHI TIẾT -->
-                        <a href="{{ url('/giay-cau-long/' . ($sp->slug ?? $sp->id)) }}" 
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
                            class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
                             XEM CHI TIẾT
                         </a>
 
                         <!-- Tên sản phẩm -->
-                        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2">
-                            {{ $sp->ten_san_pham }}
-                        </h3>
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                            <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
+                                {{ $sp->ten_san_pham }}
+                            </h3>
+                        </a>
                     </div>
 
                     <!-- Giá tiền -->

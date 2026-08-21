@@ -148,8 +148,20 @@
 
     <!-- Featured Products Section -->
     <section class="max-w-6xl mx-auto px-4 pb-12">
-        <h2 class="text-center font-extrabold text-lg uppercase mb-6">FEATURED PRODUCTS</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+            <h2 class="font-extrabold text-lg uppercase">FEATURED PRODUCTS</h2>
+            
+            <!-- Filter Tabs Button -->
+            <div class="flex flex-wrap gap-2 text-xs font-bold uppercase" id="featured-tabs">
+                <button data-type="all" class="tab-btn px-4 py-2 rounded-full bg-slate-900 text-white shadow-sm transition">Tất cả</button>
+                <button data-type="new" class="tab-btn px-4 py-2 rounded-full bg-gray-100 text-gray-600 hover:bg-orange-500 hover:text-white transition">Sản phẩm mới</button>
+                <button data-type="hot" class="tab-btn px-4 py-2 rounded-full bg-gray-100 text-gray-600 hover:bg-orange-500 hover:text-white transition">Bán chạy</button>
+                <button data-type="sale" class="tab-btn px-4 py-2 rounded-full bg-gray-100 text-gray-600 hover:bg-orange-500 hover:text-white transition">Giảm giá hot</button>
+            </div>
+        </div>
+
+        <!-- Khối hiển thị sản phẩm -->
+        <div id="featured-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 min-h-[250px]">
 
             @foreach($sanPhams as $sp)
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
@@ -185,10 +197,11 @@
         </div>
     </section>
 
-    <!-- Thêm Swiper JS Script -->
+    <!-- Thêm Swiper JS & AJAX Filter Script -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Khởi tạo Swiper Banner
             const swiper = new Swiper('.bannerSwiper', {
                 loop: true,
                 autoplay: {
@@ -203,6 +216,65 @@
                     nextEl: '.swiper-button-next-custom',
                     prevEl: '.swiper-button-prev-custom',
                 },
+            });
+
+            // Xử lý chuyển tab AJAX
+            const tabs = document.querySelectorAll('.tab-btn');
+            const grid = document.getElementById('featured-products-grid');
+            const csrfToken = '{{ csrf_token() }}';
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    // Active State cho các nút Tab
+                    tabs.forEach(t => {
+                        t.classList.remove('bg-slate-900', 'text-white');
+                        t.classList.add('bg-gray-100', 'text-gray-600');
+                    });
+                    this.classList.remove('bg-gray-100', 'text-gray-600');
+                    this.classList.add('bg-slate-900', 'text-white');
+
+                    const type = this.dataset.type;
+
+                    // Hiển thị trạng thái đang tải
+                    grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 font-medium"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải sản phẩm...</div>`;
+
+                    // Gọi API lấy dữ liệu sản phẩm tương ứng
+                    fetch(`{{ route('featured.products') }}?type=${type}`)
+                        .then(res => res.json())
+                        .then(products => {
+                            if (products.length === 0) {
+                                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 text-sm">Không tìm thấy sản phẩm nào.</div>`;
+                                return;
+                            }
+
+                            grid.innerHTML = products.map(sp => `
+                                <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
+                                    ${sp.la_san_pham_moi ? '<span class="absolute top-3 left-3 bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10">New</span>' : ''}
+                                    <div>
+                                        <div class="h-36 bg-gray-50 rounded flex items-center justify-center mb-3 p-2">
+                                            <img src="/images/${sp.anh_dai_dien ? sp.anh_dai_dien.replace(/^\//, '') : 'yonex_doura10.webp'}" alt="${sp.ten_san_pham}" class="h-full object-contain">
+                                        </div>
+                                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">${sp.ten_san_pham}</h3>
+                                        <div class="flex text-yellow-400 text-[10px] my-1">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-900">${new Intl.NumberFormat('vi-VN').format(sp.gia_co_ban)} VNĐ</p>
+                                    </div>
+                                    
+                                    <form action="{{ route('cart.add') }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                                        <input type="hidden" name="_token" value="${csrfToken}">
+                                        <input type="hidden" name="bien_the_id" value="${sp.bien_thes && sp.bien_thes.length > 0 ? sp.bien_thes[0].id : 1}">
+                                        <input type="hidden" name="so_luong" value="1">
+                                        <button type="submit" class="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-orange-500 transition">Add to Cart</button>
+                                        <label class="text-[10px] text-gray-500 flex items-center cursor-pointer"><input type="checkbox" class="mr-1"> Compare</label>
+                                    </form>
+                                </div>
+                            `).join('');
+                        })
+                        .catch(() => {
+                            grid.innerHTML = `<div class="col-span-full text-center py-12 text-red-500 text-sm">Có lỗi xảy ra khi tải dữ liệu!</div>`;
+                        });
+                });
             });
         });
     </script>

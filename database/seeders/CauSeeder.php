@@ -71,8 +71,26 @@ class CauSeeder extends Seeder
                 'gia_co_ban' => 200000,
                 'anh_dai_dien' => 'cau-nhua-victor-NCS-TUC24.webp',
             ],
+            [
+                'ten_san_pham' => 'Quả Cầu Lông Yonex AS40',
+                'slug' => Str::slug('Qua Cau Long Yonex AS40'),
+                'danh_muc_id' => 3,
+                'gia_co_ban' => 1659000,
+                'anh_dai_dien' => 'qua_cau_yonexAS40.webp',
+            ],
         ];
 
-        DB::table('san_pham')->insert($danhSachCau);
+        // 3. Sử dụng updateOrInsert theo slug để chống lỗi trùng lặp khi chạy lại
+        foreach ($danhSachCau as $item) {
+            DB::table('san_pham')->updateOrInsert(
+                ['slug' => $item['slug']],
+                [
+                    'ten_san_pham' => $item['ten_san_pham'],
+                    'danh_muc_id' => $item['danh_muc_id'],
+                    'gia_co_ban' => $item['gia_co_ban'],
+                    'anh_dai_dien' => $item['anh_dai_dien'],
+                ]
+            );
+        }
     }
 }

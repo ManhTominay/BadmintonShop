@@ -50,7 +50,7 @@ class QuanAoSeeder extends Seeder
             [
                 'ten_san_pham' => 'Quần Cầu Lông Yonex SM3387-ESST4 White',
                 'gia_co_ban' => 309000,
-                'anh_dai_dien' => 'quan-yonex-SM3387-ESST4-white.webp'
+                'anh_dai_dien' => 'quan-yonex-SM3387-ESST4-white.jpg'
             ],
             [
                 'ten_san_pham' => 'Quần Cầu Lông Yonex TSM3085 White',

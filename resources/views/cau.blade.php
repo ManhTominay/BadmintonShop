@@ -93,25 +93,27 @@
                 @foreach($danhSachCau as $sp)
                 <div class="bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
-                        <!-- Khung ảnh sản phẩm -->
-                        <div class="h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
+                        <!-- Khung ảnh sản phẩm (Click vào ảnh dẫn tới chi tiết) -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
                             @if($sp->anh_dai_dien && file_exists(public_path('images/' . $sp->anh_dai_dien)))
                                 <img src="{{ asset('images/' . $sp->anh_dai_dien) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain hover:scale-105 transition-transform duration-300">
                             @else
                                 <i class="fa-solid fa-shuttlecock text-5xl text-gray-300"></i>
                             @endif
-                        </div>
+                        </a>
 
                         <!-- Nút XEM CHI TIẾT -->
-                        <a href="{{ url('/cau/' . ($sp->slug ?? $sp->id)) }}" 
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
                            class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
                             XEM CHI TIẾT
                         </a>
 
-                        <!-- Tên sản phẩm -->
-                        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2">
-                            {{ $sp->ten_san_pham }}
-                        </h3>
+                        <!-- Tên sản phẩm (Click vào tên cũng dẫn tới chi tiết) -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                            <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
+                                {{ $sp->ten_san_pham }}
+                            </h3>
+                        </a>
                     </div>
 
                     <!-- Giá tiền -->

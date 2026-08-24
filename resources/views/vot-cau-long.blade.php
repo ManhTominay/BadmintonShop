@@ -17,10 +17,7 @@
     <!-- Header chính -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <button class="text-gray-600 hover:text-orange-500">
-                <i class="fa-solid fa-magnifying-glass text-lg"></i>
-            </button>
-
+            
             <!-- Logo Shop -->
             <a href="{{ url('/') }}" class="flex items-center space-x-2">
                 <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
@@ -30,11 +27,29 @@
                 </div>
             </a>
 
+            <!-- Thanh tìm kiếm kiểu dáng mới (Border cam, nút Tìm kiếm nằm trong khung) ở Header -->
+            <div class="flex-1 max-w-xl mx-8">
+                <form action="{{ route('vot-cau-long') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
+                    <!-- Ô nhập từ khóa (Có icon kính lúp bên trái) -->
+                    <div class="flex items-center flex-1 px-3 py-1.5">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2 text-sm"></i>
+                        <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm kiếm sản phẩm..." 
+                               class="w-full text-xs text-gray-700 bg-transparent focus:outline-none placeholder-gray-400"
+                               autocomplete="off">
+                    </div>
+                    <!-- Nút Tìm kiếm màu cam bên phải -->
+                    <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 text-xs transition duration-150">
+                        Tìm kiếm
+                    </button>
+                </form>
+            </div>
+
+            <!-- Giỏ hàng & Tài khoản -->
             <div class="flex items-center space-x-4">
-                <a href="#" class="text-gray-600 hover:text-orange-500">
+                <a href="#" class="text-gray-600 hover:text-orange-500" title="Tài khoản">
                     <i class="fa-regular fa-user text-xl"></i>
                 </a>
-                <a href="#" class="relative text-gray-600 hover:text-orange-500">
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
                 </a>
@@ -79,10 +94,10 @@
             </span>
         </div>
 
-        <!-- Form Tìm kiếm & Sắp xếp -->
+        <!-- Form Tìm kiếm trong trang & Sắp xếp -->
         <form action="{{ route('vot-cau-long') }}" method="GET" class="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
             
-            <!-- Ô tìm kiếm -->
+            <!-- Ô tìm kiếm trong trang (giữ lại nếu muốn lọc nhanh tại chỗ hoặc chỉnh sửa tùy ý) -->
             <div class="relative w-full md:w-2/3 flex items-center">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 text-gray-400"></i>
                 <input type="text" 
@@ -143,7 +158,7 @@
                     </div>
                 </div>
 
-                <!-- Thông tin tên & giá (Bọc thẻ a vào tên sản phẩm để click được) -->
+                <!-- Thông tin tên & giá -->
                 <div>
                     <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
                         <h3 class="text-sm font-bold text-gray-800 line-clamp-2 h-10 leading-snug hover:text-orange-500 transition-colors">

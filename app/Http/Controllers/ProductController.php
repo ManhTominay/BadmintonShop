@@ -7,6 +7,33 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    /**
+     * Hàm xử lý tìm kiếm toàn hệ thống (Độc lập với các danh mục)
+     */
+    public function search(Request $request)
+    {
+        $query = SanPham::with('bienThes')->where('trang_thai_kinh_doanh', true);
+
+        if ($request->filled('keyword')) {
+            $keyword = trim($request->keyword);
+            $normalized = strtolower($keyword);
+
+            if (in_array($normalized, ['lining', 'li-ning', 'li ning'])) {
+                $query->where(function($q) {
+                    $q->where('ten_san_pham', 'LIKE', '%Li-Ning%')
+                      ->orWhere('ten_san_pham', 'LIKE', '%Lining%')
+                      ->orWhere('ten_san_pham', 'LIKE', '%Li Ning%');
+                });
+            } else {
+                $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
+            }
+        }
+
+        $sanPhams = $query->orderBy('id', 'desc')->get();
+
+        return view('pages.search-results', compact('sanPhams', 'keyword'));
+    }
+
     public function votCauLong(Request $request)
     {
         $query = SanPham::with('bienThes')

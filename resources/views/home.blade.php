@@ -19,7 +19,25 @@
     <!-- Header Navigation -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <button class="text-gray-600 hover:text-orange-500"><i class="fa-solid fa-magnifying-glass text-lg"></i></button>
+            
+            <!-- Nút tìm kiếm & Khung nhập tìm kiếm -->
+            <div class="relative">
+                <button type="button" id="search-toggle-btn" class="text-gray-600 hover:text-orange-500 focus:outline-none p-1">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+
+                <!-- Hộp tìm kiếm ẩn/hiện -->
+                <div id="search-box" class="hidden absolute left-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl p-2 z-50">
+                    <form action="{{ url('/') }}" method="GET" class="flex items-center gap-1">
+                        <input type="text" name="keyword" placeholder="Nhập tên sản phẩm cần tìm..." 
+                               class="w-full text-xs border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-orange-500"
+                               autocomplete="off">
+                        <button type="submit" class="bg-slate-900 text-white px-3 py-2 rounded text-xs font-bold hover:bg-orange-500 transition">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
 
             <!-- Logo Shop -->
             <a href="{{ url('/') }}" class="flex items-center space-x-2">
@@ -36,10 +54,13 @@
                     <i class="fa-regular fa-user text-xl"></i>
                 </a>
 
-                <a href="#" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    @php
+                        $cartCount = \App\Models\GioHang::where('nguoi_dung_id', 1)->sum('so_luong');
+                    @endphp
                     <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                        {{ session('cart') ? count(session('cart')) : 0 }}
+                        {{ $cartCount }}
                     </span>
                 </a>
 
@@ -80,12 +101,12 @@
         </nav>
     </header>
 
-    <!-- BANNER HERO SLIDER MỚI -->
+    <!-- BANNER HERO SLIDER -->
     <section class="relative w-full overflow-hidden bg-gray-100 group">
         <div class="swiper bannerSwiper w-full">
             <div class="swiper-wrapper">
                 
-                <!-- Slide 1: Banner Collage Yonex -->
+                <!-- Slide 1 -->
                 <div class="swiper-slide">
                     <a href="{{ url('/vot-cau-long?keyword=Yonex') }}" class="block relative w-full">
                         <img src="{{ asset('images/banner-yonex-collage.jpg') }}" 
@@ -93,7 +114,7 @@
                              class="w-full h-[320px] sm:h-[420px] md:h-[480px] object-cover">
                     </a>
                 </div>
-                <!-- Slide 2: Banner phụ -->
+                <!-- Slide 2 -->
                 <div class="swiper-slide">
                     <a href="{{ url('/vot-cau-long') }}" class="block relative w-full">
                         <img src="{{ asset('images/banner2.jpg') }}" 
@@ -104,17 +125,16 @@
 
             </div>
 
-            <!-- Nút di chuyển TRÁI (Previous) -->
+            <!-- Nút di chuyển TRÁI -->
             <button class="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 focus:outline-none">
                 <i class="fa-solid fa-chevron-left text-sm"></i>
             </button>
 
-            <!-- Nút di chuyển PHẢI (Next) -->
+            <!-- Nút di chuyển PHẢI -->
             <button class="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 focus:outline-none">
                 <i class="fa-solid fa-chevron-right text-sm"></i>
             </button>
 
-            <!-- Dấu chấm chuyển trang -->
             <div class="swiper-pagination"></div>
         </div>
     </section>
@@ -132,7 +152,7 @@
                 <span class="text-xs font-bold">GIÀY</span>
             </a>
             <a href="{{ url('/cau') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
-                <i class="fa-solid fa-shuttlecock text-3xl text-orange-400 mb-2"></i>
+                <i class="fa-solid fa-volleyball text-3xl text-orange-400 mb-2"></i>
                 <span class="text-xs font-bold">CẦU</span>
             </a>
             <a href="{{ route('phukien', ['type' => 'bao_vot']) }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
@@ -184,7 +204,7 @@
                     <p class="text-xs font-bold text-slate-900">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                 </div>
                 
-                <form action="{{ route('cart.add') }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
                     @csrf
                     <input type="hidden" name="bien_the_id" value="{{ $sp->bienThes->first()->id ?? 1 }}">
                     <input type="hidden" name="so_luong" value="1">
@@ -201,6 +221,26 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý bật/tắt hộp tìm kiếm
+            const searchBtn = document.getElementById('search-toggle-btn');
+            const searchBox = document.getElementById('search-box');
+
+            if (searchBtn && searchBox) {
+                searchBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    searchBox.classList.toggle('hidden');
+                    if (!searchBox.classList.contains('hidden')) {
+                        searchBox.querySelector('input').focus();
+                    }
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!searchBox.contains(e.target) && !searchBtn.contains(e.target)) {
+                        searchBox.classList.add('hidden');
+                    }
+                });
+            }
+
             // Khởi tạo Swiper Banner
             const swiper = new Swiper('.bannerSwiper', {
                 loop: true,
@@ -261,7 +301,7 @@
                                         <p class="text-xs font-bold text-slate-900">${new Intl.NumberFormat('vi-VN').format(sp.gia_co_ban)} VNĐ</p>
                                     </div>
                                     
-                                    <form action="{{ route('cart.add') }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                                    <form action="/gio-hang/them/${sp.id}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
                                         <input type="hidden" name="_token" value="${csrfToken}">
                                         <input type="hidden" name="bien_the_id" value="${sp.bien_thes && sp.bien_thes.length > 0 ? sp.bien_thes[0].id : 1}">
                                         <input type="hidden" name="so_luong" value="1">

@@ -17,8 +17,7 @@
     <!-- Header Navigation -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <button class="text-gray-600 hover:text-orange-500"><i class="fa-solid fa-magnifying-glass text-lg"></i></button>
-
+            
             <!-- Logo Shop -->
             <a href="{{ route('home') }}" class="flex items-center space-x-2">
                 <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
@@ -27,6 +26,24 @@
                     <p class="font-bold text-xs tracking-widest text-orange-500 uppercase">PRO SHOP</p>
                 </div>
             </a>
+
+            <!-- Thanh tìm kiếm kiểu dáng mới ở Header -->
+            <div class="flex-1 max-w-xl mx-8">
+                <form action="{{ route('phukien') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
+                    @if(request('type'))
+                        <input type="hidden" name="type" value="{{ request('type') }}">
+                    @endif
+                    <div class="flex items-center flex-1 px-3 py-1.5">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2 text-sm"></i>
+                        <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm kiếm sản phẩm..." 
+                               class="w-full text-xs text-gray-700 bg-transparent focus:outline-none placeholder-gray-400"
+                               autocomplete="off">
+                    </div>
+                    <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 text-xs transition duration-150">
+                        Tìm kiếm
+                    </button>
+                </form>
+            </div>
 
             <div class="flex items-center space-x-4">
                 <a href="#" class="text-gray-600 hover:text-orange-500"><i class="fa-regular fa-user text-xl"></i></a>
@@ -63,18 +80,19 @@
                 </p>
             </div>
 
-            <!-- Tìm kiếm & Sắp xếp -->
+            <!-- Form Sắp xếp (Thanh tìm kiếm phụ đã được chuyển lên Header chuẩn) -->
             <form action="{{ route('phukien') }}" method="GET" class="flex items-center gap-2">
                 @if(request('type'))
                     <input type="hidden" name="type" value="{{ request('type') }}">
                 @endif
-                <input type="text" name="keyword" class="border rounded px-3 py-1.5 text-xs w-48 focus:outline-none focus:border-orange-500 bg-white" placeholder="Tìm theo tên/thương hiệu..." value="{{ request('keyword') }}">
-                <select name="sort" class="border rounded px-2 py-1.5 text-xs bg-white focus:outline-none text-gray-700">
+                @if(request('keyword'))
+                    <input type="hidden" name="keyword" value="{{ request('keyword') }}">
+                @endif
+                <select name="sort" onchange="this.form.submit()" class="border rounded px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-orange-500 text-gray-700 cursor-pointer">
                     <option value="">Sắp xếp mặc định</option>
                     <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
                     <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá giảm dần</option>
                 </select>
-                <button type="submit" class="bg-slate-900 text-white px-4 py-1.5 rounded text-xs font-bold hover:bg-orange-500 transition">Lọc</button>
             </form>
         </div>
 

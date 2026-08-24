@@ -22,6 +22,14 @@
 
     <!-- Nội dung chi tiết sản phẩm -->
     <div class="max-w-6xl mx-auto px-4 py-10">
+        
+        <!-- Hiển thị thông báo thành công khi thêm vào giỏ hàng -->
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-sm font-bold flex items-center shadow-sm">
+                <i class="fa-solid fa-check-circle mr-2 text-lg"></i> {{ session('success') }}
+            </div>
+        @endif
+
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
             
             <!-- Cột hình ảnh sản phẩm -->
@@ -54,11 +62,12 @@
                     </div>
                 </div>
 
-                <!-- Nút thêm vào giỏ hàng -->
-                <form action="#" method="POST">
+                <!-- Form thêm vào giỏ hàng có kèm token và bien_the_id -->
+                <form action="{{ route('cart.add', $sanPham->id) }}" method="POST">
                     @csrf
-                    <input type="hidden" name="san_pham_id" value="{{ $sanPham->id }}">
-                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md">
+                    <input type="hidden" name="bien_the_id" value="{{ $sanPham->id }}">
+                    <input type="hidden" name="so_luong" value="1">
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md cursor-pointer">
                         THÊM VÀO GIỎ HÀNG
                     </button>
                 </form>
@@ -72,7 +81,7 @@
             <h2 class="text-xl font-black text-slate-900 mb-6">Sản phẩm liên quan</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach($sanPhamLienQuan as $item)
-                <div class="bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between">
+                <div class="bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition">
                     <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
                         <div class="h-36 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2">
                             <img src="{{ asset('images/' . ($item->anh_dai_dien ?? 'yonex_doura10.webp')) }}" class="h-full w-full object-contain">

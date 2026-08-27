@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\ThongSoVot;
-use App\Models\BienTheSanPham;
 
 class SanPham extends Model
 {
@@ -38,5 +36,11 @@ class SanPham extends Model
     public function thongSoVot()
     {
         return $this->hasOne(ThongSoVot::class, 'san_pham_id');
+    }
+    public function index()
+    {
+        // Sắp xếp theo id giảm dần (thay cho latest vì bảng tắt timestamps)
+        $products = SanPham::orderBy('id', 'desc')->paginate(10);
+        return view('admin.products.index', compact('products'));
     }
 }

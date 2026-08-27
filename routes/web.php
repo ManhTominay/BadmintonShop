@@ -1,30 +1,77 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+
+// Khai báo các Controller phía Client (User)
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductController as ClientProductController;
 use App\Http\Controllers\CauController; 
 use App\Http\Controllers\PhuKienController;
 use App\Http\Controllers\AuthController;
 
-// 1. Trang chủ & Danh mục sản phẩm
+// Khai báo các Controller phía Admin (Sử dụng alias tránh trùng lặp tên ProductController)
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SettingController;
+
+
+/*
+|--------------------------------------------------------------------------
+| 1. KHU VỰC QUẢN TRỊ ADMIN (Yêu cầu đăng nhập + Check phân quyền admin)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    
+    // Kiểm tra nhanh quyền Admin trước khi vào các trang quản trị (có thể tối ưu bằng Middleware riêng)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Quản lý sản phẩm (CRUD) sử dụng AdminProductController
+    Route::resource('products', AdminProductController::class);
+
+    // Quản lý đơn hàng
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    // Quản lý tài khoản & Khóa tài khoản
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::put('/users/{id}/lock', [UserController::class, 'toggleLock'])->name('users.lock');
+
+    // Cấu hình hệ thống
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| 2. TRANG CHỦ & DANH MỤC SẢN PHẨM (Client)
+|--------------------------------------------------------------------------
+*/
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/vot-cau-long', [ProductController::class, 'votCauLong'])->name('vot-cau-long');
-Route::get('/giay-cau-long', [ProductController::class, 'giayCauLong'])->name('giay.index');
-Route::get('/quan-ao', [ProductController::class, 'quanAo'])->name('quan-ao');
+Route::get('/vot-cau-long', [ClientProductController::class, 'votCauLong'])->name('vot-cau-long');
+Route::get('/giay-cau-long', [ClientProductController::class, 'giayCauLong'])->name('giay.index');
+Route::get('/quan-ao', [ClientProductController::class, 'quanAo'])->name('quan-ao');
 Route::get('/cau', [CauController::class, 'index'])->name('cau');
 Route::get('/phu-kien', [PhuKienController::class, 'index'])->name('phukien');
 
-// Route Chi tiết sản phẩm
-Route::get('/san-pham/{id}', [ProductController::class, 'chiTietSanPham'])->name('san-pham.chi-tiet');
-
-// Route Tìm kiếm sản phẩm
-Route::get('/tim-kiem', [ProductController::class, 'search'])->name('product.search');
+// Chi tiết sản phẩm & Tìm kiếm
+Route::get('/san-pham/{id}', [ClientProductController::class, 'chiTietSanPham'])->name('san-pham.chi-tiet');
+Route::get('/tim-kiem', [ClientProductController::class, 'search'])->name('product.search');
 
 Route::get('/api/featured-products', [HomeController::class, 'getFeaturedProducts'])->name('featured.products');
 
-// 2. Xác thực người dùng (Chỉ dành cho khách chưa đăng nhập)
+
+/*
+|--------------------------------------------------------------------------
+| 3. XÁC THỰC NGƯỜI DÙNG (Dành cho khách chưa đăng nhập - middleware 'guest')
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
     // Đăng nhập
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -35,21 +82,22 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// 3. Các chức năng yêu cầu bắt buộc phải ĐĂNG NHẬP mới được dùng (Giỏ hàng, v.v.)
-Route::middleware(['auth'])->group(function () {
-    // Thêm giỏ hàng
-    Route::post('/gio-hang/them/{id}', [CartController::class, 'addToCart'])->name('cart.add');
-    
-    // Hiển thị giỏ hàng
-    Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
 
-    // Cập nhật và Xóa sản phẩm trong giỏ hàng
+/*
+|--------------------------------------------------------------------------
+| 4. CÁC CHỨC NĂNG YÊU CẦU ĐĂNG NHẬP (Giỏ hàng, Thanh toán, Đăng xuất)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    // Giỏ hàng
+    Route::post('/gio-hang/them/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
     Route::patch('/gio-hang/cap-nhat/{id}', [CartController::class, 'updateCart'])->name('cart.update');
     Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
     
-    // 👇 THÊM ROUTE CHECKOUT NÀY VÀO ĐỂ HẾT LỖI
+    // Thanh toán
     Route::get('/thanh-toan', function () {
-        return view('checkout'); // Hoặc trỏ tới Controller xử lý thanh toán của bạn
+        return view('checkout');
     })->name('checkout');
 
     // Đăng xuất

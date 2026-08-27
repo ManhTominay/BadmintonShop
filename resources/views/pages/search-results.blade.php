@@ -112,7 +112,8 @@
                         <p class="text-xs font-bold text-slate-900">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                     </div>
                     
-                    <form action="{{ route('cart.add') }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                    <!-- ĐÃ SỬA: Thêm $sp->id vào route('cart.add', $sp->id) -->
+                    <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
                         @csrf
                         <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
                         <input type="hidden" name="so_luong" value="1">

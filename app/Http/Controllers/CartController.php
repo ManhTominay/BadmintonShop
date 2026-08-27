@@ -5,11 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\GioHang;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // Nhớ đảm bảo có dòng use Auth này
 
 class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
+        // Kiểm tra xem đã đăng nhập chưa
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.');
+        }
+
         $request->validate([
             'bien_the_id' => 'required',
             'so_luong' => 'required|integer|min:1',
@@ -17,8 +23,8 @@ class CartController extends Controller
             'so_kg_cang' => 'nullable|numeric',
         ]);
 
-        // Cố định user_id = 1 để khớp với dữ liệu trong database
-        $userId = 1;
+        // Lấy ID người dùng thực tế đang đăng nhập (thay vì cố định là 1)
+        $userId = Auth::id();
 
         $cartItem = GioHang::where('nguoi_dung_id', $userId)
             ->where('bien_the_id', $request->bien_the_id)
@@ -44,10 +50,14 @@ class CartController extends Controller
 
     public function index()
     {
-        // Cố định user_id = 1 để khớp với bảng gio_hang hiện tại của bạn
-        $userId = 1;
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
 
-        // Lấy danh sách giỏ hàng từ database
+        // Lấy ID người dùng đang đăng nhập
+        $userId = Auth::id();
+
+        // Lấy danh sách giỏ hàng từ database theo đúng user đang đăng nhập
         $gioHangs = GioHang::where('nguoi_dung_id', $userId)->get();
 
         $cart = [];
@@ -74,7 +84,9 @@ class CartController extends Controller
         ]);
 
         $cartItem = GioHang::find($id);
-        if ($cartItem) {
+        
+        // Đảm bảo chỉ user sở hữu giỏ hàng đó mới được quyền cập nhật
+        if ($cartItem && $cartItem->nguoi_dung_id == Auth::id()) {
             $cartItem->so_luong = $request->so_luong;
             $cartItem->save();
         }
@@ -86,7 +98,9 @@ class CartController extends Controller
     public function removeFromCart($id)
     {
         $cartItem = GioHang::find($id);
-        if ($cartItem) {
+        
+        // Đảm bảo chỉ user sở hữu mới được xóa
+        if ($cartItem && $cartItem->nguoi_dung_id == Auth::id()) {
             $cartItem->delete();
         }
 

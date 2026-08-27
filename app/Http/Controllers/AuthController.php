@@ -27,6 +27,13 @@ class AuthController extends Controller
             'password' => $credentials['password'],
         ])) {
             $request->session()->regenerate();
+
+            // KIỂM TRA QUYỀN: Nếu là admin thì chuyển hướng thẳng vào dashboard
+            if (Auth::user()->vai_tro === 'admin') {
+                return redirect()->intended('/admin/dashboard');
+            }
+
+            // Nếu là khách hàng bình thường thì về trang chủ
             return redirect()->intended('/');
         }
 

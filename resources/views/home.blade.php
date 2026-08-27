@@ -20,35 +20,37 @@
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             
-            <!-- Nút tìm kiếm & Khung nhập tìm kiếm -->
-            <div class="relative">
-                <button type="button" id="search-toggle-btn" class="text-gray-600 hover:text-orange-500 focus:outline-none p-1">
-                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
-                </button>
-
-                <!-- Hộp tìm kiếm ẩn/hiện -->
-                <div id="search-box" class="hidden absolute left-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl p-2 z-50">
-                    <form action="{{ url('/') }}" method="GET" class="flex items-center gap-1">
-                        <input type="text" name="keyword" placeholder="Nhập tên sản phẩm cần tìm..." 
-                               class="w-full text-xs border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-orange-500"
-                               autocomplete="off">
-                        <button type="submit" class="bg-slate-900 text-white px-3 py-2 rounded text-xs font-bold hover:bg-orange-500 transition">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
-                    </form>
-                </div>
+            <!-- 1. Logo nằm bên trái -->
+            <div class="flex-shrink-0">
+                <a href="{{ url('/') }}" class="block">
+                    <span class="text-2xl font-extrabold tracking-wider text-slate-900">BADMINTON</span>
+                    <span class="block text-xs font-bold tracking-widest text-orange-500 uppercase">PRO SHOP</span>
+                </a>
             </div>
 
-            <!-- Logo Shop -->
-            <a href="{{ url('/') }}" class="flex items-center space-x-2">
-                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
-                <div class="leading-none">
-                    <h1 class="font-extrabold text-xl tracking-tight text-slate-900 uppercase">BADMINTON</h1>
-                    <p class="font-bold text-xs tracking-widest text-orange-500 uppercase">PRO SHOP</p>
-                </div>
-            </a>
+            <!-- 2. Khung nhập tìm kiếm ở giữa (ĐÃ SỬA ACTION THÀNH route('product.search')) -->
+            <div class="flex-1 max-w-xl mx-8">
+                <form action="{{ route('product.search') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
+                    
+                    <!-- Ô nhập từ khóa có icon kính lúp bên trong -->
+                    <div class="relative flex items-center flex-1 px-4 py-2">
+                        <span class="absolute left-4 text-gray-400 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                        </span>
+                        <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm kiếm sản phẩm trên toàn hệ thống..." 
+                               class="w-full text-sm text-gray-700 bg-transparent pl-7 pr-2 focus:outline-none placeholder-gray-400"
+                               autocomplete="off">
+                    </div>
 
-            <!-- Khối Tài Khoản / Giỏ Hàng / Đăng Nhập & Đăng Ký -->
+                    <!-- Nút Tìm kiếm màu cam liền mạch bên phải -->
+                    <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2.5 text-sm transition duration-150">
+                        Tìm kiếm
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- 3. Khu vực Tài khoản & Giỏ hàng nằm bên phải -->
             <div class="flex items-center space-x-4">
                 <a href="{{ Auth::check() ? '#' : route('login') }}" class="text-gray-600 hover:text-orange-500" title="Tài khoản">
                     <i class="fa-regular fa-user text-xl"></i>
@@ -57,14 +59,17 @@
                 <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     @php
-                        $cartCount = \App\Models\GioHang::where('nguoi_dung_id', 1)->sum('so_luong');
+                        $cartCount = 0;
+                        if (Auth::check()) {
+                            $cartCount = \App\Models\GioHang::where('nguoi_dung_id', Auth::id())->sum('so_luong');
+                        }
                     @endphp
                     <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                         {{ $cartCount }}
                     </span>
                 </a>
 
-                <!-- Nút Đăng nhập / Đăng ký bên phải Giỏ hàng -->
+                <!-- Nút Đăng nhập / Đăng ký / Xin chào -->
                 <div class="flex items-center space-x-2 text-xs font-semibold pl-2 border-l border-gray-200">
                     @auth
                         <span class="text-slate-700">
@@ -85,6 +90,7 @@
                     @endauth
                 </div>
             </div>
+
         </div>
 
         <nav class="border-t border-gray-100">
@@ -108,7 +114,7 @@
                 
                 <!-- Slide 1 -->
                 <div class="swiper-slide">
-                    <a href="{{ url('/vot-cau-long?keyword=Yonex') }}" class="block relative w-full">
+                    <a href="{{ route('product.search') }}?keyword=Yonex" class="block relative w-full">
                         <img src="{{ asset('images/banner-yonex-collage.jpg') }}" 
                              alt="Yonex Badminton Collection" 
                              class="w-full h-[320px] sm:h-[420px] md:h-[480px] object-cover">
@@ -141,7 +147,7 @@
 
     <!-- Shop By Category -->
     <section class="max-w-6xl mx-auto px-4 py-8">
-        <h2 class="text-center font-extrabold text-lg uppercase mb-6">SHOP BY CATEGORY</h2>
+        <h2 class="font-extrabold text-lg uppercase mb-6 text-center">SHOP BY CATEGORY</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             <a href="{{ url('/vot-cau-long') }}" class="bg-slate-900 rounded-lg p-4 text-center text-white flex flex-col items-center hover:bg-orange-500 transition">
                 <i class="fa-solid fa-table-tennis-paddle-ball text-3xl text-orange-400 mb-2"></i>
@@ -206,7 +212,7 @@
                 
                 <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
                     @csrf
-                    <input type="hidden" name="bien_the_id" value="{{ $sp->bienThes->first()->id ?? 1 }}">
+                    <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
                     <input type="hidden" name="so_luong" value="1">
                     <button type="submit" class="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-orange-500 transition">Add to Cart</button>
                     <label class="text-[10px] text-gray-500 flex items-center cursor-pointer"><input type="checkbox" class="mr-1"> Compare</label>
@@ -221,26 +227,6 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Xử lý bật/tắt hộp tìm kiếm
-            const searchBtn = document.getElementById('search-toggle-btn');
-            const searchBox = document.getElementById('search-box');
-
-            if (searchBtn && searchBox) {
-                searchBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    searchBox.classList.toggle('hidden');
-                    if (!searchBox.classList.contains('hidden')) {
-                        searchBox.querySelector('input').focus();
-                    }
-                });
-
-                document.addEventListener('click', function (e) {
-                    if (!searchBox.contains(e.target) && !searchBtn.contains(e.target)) {
-                        searchBox.classList.add('hidden');
-                    }
-                });
-            }
-
             // Khởi tạo Swiper Banner
             const swiper = new Swiper('.bannerSwiper', {
                 loop: true,
@@ -318,5 +304,48 @@
             });
         });
     </script>
+    <!-- Footer Tối Giản -->
+<footer class="bg-amber-50/70 border-t border-amber-100 text-gray-700 text-xs mt-16 pt-10 pb-6">
+    <div class="max-w-6xl mx-auto px-4">
+        
+        <!-- Hàng 1: Hotline cơ bản -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-8 border-b border-gray-200 text-center sm:text-left">
+            <div class="flex items-center justify-center sm:justify-start space-x-2">
+                <i class="fa-solid fa-phone text-orange-500 text-lg"></i>
+                <div>
+                    <p class="text-[11px] text-gray-500">Tư vấn và CSKH</p>
+                    <p class="font-bold text-sm text-slate-900">0981852431</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-center sm:justify-start space-x-2">
+              
+               
+            </div>
+        </div>
+
+        <!-- Hàng 2: Thông tin công ty đã cập nhật -->
+        <div class="py-8 space-y-3 max-w-2xl">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
+                    B
+                </div>
+                <span class="font-extrabold text-base tracking-wider text-slate-900">BADMINTON SHOP</span>
+            </div>
+            <p class="font-bold text-slate-900">Công ty TNHH Badminton Sport Việt Nam</p>
+            <p><i class="fa-solid fa-location-dot text-orange-500 mr-1.5"></i> **Địa chỉ:** Trường Đại học Tài nguyên và Môi trường Hà Nội</p>
+            <p><i class="fa-solid fa-user text-orange-500 mr-1.5"></i> **Người nhận:** ManhTominay</p>
+            <p><i class="fa-solid fa-envelope text-orange-500 mr-1.5"></i> **Email:** vdtien26976@gmail.com</p>
+            <p class="text-[11px] text-gray-500 leading-relaxed">
+                Giấy phép kinh doanh số: 0109370129 đăng ký thay đổi lần 1 ngày 21/10/2020 (đăng ký lần đầu ngày 09/10/2020) do sở kế hoạch và đầu tư Hà Nội cấp.
+            </p>
+        </div>
+
+        <!-- Copyright dưới cùng -->
+        <div class="border-t border-gray-200 pt-6 text-center text-gray-500 text-[11px]">
+            <p>&copy; 2026 BADMINTON PRO SHOP. All rights reserved.</p>
+        </div>
+
+    </div>
+</footer>
 </body>
 </html>

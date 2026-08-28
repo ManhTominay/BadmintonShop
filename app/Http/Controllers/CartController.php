@@ -106,4 +106,31 @@ class CartController extends Controller
 
         return redirect()->back()->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
     }
+    public function checkout(Request $request)
+{
+    // Lấy chuỗi items trên URL (ví dụ: ?items=9,12)
+    $itemIds = $request->query('items');
+    
+    if (!$itemIds) {
+        return redirect()->route('cart.index')->with('error', 'Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
+    }
+
+    $idsArray = explode(',', $itemIds);
+    $cart = session()->get('cart', []);
+    $checkoutItems = [];
+    $totalPrice = 0;
+
+    foreach ($idsArray as $id) {
+        if (isset($cart[$id])) {
+            $checkoutItems[$id] = $cart[$id];
+            $totalPrice += $cart[$id]['gia'] * $cart[$id]['so_luong'];
+        }
+    }
+
+    if (empty($checkoutItems)) {
+        return redirect()->route('cart.index')->with('error', 'Không tìm thấy sản phẩm hợp lệ trong giỏ hàng!');
+    }
+
+    return view('checkout', compact('checkoutItems', 'totalPrice'));
+}
 }

@@ -10,21 +10,57 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Lấy TOÀN BỘ sản phẩm đang kinh doanh (bỏ take(4) và bỏ điều kiện chỉ lấy sản phẩm nổi bật)
-        $sanPhams = SanPham::with(['bienThes', 'thongSoVot'])
+        // 1. Lấy đúng sản phẩm Vợt cầu lông (Chỉ lấy cây vợt thực sự, loại trừ quấn cán, bao, túi, balo)
+        $votCaulong = SanPham::with(['bienThes', 'thongSoVot'])
             ->where('trang_thai_kinh_doanh', true)
+            ->where(function($query) {
+                $query->where('ten_san_pham', 'LIKE', 'Vợt %')
+                      ->orWhere('ten_san_pham', 'LIKE', '% Vợt %');
+            })
+            ->where('ten_san_pham', 'NOT LIKE', '%Cuốn cán%')
+            ->where('ten_san_pham', 'NOT LIKE', '%Bao%')
+            ->where('ten_san_pham', 'NOT LIKE', '%Túi%')
+            ->where('ten_san_pham', 'NOT LIKE', '%Balo%')
             ->orderBy('id', 'desc')
+            ->take(4)
             ->get();
 
-        $danhSachCuoc = BienTheSanPham::whereHas('sanPham', function($query) {
-            $query->where('ten_san_pham', 'LIKE', '%Cước%')
-                  ->orWhere('ten_san_pham', 'LIKE', '%Dây%');
-        })->get();
+        // 2. Lấy 4 sản phẩm Giày cầu lông
+        $giayCaulong = SanPham::with(['bienThes'])
+            ->where('trang_thai_kinh_doanh', true)
+            ->where('ten_san_pham', 'LIKE', '%Giày%')
+            ->orderBy('id', 'desc')
+            ->take(4)
+            ->get();
 
-        return view('home', compact('sanPhams', 'danhSachCuoc'));
+        // 3. Lấy 4 sản phẩm Cước cầu lông
+        $cuocCaulong = SanPham::with(['bienThes'])
+            ->where('trang_thai_kinh_doanh', true)
+            ->where(function($query) {
+                $query->where('ten_san_pham', 'LIKE', '%Cước%')
+                      ->orWhere('ten_san_pham', 'LIKE', '%Dây%');
+            })
+            ->orderBy('id', 'desc')
+            ->take(4)
+            ->get();
+
+        // 4. Lấy 4 sản phẩm Phụ kiện (Bao vợt, Quấn cán, v.v.)
+        $phuKien = SanPham::with(['bienThes'])
+            ->where('trang_thai_kinh_doanh', true)
+            ->where(function($query) {
+                $query->where('ten_san_pham', 'LIKE', '%Phụ kiện%')
+                      ->orWhere('ten_san_pham', 'LIKE', '%Quấn cán%')
+                      ->orWhere('ten_san_pham', 'LIKE', '%Bao%')
+                      ->orWhere('ten_san_pham', 'LIKE', '%Túi%');
+            })
+            ->orderBy('id', 'desc')
+            ->take(4)
+            ->get();
+
+        return view('home', compact('votCaulong', 'giayCaulong', 'cuocCaulong', 'phuKien'));
     }
 
-    // Hàm xử lý AJAX khi bấm các tab
+    // Hàm xử lý AJAX khi bấm các tab sản phẩm nổi bật/mới/sale
     public function getFeaturedProducts(Request $request)
     {
         $type = $request->get('type', 'all');
@@ -43,7 +79,7 @@ class HomeController extends Controller
                 $query->whereNotNull('gia_khuyen_mai')->where('gia_khuyen_mai', '>', 0);
                 break;
             default:
-                $query->orderBy('id', 'desc'); // 'all' lấy toàn bộ danh sách sản phẩm
+                $query->orderBy('id', 'desc');
                 break;
         }
 

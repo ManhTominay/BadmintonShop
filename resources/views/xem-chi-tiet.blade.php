@@ -16,7 +16,17 @@
                 <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
             </a>
             <a href="{{ url('/') }}" class="font-extrabold text-xl tracking-tight text-slate-900 uppercase">BADMINTON PRO</a>
-            <div></div>
+            <div class="flex items-center">
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    @php
+                        $headerCartCount = Auth::check() ? \App\Models\GioHang::validCartCount(Auth::id()) : 0;
+                    @endphp
+                    <span data-cart-count class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {{ $headerCartCount }}
+                    </span>
+                </a>
+            </div>
         </div>
     </header>
 
@@ -35,7 +45,7 @@
             <!-- Cột hình ảnh sản phẩm -->
             <div class="bg-gray-50 rounded-xl flex items-center justify-center p-6 h-96">
                 @php
-                    $imageName = !empty($sanPham->anh_dai_dien) ? $sanPham->anh_dai_dien : 'yonex_doura10.webp';
+                    $imageName = \App\Models\SanPham::resolveImageName($sanPham->anh_dai_dien ?? null);
                 @endphp
                 <img src="{{ asset('images/' . $imageName) }}" 
                      onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';"
@@ -71,6 +81,31 @@
                     </div>
                     @endif
 
+                    @php
+                        $categoryId = (int) ($sanPham->danh_muc_id ?? 0);
+                        $showSizeSelector = in_array($categoryId, [2, 4, 6], true);
+                        $sizeList = $categoryId === 2
+                            ? ['36', '37', '38', '39', '40', '41', '42', '43']
+                            : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+                    @endphp
+
+                    @if($showSizeSelector)
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">
+                            {{ $categoryId === 2 ? 'Chọn size giày:' : 'Chọn size áo:' }}
+                        </label>
+                        <div class="flex flex-wrap gap-2" id="size-container">
+                            @foreach($sizeList as $size)
+                                <button type="button"
+                                        data-size="{{ $size }}"
+                                        class="size-btn px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 bg-white text-gray-700 hover:border-orange-500 hover:text-orange-600 transition {{ $loop->first ? 'border-orange-500 bg-orange-50 text-orange-600' : '' }}">
+                                    {{ $size }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="border-t border-gray-100 pt-4 mb-6">
                         <h3 class="text-sm font-bold text-gray-700 uppercase mb-2">Mô tả sản phẩm:</h3>
                         <div class="text-sm text-gray-600 leading-relaxed space-y-2">
@@ -84,6 +119,9 @@
                     @csrf
                     <!-- Biến thể ID sẽ tự động thay đổi theo nút bấm biến thể phía trên -->
                     <input type="hidden" name="bien_the_id" id="selected-bien-the-id" value="{{ $sanPham->bienThes->first()->id ?? $sanPham->id }}">
+                    @if($showSizeSelector)
+                        <input type="hidden" name="size" id="selected-size" value="{{ $sizeList[0] }}">
+                    @endif
                     
                     <div class="flex items-center gap-4 mb-4">
                         <!-- Chọn số lượng -->
@@ -111,7 +149,13 @@
                 <div class="bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition">
                     <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
                         <div class="h-36 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2">
-                            <img src="{{ asset('images/' . ($item->anh_dai_dien ?? 'yonex_doura10.webp')) }}" class="h-full w-full object-contain" alt="{{ $item->ten_san_pham }}">
+                            @php
+                                $relatedImage = \App\Models\SanPham::resolveImageName($item->anh_dai_dien ?? null);
+                            @endphp
+                            <img src="{{ asset('images/' . $relatedImage) }}"
+                                 class="h-full w-full object-contain"
+                                 alt="{{ $item->ten_san_pham }}"
+                                 onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';">
                         </div>
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $item->ten_san_pham }}</h3>
                     </a>
@@ -145,7 +189,9 @@
 
             // Xử lý chọn biến thể sản phẩm
             const variantBtns = document.querySelectorAll('.variant-btn');
+            const sizeBtns = document.querySelectorAll('.size-btn');
             const hiddenVariantInput = document.getElementById('selected-bien-the-id');
+            const hiddenSizeInput = document.getElementById('selected-size');
             const productPriceEl = document.getElementById('product-price');
 
             variantBtns.forEach(btn => {
@@ -171,7 +217,20 @@
                     }
                 });
             });
+
+            sizeBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    sizeBtns.forEach(b => {
+                        b.classList.remove('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                        b.classList.add('border-gray-200', 'bg-white', 'text-gray-700');
+                    });
+                    this.classList.remove('border-gray-200', 'bg-white', 'text-gray-700');
+                    this.classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                    hiddenSizeInput.value = this.getAttribute('data-size');
+                });
+            });
         });
     </script>
+    @include('partials.cart-ajax')
 </body>
 </html>

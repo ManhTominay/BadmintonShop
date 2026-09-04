@@ -27,17 +27,15 @@
                 </div>
             </a>
 
-            <!-- Thanh tìm kiếm kiểu dáng mới (Border cam, nút Tìm kiếm nằm trong khung) -->
+            <!-- Thanh tìm kiếm kiểu dáng mới -->
             <div class="flex-1 max-w-xl mx-8">
                 <form action="{{ url('/tim-kiem') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
-                    <!-- Ô nhập từ khóa (Có icon kính lúp bên trái) -->
                     <div class="flex items-center flex-1 px-3 py-1.5">
                         <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2 text-sm"></i>
                         <input type="text" name="keyword" value="{{ $keyword ?? '' }}" placeholder="Tìm kiếm sản phẩm..." 
                                class="w-full text-xs text-gray-700 bg-transparent focus:outline-none placeholder-gray-400"
                                autocomplete="off">
                     </div>
-                    <!-- Nút Tìm kiếm màu cam bên phải -->
                     <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 text-xs transition duration-150">
                         Tìm kiếm
                     </button>
@@ -46,13 +44,38 @@
 
             <!-- Giỏ hàng & Tài khoản -->
             <div class="flex items-center space-x-4">
-                <a href="{{ Auth::check() ? '#' : route('login') }}" class="text-gray-600 hover:text-orange-500" title="Tài khoản">
-                    <i class="fa-regular fa-user text-xl"></i>
-                </a>
-                <a href="#" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
+                @auth
+                    <div class="relative group">
+                        <button type="button" class="text-gray-600 hover:text-orange-500 transition" title="Tài khoản">
+                            <i class="fa-regular fa-user text-xl"></i>
+                        </button>
+
+                        <div class="absolute right-0 top-full mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="px-3 py-2 border-b border-gray-100 text-xs font-bold text-slate-700">
+                                Xin chào, <span class="text-orange-500">{{ Auth::user()->ho_ten ?? Auth::user()->full_name ?? Auth::user()->name ?? Auth::user()->username }}</span>
+                            </div>
+                            <a href="{{ route('account.profile') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                <i class="fa-solid fa-user-pen text-[11px]"></i> Chỉnh sửa tài khoản
+                            </a>
+                            <a href="{{ route('account.orders') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                <i class="fa-solid fa-box-open text-[11px]"></i> Đơn hàng
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-t border-gray-100">
+                                    <i class="fa-solid fa-right-from-bracket text-[11px]"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-orange-500 transition py-1 px-1">Đăng nhập</a>
+                    <a href="{{ route('register') }}" class="bg-orange-500 text-white px-3 py-1.5 rounded hover:bg-orange-600 transition shadow-sm">Đăng ký</a>
+                @endauth
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
-                    <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                        {{ session('cart') ? count(session('cart')) : 0 }}
+                    <span data-cart-count class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {{ $cartCount ?? 0 }}
                     </span>
                 </a>
             </div>
@@ -96,30 +119,38 @@
         @if(isset($sanPhams) && count($sanPhams) > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach($sanPhams as $sp)
-                <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
+                <div class="bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:border-orange-500 hover:shadow-md transition duration-300">
                     <div>
-                        <div class="h-36 bg-gray-50 rounded flex items-center justify-center mb-3 p-2">
-                            @if(!empty($sp->anh_dai_dien) && file_exists(public_path('images/' . $sp->anh_dai_dien)))
-                                <img src="{{ asset('images/' . $sp->anh_dai_dien) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain">
-                            @else
-                                <img src="{{ asset('images/yonex_doura10.webp') }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain">
-                            @endif
+                        <!-- Ảnh sản phẩm có link chi tiết -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
+                            @php
+                                $imageName = \App\Models\SanPham::resolveImageName($sp->anh_dai_dien ?? null);
+                            @endphp
+                            <img src="{{ asset('images/' . $imageName) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';">
+                        </a>
+
+                        <!-- Tên sản phẩm có link chi tiết -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->id) }}">
+                            <h3 class="text-xs font-bold text-gray-800 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors h-8">
+                                {{ $sp->ten_san_pham }}
+                            </h3>
+                        </a>
+
+                        <!-- Đánh giá sao -->
+                        <div class="flex text-amber-400 text-[10px] my-1">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
                         </div>
-                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $sp->ten_san_pham }}</h3>
-                        <div class="flex text-yellow-400 text-[10px] my-1">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                        </div>
-                        <p class="text-xs font-bold text-slate-900">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+
+                        <!-- Giá sản phẩm -->
+                        <p class="text-xs font-bold text-slate-900 mb-3">
+                            {{ number_format($sp->gia_co_ban ?? $sp->gia, 0, ',', '.') }} VNĐ
+                        </p>
                     </div>
                     
-                    <!-- ĐÃ SỬA: Thêm $sp->id vào route('cart.add', $sp->id) -->
-                    <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
-                        @csrf
-                        <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
-                        <input type="hidden" name="so_luong" value="1">
-                        <button type="submit" class="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-orange-500 transition">Add to Cart</button>
-                        <label class="text-[10px] text-gray-500 flex items-center cursor-pointer"><input type="checkbox" class="mr-1"> Compare</label>
-                    </form>
                 </div>
                 @endforeach
             </div>
@@ -136,6 +167,8 @@
         @endif
 
     </main>
+
+    @include('partials.cart-ajax')
 
     <!-- Footer -->
     <footer class="bg-slate-900 text-white text-xs py-6 text-center mt-12">

@@ -63,18 +63,22 @@ class PhuKienController extends Controller
         }
 
         // 4. Sắp xếp giá hoặc ID
-        if ($request->sort == 'price_asc') {
-            $query->orderBy('gia_co_ban', 'asc');
-        } elseif ($request->sort == 'price_desc') {
-            $query->orderBy('gia_co_ban', 'desc');
+        if ($request->filled('sort')) {
+            if ($request->sort === 'price_asc') {
+                $query->orderBy('gia_co_ban', 'asc');
+            } elseif ($request->sort === 'price_desc') {
+                $query->orderBy('gia_co_ban', 'desc');
+            } else {
+                $query->orderBy('id', 'desc');
+            }
         } else {
             $query->orderBy('id', 'desc');
         }
 
         // 5. Lấy danh sách và lọc bỏ các sản phẩm không có file ảnh thực tế trên ổ đĩa
         $danhSachPhuKien = $query->get()->filter(function ($item) {
-            $imagePath = public_path('images/' . ltrim($item->anh_dai_dien, '/'));
-            return file_exists($imagePath);
+            $imageName = SanPham::resolveImageName($item->anh_dai_dien ?? null);
+            return file_exists(public_path('images/' . $imageName));
         });
 
         return view('phukien', compact('danhSachPhuKien'));

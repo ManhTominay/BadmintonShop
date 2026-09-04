@@ -12,21 +12,24 @@ class ProductController extends Controller
      */
     public function search(Request $request)
     {
+        $keyword = trim((string) $request->input('keyword', ''));
+
+        if ($keyword === '') {
+            return redirect()->route('home');
+        }
+
         $query = SanPham::with('bienThes')->where('trang_thai_kinh_doanh', true);
 
-        if ($request->filled('keyword')) {
-            $keyword = trim($request->keyword);
-            $normalized = strtolower($keyword);
+        $normalized = strtolower($keyword);
 
-            if (in_array($normalized, ['lining', 'li-ning', 'li ning'])) {
-                $query->where(function($q) {
-                    $q->where('ten_san_pham', 'LIKE', '%Li-Ning%')
-                      ->orWhere('ten_san_pham', 'LIKE', '%Lining%')
-                      ->orWhere('ten_san_pham', 'LIKE', '%Li Ning%');
-                });
-            } else {
-                $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
-            }
+        if (in_array($normalized, ['lining', 'li-ning', 'li ning'])) {
+            $query->where(function($q) {
+                $q->where('ten_san_pham', 'LIKE', '%Li-Ning%')
+                  ->orWhere('ten_san_pham', 'LIKE', '%Lining%')
+                  ->orWhere('ten_san_pham', 'LIKE', '%Li Ning%');
+            });
+        } else {
+            $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
         }
 
         $sanPhams = $query->orderBy('id', 'desc')->get();
@@ -36,12 +39,13 @@ class ProductController extends Controller
 
     public function votCauLong(Request $request)
     {
+        $keyword = trim((string) $request->input('keyword', ''));
+
         $query = SanPham::with('bienThes')
             ->where('trang_thai_kinh_doanh', true)
             ->where('danh_muc_id', 1);
 
-        if ($request->has('keyword') && !empty($request->keyword)) {
-            $keyword = trim($request->keyword);
+        if ($keyword !== '') {
             if (strtolower($keyword) == 'lining' || strtolower($keyword) == 'li-ning') {
                 $query->where(function($q) {
                     $q->where('ten_san_pham', 'LIKE', '%Li-Ning%')
@@ -52,13 +56,39 @@ class ProductController extends Controller
             }
         }
 
+        if ($request->filled('sort')) {
+            if ($request->sort === 'price_asc') {
+                $query->orderBy('gia_co_ban', 'asc');
+            } elseif ($request->sort === 'price_desc') {
+                $query->orderBy('gia_co_ban', 'desc');
+            } else {
+                $query->orderByRaw("CASE
+                    WHEN ten_san_pham LIKE '%Yonex%' THEN 1
+                    WHEN ten_san_pham LIKE '%Victor%' THEN 2
+                    WHEN ten_san_pham LIKE '%Li-Ning%' OR ten_san_pham LIKE '%Lining%' THEN 3
+                    WHEN ten_san_pham LIKE '%Mizuno%' THEN 4
+                    ELSE 5
+                END ASC")
+                ->orderBy('gia_co_ban', 'asc');
+            }
+        } else {
+            $query->orderByRaw("CASE
+                    WHEN ten_san_pham LIKE '%Yonex%' THEN 1
+                    WHEN ten_san_pham LIKE '%Victor%' THEN 2
+                    WHEN ten_san_pham LIKE '%Li-Ning%' OR ten_san_pham LIKE '%Lining%' THEN 3
+                    WHEN ten_san_pham LIKE '%Mizuno%' THEN 4
+                    ELSE 5
+                END ASC")
+                ->orderBy('gia_co_ban', 'asc');
+        }
+
         $danhSachVot = $query->get();
         return view('vot-cau-long', compact('danhSachVot'));
     }
 
     public function giayCauLong(Request $request)
     {
-        $query = SanPham::where('danh_muc_id', 4);
+        $query = SanPham::where('danh_muc_id', 2);
 
         if ($request->filled('keyword')) {
             $keyword = trim($request->keyword);
@@ -80,7 +110,14 @@ class ProductController extends Controller
         } elseif ($request->sort == 'price_desc') {
             $query->orderBy('gia_co_ban', 'desc');
         } else {
-            $query->orderBy('id', 'desc');
+            $query->orderByRaw("CASE
+                    WHEN ten_san_pham LIKE '%Yonex%' THEN 1
+                    WHEN ten_san_pham LIKE '%Victor%' THEN 2
+                    WHEN ten_san_pham LIKE '%Li-Ning%' OR ten_san_pham LIKE '%Lining%' THEN 3
+                    WHEN ten_san_pham LIKE '%Mizuno%' THEN 4
+                    ELSE 5
+                END ASC")
+                ->orderBy('gia_co_ban', 'asc');
         }
 
         $danhSachGiay = $query->get();
@@ -91,7 +128,7 @@ class ProductController extends Controller
     {
         $query = SanPham::with('bienThes')
             ->where('trang_thai_kinh_doanh', true)
-            ->where('danh_muc_id', 6);
+            ->where('danh_muc_id', 4);
 
         if ($request->filled('keyword')) {
             $keyword = trim($request->keyword);
@@ -106,6 +143,32 @@ class ProductController extends Controller
             } else {
                 $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
             }
+        }
+
+        if ($request->filled('sort')) {
+            if ($request->sort === 'price_asc') {
+                $query->orderBy('gia_co_ban', 'asc');
+            } elseif ($request->sort === 'price_desc') {
+                $query->orderBy('gia_co_ban', 'desc');
+            } else {
+                $query->orderByRaw("CASE
+                    WHEN ten_san_pham LIKE '%Yonex%' THEN 1
+                    WHEN ten_san_pham LIKE '%Victor%' THEN 2
+                    WHEN ten_san_pham LIKE '%Li-Ning%' OR ten_san_pham LIKE '%Lining%' THEN 3
+                    WHEN ten_san_pham LIKE '%Mizuno%' THEN 4
+                    ELSE 5
+                END ASC")
+                ->orderBy('gia_co_ban', 'asc');
+            }
+        } else {
+            $query->orderByRaw("CASE
+                    WHEN ten_san_pham LIKE '%Yonex%' THEN 1
+                    WHEN ten_san_pham LIKE '%Victor%' THEN 2
+                    WHEN ten_san_pham LIKE '%Li-Ning%' OR ten_san_pham LIKE '%Lining%' THEN 3
+                    WHEN ten_san_pham LIKE '%Mizuno%' THEN 4
+                    ELSE 5
+                END ASC")
+                ->orderBy('gia_co_ban', 'asc');
         }
 
         $danhSachQuanAo = $query->get();
@@ -167,6 +230,15 @@ class ProductController extends Controller
             $keyword = trim($request->keyword);
             $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
         }
+
+        $query->orderByRaw("CASE
+                WHEN ten_san_pham LIKE '%Yonex%' THEN 1
+                WHEN ten_san_pham LIKE '%Victor%' THEN 2
+                WHEN ten_san_pham LIKE '%Li-Ning%' OR ten_san_pham LIKE '%Lining%' THEN 3
+                WHEN ten_san_pham LIKE '%Mizuno%' THEN 4
+                ELSE 5
+            END ASC")
+            ->orderBy('gia_co_ban', 'asc');
 
         $danhSachPhuKien = $query->get();
         return view('phu-kien', compact('danhSachPhuKien'));

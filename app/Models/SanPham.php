@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SanPham extends Model
 {
+    protected const DEFAULT_IMAGE = 'yonex_doura10.webp';
+
     protected $table = 'san_pham';
     public $timestamps = false;
 
@@ -21,6 +23,39 @@ class SanPham extends Model
         'la_san_pham_moi', 
         'trang_thai_kinh_doanh'
     ];
+
+    public static function resolveImageName(?string $imageName = null): string
+    {
+        $candidate = trim((string) ($imageName ?? ''));
+        $candidate = preg_replace('#^/?(public|storage)/#i', '', $candidate);
+        $candidate = preg_replace('#^images/?#i', '', $candidate);
+        $candidate = ltrim($candidate, '/');
+
+        if ($candidate === '') {
+            return self::DEFAULT_IMAGE;
+        }
+
+        if (file_exists(public_path('images/' . $candidate))) {
+            return $candidate;
+        }
+
+        $basename = basename($candidate);
+        if ($basename !== '' && file_exists(public_path('images/' . $basename))) {
+            return $basename;
+        }
+
+        return self::DEFAULT_IMAGE;
+    }
+
+    public function imageUrl(): string
+    {
+        return asset('images/' . self::resolveImageName($this->anh_dai_dien));
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        return $this->imageUrl();
+    }
 
     /**
      * Mối quan hệ 1-N với biến thể sản phẩm (Kích thước, màu sắc...)

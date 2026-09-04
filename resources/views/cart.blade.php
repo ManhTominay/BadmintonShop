@@ -35,9 +35,18 @@
                 <div class="lg:col-span-2 space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         
-                        <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center text-xs font-bold text-gray-700">
-                            <input type="checkbox" id="select-all" class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500 cursor-pointer mr-3">
-                            <label for="select-all" class="cursor-pointer select-none uppercase tracking-wider">Chọn tất cả sản phẩm</label>
+                        <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between text-xs font-bold text-gray-700">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="select-all" class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500 cursor-pointer mr-3">
+                                <label for="select-all" class="cursor-pointer select-none uppercase tracking-wider">Chọn tất cả sản phẩm</label>
+                            </div>
+
+                            <form action="{{ route('cart.clear') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="text-red-500 hover:text-red-600 font-bold uppercase tracking-wider">
+                                    Xóa tất cả
+                                </button>
+                            </form>
                         </div>
 
                         <div class="p-6 divide-y divide-gray-100">
@@ -62,6 +71,9 @@
                                         </div>
                                         <div>
                                             <h3 class="text-xs font-bold text-gray-800 line-clamp-2">{{ $item['ten'] }}</h3>
+                                            @if(!empty($item['size']))
+                                                <p class="text-[10px] font-bold text-slate-600 mt-1">Size: {{ $item['size'] }}</p>
+                                            @endif
                                             <p class="text-xs font-bold text-orange-500 mt-1">{{ number_format($gia, 0, ',', '.') }} VNĐ</p>
                                         </div>
                                     </div>

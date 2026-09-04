@@ -138,8 +138,10 @@ class QuanAoSeeder extends Seeder
                 ['slug' => Str::slug($item['ten_san_pham'])],
                 [
                     'ten_san_pham' => $item['ten_san_pham'],
+                    'danh_muc_id' => 4,
                     'gia_co_ban'   => $item['gia_co_ban'],
-                    'anh_dai_dien' => $item['anh_dai_dien']
+                    'anh_dai_dien' => $item['anh_dai_dien'],
+                    'trang_thai_kinh_doanh' => true,
                 ]
             );
         }

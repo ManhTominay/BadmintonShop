@@ -6,16 +6,63 @@
     <title>Đăng nhập - BADMINTON PRO SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .login-shell {
+            background: #f3f3f3;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #f9f9f9;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+        .brand-word {
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+        .field-label {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            color: #4b5563;
+            font-weight: 800;
+        }
+        .form-input {
+            border: 1px solid #dfe7ef;
+            background: #edf3f8;
+            border-radius: 6px;
+            height: 42px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #1f2937;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #d1d9e2;
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.08);
+        }
+        .submit-btn {
+            background: linear-gradient(180deg, #ff9d2f 0%, #f57b00 100%);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+        }
+        .submit-btn:hover {
+            filter: brightness(0.98);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <!-- Logo -->
+<body class="login-shell min-h-screen flex items-center justify-center px-4">
+    <div class="login-card p-7 sm:p-8">
         <div class="text-center mb-6">
-            <a href="{{ url('/') }}" class="inline-flex items-center space-x-2">
-                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
-                <span class="font-extrabold text-2xl text-slate-900 uppercase">BADMINTON <span class="text-orange-500">PRO</span></span>
+            <a href="{{ url('/') }}" class="inline-block">
+                <div class="brand-word text-3xl text-slate-900 uppercase leading-none">
+                    BADMINTON <span class="text-orange-500">PRO</span>
+                </div>
             </a>
-            <h2 class="text-gray-600 text-sm mt-2 font-medium">Đăng nhập tài khoản của bạn</h2>
+            <h2 class="text-gray-600 text-sm mt-3 font-medium">Đăng nhập tài khoản của bạn</h2>
         </div>
 
         @if ($errors->any())
@@ -27,16 +74,22 @@
         <form action="{{ route('login') }}" method="POST" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-500" placeholder="nhapemail@example.com">
+                <label class="field-label block mb-2 uppercase">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" required class="form-input w-full" placeholder="tan@gmail.com">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Mật khẩu</label>
-                <input type="password" name="password" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-500" placeholder="••••••••">
+                <label class="field-label block mb-2 uppercase">Mật khẩu</label>
+                <input type="password" name="password" required class="form-input w-full" placeholder="••••••••">
             </div>
 
-            <button type="submit" class="w-full bg-orange-500 text-white font-bold py-2.5 rounded hover:bg-orange-600 transition text-sm uppercase">
+            <div class="text-right mt-1">
+                <a href="{{ route('password.request') }}" class="text-xs text-orange-500 hover:text-orange-600 font-semibold">
+                    Quên mật khẩu?
+                </a>
+            </div>
+
+            <button type="submit" class="submit-btn w-full text-white font-bold py-3 rounded text-sm uppercase transition">
                 Đăng nhập
             </button>
         </form>

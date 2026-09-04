@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHỤ KIỆN CẦU LÔNG - BADMINTON PRO SHOP</title>
+    <!-- Thẻ base giúp xử lý triệt để lỗi vỡ đường dẫn ảnh/link khi chuyển trang -->
+    <base href="{{ asset('/') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -27,7 +29,7 @@
                 </div>
             </a>
 
-            <!-- Thanh tìm kiếm kiểu dáng mới ở Header -->
+            <!-- Thanh tìm kiếm ở Header -->
             <div class="flex-1 max-w-xl mx-8">
                 <form action="{{ route('phukien') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
                     @if(request('type'))
@@ -45,17 +47,55 @@
                 </form>
             </div>
 
+            <!-- Giỏ hàng & Tài khoản -->
             <div class="flex items-center space-x-4">
-                <a href="#" class="text-gray-600 hover:text-orange-500"><i class="fa-regular fa-user text-xl"></i></a>
-                <a href="#" class="relative text-gray-600 hover:text-orange-500">
+                @auth
+                    <div class="relative group">
+                        <button type="button" class="text-gray-600 hover:text-orange-500 transition" title="Tài khoản">
+                            <i class="fa-regular fa-user text-xl"></i>
+                        </button>
+
+                        <div class="absolute right-0 top-full mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="px-3 py-2 border-b border-gray-100 text-xs font-bold text-slate-700">
+                                Xin chào, <span class="text-orange-500">{{ Auth::user()->ho_ten ?? Auth::user()->full_name ?? Auth::user()->name ?? Auth::user()->username }}</span>
+                            </div>
+                            <a href="{{ route('account.profile') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                <i class="fa-solid fa-user-pen text-[11px]"></i> Chỉnh sửa tài khoản
+                            </a>
+                            <a href="{{ route('account.orders') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                <i class="fa-solid fa-box-open text-[11px]"></i> Đơn hàng
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-t border-gray-100">
+                                    <i class="fa-solid fa-right-from-bracket text-[11px]"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-orange-500 transition py-1 px-1">Đăng nhập</a>
+                    <a href="{{ route('register') }}" class="bg-orange-500 text-white px-3 py-1.5 rounded hover:bg-orange-600 transition shadow-sm">Đăng ký</a>
+                @endauth
+
+                <!-- Giỏ hàng hiển thị số lượng tự động -->
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
-                    <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                        {{ session('cart') ? count(session('cart')) : 0 }}
+                    @php
+                        if (!isset($cartCount)) {
+                            $cartCount = Auth::check() 
+                                ? \App\Models\GioHang::where('nguoi_dung_id', Auth::id())->sum('so_luong') 
+                                : (session('cart') ? count(session('cart')) : 0);
+                        }
+                    @endphp
+                    <span data-cart-count class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {{ $cartCount }}
                     </span>
                 </a>
             </div>
         </div>
 
+        <!-- Navigation Menu -->
         <nav class="border-t border-gray-100">
             <div class="max-w-6xl mx-auto px-4">
                 <ul class="flex items-center justify-center space-x-8 py-2 text-xs font-bold uppercase tracking-wider">
@@ -80,7 +120,7 @@
                 </p>
             </div>
 
-            <!-- Form Sắp xếp (Thanh tìm kiếm phụ đã được chuyển lên Header chuẩn) -->
+            <!-- Form Sắp xếp -->
             <form action="{{ route('phukien') }}" method="GET" class="flex items-center gap-2">
                 @if(request('type'))
                     <input type="hidden" name="type" value="{{ request('type') }}">
@@ -88,10 +128,11 @@
                 @if(request('keyword'))
                     <input type="hidden" name="keyword" value="{{ request('keyword') }}">
                 @endif
+                <label class="text-xs font-semibold text-gray-600 whitespace-nowrap">Sắp xếp:</label>
                 <select name="sort" onchange="this.form.submit()" class="border rounded px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-orange-500 text-gray-700 cursor-pointer">
-                    <option value="">Sắp xếp mặc định</option>
-                    <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
-                    <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá giảm dần</option>
+                    <option value="">Mới nhất</option>
+                    <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá: thấp đến cao</option>
+                    <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá: cao đến thấp</option>
                 </select>
             </form>
         </div>
@@ -125,18 +166,19 @@
         <!-- Danh sách Phụ Kiện -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
             @forelse($danhSachPhuKien as $item)
-                <div class="bg-white rounded-xl p-3 border border-gray-100 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+                <div class="group bg-white rounded-xl p-3 border border-gray-100 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-orange-500 transition-all duration-300">
                     <div>
-                        <!-- Khung Ảnh (Bấm vào ảnh chuyển đến trang chi tiết) -->
+                        <!-- Khung Ảnh -->
                         <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block h-48 bg-gray-50 rounded-lg flex items-center justify-center p-2 mb-3 overflow-hidden relative">
-                            @if($item->anh_dai_dien)
-                                <img src="{{ asset('images/' . ltrim($item->anh_dai_dien, '/')) }}" 
+                            @php
+                                $imageName = \App\Models\SanPham::resolveImageName($item->anh_dai_dien ?? null);
+                            @endphp
+                            @if(!empty($imageName) && file_exists(public_path('images/' . $imageName)))
+                                <img src="{{ asset('images/' . $imageName) }}" 
                                      alt="{{ $item->ten_san_pham }}" 
-                                     class="max-h-full max-w-full object-contain hover:scale-105 transition-transform duration-300"
-                                     onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
-                                <span class="hidden text-xs text-gray-400 font-medium">Không tìm thấy ảnh</span>
+                                     class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
                             @else
-                                <span class="text-xs text-gray-400 font-medium">Chưa có ảnh</span>
+                                <i class="fa-solid fa-box text-4xl text-gray-300"></i>
                             @endif
                         </a>
 
@@ -145,20 +187,19 @@
                             XEM CHI TIẾT
                         </a>
 
-                        <!-- Tên sản phẩm (Bấm vào tên chuyển đến trang chi tiết) -->
+                        <!-- Tên sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
                             <h3 class="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] hover:text-orange-500 transition-colors">
                                 {{ $item->ten_san_pham }}
                             </h3>
                         </a>
-                    </div>
 
-                    <!-- Giá sản phẩm -->
-                    <div class="mt-2">
-                        <p class="text-xs font-bold text-orange-600">
+                        <!-- Giá sản phẩm -->
+                        <p class="text-xs font-bold text-orange-600 mt-2">
                             {{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ
                         </p>
                     </div>
+
                 </div>
             @empty
                 <div class="col-span-full text-center py-12 text-gray-500 text-sm">
@@ -175,5 +216,74 @@
         @endif
     </div>
 
+    <!-- Footer -->
+    <footer class="bg-amber-50/70 border-t border-amber-100 text-gray-700 text-sm mt-16 pt-10 pb-6">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 items-start">
+                
+                <!-- Cột 1: Thông tin công ty -->
+                <div class="space-y-3">
+                    <p class="font-bold text-slate-900 text-base uppercase tracking-wider">Thông tin công ty</p>
+                    <ul class="space-y-2.5 text-sm">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-location-dot text-orange-500 w-4 mt-1 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Địa chỉ:</strong> Trường Đại học Tài nguyên và Môi trường Hà Nội</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-user text-orange-500 w-4 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Người nhận:</strong> ManhTominay</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-envelope text-orange-500 w-4 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Email:</strong> vdtien26976@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cột 2: Danh mục sản phẩm -->
+                <div class="space-y-3 md:text-center">
+                    <p class="font-bold text-slate-900 text-base uppercase tracking-wider">Danh mục sản phẩm</p>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="{{ url('/vot-cau-long') }}" class="hover:text-orange-500 transition block">Vợt cầu lông</a></li>
+                        <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition block">Giày cầu lông</a></li>
+                        <li><a href="{{ url('/quan-ao') }}" class="hover:text-orange-500 transition block">Quần áo cầu lông</a></li>
+                        <li><a href="{{ route('cau') }}" class="hover:text-orange-500 transition block">Cầu lông</a></li>
+                        <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition block">Phụ kiện cầu lông</a></li>
+                    </ul>
+                </div>
+
+                <!-- Cột 3: Liên hệ -->
+                <div class="space-y-3">
+                    <p class="font-bold text-slate-900 text-base uppercase tracking-wider">Liên hệ</p>
+                    <ul class="space-y-2.5 text-sm">
+                        <li class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-phone text-orange-500 w-4 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Hotline:</strong> 0981 852 431</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-envelope text-orange-500 w-4 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Hỗ trợ:</strong> vdtien26976@gmail.com</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-clock text-orange-500 w-4 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Giờ làm việc:</strong> 8:00 - 21:00 (T2 - CN)</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-location-dot text-orange-500 w-4 flex-shrink-0"></i>
+                            <span><strong class="text-slate-900 font-semibold">Cơ sở:</strong> Hà Nội, Việt Nam</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-gray-200/80 pt-6 text-center text-gray-500 text-xs">
+                <p>&copy; 2026 BADMINTON PRO SHOP. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    @include('partials.cart-ajax')
 </body>
 </html>

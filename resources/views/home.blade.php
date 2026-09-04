@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BADMINTON PRO SHOP</title>
+    <!-- Gốc URL tuyệt đối giúp xử lý triệt để lỗi mất ảnh khi chuyển trang con -->
+    <base href="{{ asset('/') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -46,38 +48,46 @@
 
             <!-- 3. Tài khoản & Giỏ hàng -->
             <div class="flex items-center space-x-4">
-                <a href="{{ Auth::check() ? '#' : route('login') }}" class="text-gray-600 hover:text-orange-500" title="Tài khoản">
-                    <i class="fa-regular fa-user text-xl"></i>
-                </a>
+                @auth
+                    <div class="relative group">
+                        <button type="button" class="text-gray-600 hover:text-orange-500 transition" title="Tài khoản">
+                            <i class="fa-regular fa-user text-xl"></i>
+                        </button>
+
+                        <div class="absolute right-0 top-full mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="px-3 py-2 border-b border-gray-100 text-xs font-bold text-slate-700">
+                                Xin chào, <span class="text-orange-500">{{ Auth::user()->ho_ten ?? Auth::user()->full_name ?? Auth::user()->name ?? Auth::user()->username }}</span>
+                            </div>
+                            <a href="{{ route('account.profile') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                <i class="fa-solid fa-user-pen text-[11px]"></i> Chỉnh sửa tài khoản
+                            </a>
+                            <a href="{{ route('account.orders') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                <i class="fa-solid fa-box-open text-[11px]"></i> Đơn hàng
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-t border-gray-100">
+                                    <i class="fa-solid fa-right-from-bracket text-[11px]"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-orange-500 transition py-1 px-1">Đăng nhập</a>
+                    <a href="{{ route('register') }}" class="bg-orange-500 text-white px-3 py-1.5 rounded hover:bg-orange-600 transition shadow-sm">Đăng ký</a>
+                @endauth
 
                 <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     @php
-                        $cartCount = 0;
-                        if (Auth::check()) {
-                            $cartCount = \App\Models\GioHang::where('nguoi_dung_id', Auth::id())->sum('so_luong');
+                        if (!isset($cartCount)) {
+                            $cartCount = Auth::check() ? \App\Models\GioHang::where('nguoi_dung_id', Auth::id())->sum('so_luong') : 0;
                         }
                     @endphp
-                    <span class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    <span data-cart-count class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                         {{ $cartCount }}
                     </span>
                 </a>
-
-                <div class="flex items-center space-x-2 text-xs font-semibold pl-2 border-l border-gray-200">
-                    @auth
-                        <span class="text-slate-700">
-                            Xin chào, <strong class="text-orange-500 font-bold">{{ Auth::user()->ho_ten ?? Auth::user()->full_name ?? Auth::user()->name ?? Auth::user()->username }}</strong>
-                        </span>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-gray-500 hover:text-orange-500 transition ml-1">Đăng xuất</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-orange-500 transition py-1 px-1">Đăng nhập</a>
-                        <span class="text-gray-300">|</span>
-                        <a href="{{ route('register') }}" class="bg-orange-500 text-white px-3 py-1.5 rounded hover:bg-orange-600 transition shadow-sm">Đăng ký</a>
-                    @endauth
-                </div>
             </div>
 
         </div>
@@ -151,42 +161,41 @@
 
     <!-- 0. DANH MỤC: SẢN PHẨM BÁN CHẠY -->
     <section class="max-w-6xl mx-auto px-4 py-10">
-        <div class="mb-8 flex items-center justify-between relative h-10">
+        <div class="mb-8 flex items-center justify-center relative h-10">
             <div class="absolute left-0 top-1/2 w-full h-[1px] bg-gray-200 z-0"></div>
-            <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 bg-gray-50 px-4">
+            <div class="relative z-10 bg-gray-50 px-4">
                 <h2 class="font-extrabold text-xl uppercase tracking-wider text-slate-900 text-center">SẢN PHẨM BÁN CHẠY</h2>
             </div>
-            <a href="{{ url('/san-pham-ban-chay') }}" class="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-50 pl-4 text-sm font-bold text-orange-600 hover:text-orange-700 z-10 flex items-center gap-1.5 transition">
-                Xem tất cả <i class="fa-solid fa-arrow-right text-xs"></i>
-            </a>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             @php
-                if (isset($banChay) && count($banChay) > 0) {
-                    $sanPhamBanChay = $banChay;
-                } else {
-                    $allSp = \App\Models\SanPham::all();
+                $allSp = \App\Models\SanPham::all();
+                $resolveProductImage = function ($product) {
+                    return asset('images/' . \App\Models\SanPham::resolveImageName($product->anh_dai_dien ?? null));
+                };
 
-                    $pVot     = $allSp->filter(function($p) { return stripos($p->ten_san_pham, 'vợt') !== false; })->take(2);
-                    $pGiay    = $allSp->filter(function($p) { return stripos($p->ten_san_pham, 'giày') !== false; })->take(2);
-                    $pAo      = $allSp->filter(function($p) { return stripos($p->ten_san_pham, 'áo') !== false; })->take(1);
-                    $pQuan    = $allSp->filter(function($p) { return stripos($p->ten_san_pham, 'quần') !== false; })->take(1);
-                    $pCau     = $allSp->filter(function($p) { return stripos($p->ten_san_pham, 'cầu') !== false; })->take(1);
-                    $pPhuKien = $allSp->filter(function($p) { 
-                        return stripos($p->ten_san_pham, 'phụ kiện') !== false || 
-                               stripos($p->ten_san_pham, 'quấn') !== false || 
-                               stripos($p->ten_san_pham, 'túi') !== false || 
-                               stripos($p->ten_san_pham, 'balo') !== false; 
-                    })->take(1);
+                // Hàng 1: Lấy 2 Vợt & 2 Giày
+                $pVot  = $allSp->filter(fn($p) => mb_stripos($p->ten_san_pham, 'Vợt') !== false)->take(2);
+                $pGiay = $allSp->filter(fn($p) => mb_stripos($p->ten_san_pham, 'Giày') !== false)->take(2);
 
-                    $sanPhamBanChay = collect()->concat($pVot)->concat($pGiay)->concat($pAo)->concat($pQuan)->concat($pCau)->concat($pPhuKien);
+                // Hàng 2: Lấy lần lượt 1 Áo -> 1 Quần -> 1 Cầu -> 1 Phụ kiện
+                $pAo      = $allSp->filter(fn($p) => mb_stripos($p->ten_san_pham, 'Áo') !== false)->take(1);
+                $pQuan    = $allSp->filter(fn($p) => mb_stripos($p->ten_san_pham, 'Quần') !== false)->take(1);
+                $pCau     = $allSp->filter(fn($p) => mb_stripos($p->ten_san_pham, 'Quả cầu') !== false || mb_stripos($p->ten_san_pham, 'Hộp cầu') !== false || mb_stripos($p->ten_san_pham, 'Trái cầu') !== false)->take(1);
+                $pPhuKien = $allSp->filter(fn($p) => mb_stripos($p->ten_san_pham, 'Túi') !== false || mb_stripos($p->ten_san_pham, 'Balo') !== false || mb_stripos($p->ten_san_pham, 'Quấn') !== false || mb_stripos($p->ten_san_pham, 'Cước') !== false || mb_stripos($p->ten_san_pham, 'Phụ kiện') !== false)->take(1);
 
-                    if ($sanPhamBanChay->count() < 8) {
-                        $sanPhamBanChay = $allSp->take(8);
-                    } else {
-                        $sanPhamBanChay = $sanPhamBanChay->take(8);
-                    }
+                // Ghép lại đúng 8 sản phẩm theo chuẩn thứ tự
+                $sanPhamBanChay = collect()
+                    ->concat($pVot)
+                    ->concat($pGiay)
+                    ->concat($pAo)
+                    ->concat($pQuan)
+                    ->concat($pCau)
+                    ->concat($pPhuKien);
+
+                if ($sanPhamBanChay->count() < 8) {
+                    $sanPhamBanChay = $allSp->take(8);
                 }
             @endphp
 
@@ -194,18 +203,19 @@
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
                     <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
-                        <img src="{{ $sp->anh_dai_dien ? asset('images/' . $sp->anh_dai_dien) : asset('images/yonex_doura10.webp') }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
+                        <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
-                    <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $sp->ten_san_pham }}</h3>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                        XEM CHI TIẾT
+                    </a>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
+                    </a>
                     <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                 </div>
-                
-                <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-4 pt-2 border-t border-gray-100">
-                    @csrf
-                    <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
-                    <input type="hidden" name="so_luong" value="1">
-                    <button type="submit" class="w-full bg-white border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs font-bold py-2 rounded transition">Thêm Vào Giỏ Hàng</button>
-                </form>
             </div>
             @endforeach
         </div>
@@ -228,18 +238,19 @@
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
                     <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
-                        <img src="{{ $sp->anh_dai_dien ? asset('images/' . $sp->anh_dai_dien) : asset('images/yonex_doura10.webp') }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
+                        <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
-                    <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $sp->ten_san_pham }}</h3>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                        XEM CHI TIẾT
+                    </a>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
+                    </a>
                     <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                 </div>
-                
-                <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-4 pt-2 border-t border-gray-100">
-                    @csrf
-                    <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
-                    <input type="hidden" name="so_luong" value="1">
-                    <button type="submit" class="w-full bg-white border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs font-bold py-2 rounded transition">Thêm Vào Giỏ Hàng</button>
-                </form>
             </div>
             @endforeach
         </div>
@@ -262,18 +273,20 @@
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
                     <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
-                        <img src="{{ $sp->anh_dai_dien ? asset('images/' . $sp->anh_dai_dien) : asset('images/yonex_doura10.webp') }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
+                        <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
-                    <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $sp->ten_san_pham }}</h3>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                        XEM CHI TIẾT
+                    </a>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
+                    </a>
+                    <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 mt-1">Size: 36-43</p>
                     <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                 </div>
-                
-                <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-4 pt-2 border-t border-gray-100">
-                    @csrf
-                    <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
-                    <input type="hidden" name="so_luong" value="1">
-                    <button type="submit" class="w-full bg-white border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs font-bold py-2 rounded transition">Thêm Vào Giỏ Hàng</button>
-                </form>
             </div>
             @endforeach
         </div>
@@ -293,25 +306,31 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             @php
-                $listQuanAo = isset($quanAo) ? $quanAo : (isset($quan_ao) ? $quan_ao : \App\Models\SanPham::where('ten_san_pham', 'like', '%áo%')->orWhere('ten_san_pham', 'like', '%quần%')->take(4)->get());
+                $listQuanAo = $quanAo ?? \App\Models\SanPham::where('trang_thai_kinh_doanh', true)
+                    ->where('danh_muc_id', 4)
+                    ->orderBy('id', 'desc')
+                    ->take(4)
+                    ->get();
             @endphp
 
             @foreach($listQuanAo as $sp)
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
                     <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
-                        <img src="{{ $sp->anh_dai_dien ? asset('images/' . $sp->anh_dai_dien) : asset('images/yonex_doura10.webp') }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
+                        <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
-                    <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $sp->ten_san_pham }}</h3>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                        XEM CHI TIẾT
+                    </a>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
+                    </a>
+                    <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 mt-1">Size: XS/S/M/L/XL/XXL</p>
                     <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                 </div>
-                
-                <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-4 pt-2 border-t border-gray-100">
-                    @csrf
-                    <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
-                    <input type="hidden" name="so_luong" value="1">
-                    <button type="submit" class="w-full bg-white border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs font-bold py-2 rounded transition">Thêm Vào Giỏ Hàng</button>
-                </form>
             </div>
             @endforeach
         </div>
@@ -334,18 +353,19 @@
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
                     <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
-                        <img src="{{ $sp->anh_dai_dien ? asset('images/' . $sp->anh_dai_dien) : asset('images/yonex_doura10.webp') }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
+                        <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
-                    <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $sp->ten_san_pham }}</h3>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                        XEM CHI TIẾT
+                    </a>
+
+                    <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
+                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
+                    </a>
                     <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                 </div>
-                
-                <form action="{{ route('cart.add', $sp->id) }}" method="POST" class="mt-4 pt-2 border-t border-gray-100">
-                    @csrf
-                    <input type="hidden" name="bien_the_id" value="{{ optional($sp->bienThes->first())->id ?? 1 }}">
-                    <input type="hidden" name="so_luong" value="1">
-                    <button type="submit" class="w-full bg-white border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs font-bold py-2 rounded transition">Thêm Vào Giỏ Hàng</button>
-                </form>
             </div>
             @endforeach
         </div>
@@ -363,6 +383,8 @@
             });
         });
     </script>
+
+    @include('partials.cart-ajax')
 
     <!-- Footer -->
     <footer class="bg-amber-50/70 border-t border-amber-100 text-gray-700 text-sm mt-16 pt-10 pb-6">
@@ -431,5 +453,34 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Update cart count on page load to reflect items added on other pages
+        document.addEventListener('DOMContentLoaded', function () {
+            const badge = document.querySelector('[data-cart-count]');
+            if (badge) {
+                @if(Auth::check())
+                    // Fetch current cart count from server
+                    fetch('/api/cart-count', {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.cartCount !== undefined) {
+                            badge.textContent = data.cartCount;
+                        }
+                    })
+                    .catch(() => {
+                        // Silent fail - use the server-rendered count
+                    });
+                @endif
+            }
+        });
+    </script>
 </body>
 </html>

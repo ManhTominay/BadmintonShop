@@ -82,6 +82,13 @@ Route::middleware('guest')->group(function () {
     // Đăng ký
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Quên mật khẩu
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/password-reset-sent', [AuthController::class, 'showResetSentPage'])->name('password.sent');
+    Route::get('/password-reset/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/password-reset', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 
@@ -96,6 +103,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
     Route::patch('/gio-hang/cap-nhat/{id}', [CartController::class, 'updateCart'])->name('cart.update');
     Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::post('/gio-hang/xoa-tat-ca', [CartController::class, 'clearCart'])->name('cart.clear');
+    Route::get('/api/cart-count', [CartController::class, 'getCartCount'])->name('cart.count');
     
     // Điểm đến khi bấm nút thanh toán ở giỏ hàng (Kiểm tra địa chỉ lần đầu)
     Route::get('/thanh-toan', [CheckoutController::class, 'index'])->name('checkout');
@@ -104,10 +113,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thanh-toan/dia-chi', [CheckoutController::class, 'showAddressForm'])->name('checkout.address');
     Route::post('/thanh-toan/dia-chi', [CheckoutController::class, 'storeAddress'])->name('checkout.address.store');
 
-    // Trang checkout thanh toán thực tế (hiển thị file checkout.blade.php của bạn)
-    Route::get('/thanh-toan/xac-nhan', function (Request $request) {
-        return view('checkout');
-    })->name('checkout.payment');
+    // Trang thay đổi địa chỉ người dùng hiện có
+    Route::get('/thanh-toan/dia-chi/cap-nhat', [CheckoutController::class, 'editAddressForm'])->name('checkout.address.edit');
+    Route::put('/thanh-toan/dia-chi/cap-nhat', [CheckoutController::class, 'updateAddress'])->name('checkout.address.update');
+
+    // Trang checkout thanh toán thực tế
+    Route::get('/thanh-toan/xac-nhan', [CheckoutController::class, 'showPaymentPage'])->name('checkout.payment');
+
+    // Tài khoản người dùng
+    Route::get('/tai-khoan', [App\Http\Controllers\AccountController::class, 'profile'])->name('account.profile');
+    Route::put('/tai-khoan', [App\Http\Controllers\AccountController::class, 'updateProfile'])->name('account.update-profile');
+    Route::put('/tai-khoan/mat-khau', [App\Http\Controllers\AccountController::class, 'updatePassword'])->name('account.update-password');
+    Route::get('/don-hang', [App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
+    Route::get('/tai-khoan/dia-chi', [App\Http\Controllers\AccountController::class, 'addresses'])->name('account.addresses');
+    Route::post('/tai-khoan/dia-chi/mac-dinh/{id}', [App\Http\Controllers\AccountController::class, 'setDefaultAddress'])->name('account.addresses.default');
 
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

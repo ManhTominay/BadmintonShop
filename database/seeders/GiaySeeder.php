@@ -114,14 +114,15 @@ class GiaySeeder extends Seeder
         ];
         foreach ($danhSachGiay as $giay) {
             $slug = Str::slug($giay['ten_san_pham']);
-            
-            // Cập nhật tên ảnh & giá nếu đã có slug, hoặc tạo mới nếu chưa có
+
             SanPham::updateOrCreate(
                 ['slug' => $slug],
                 [
                     'ten_san_pham' => $giay['ten_san_pham'],
+                    'danh_muc_id' => 2,
                     'gia_co_ban'   => $giay['gia_co_ban'],
                     'anh_dai_dien' => $giay['anh_dai_dien'],
+                    'trang_thai_kinh_doanh' => true,
                 ]
             );
         }

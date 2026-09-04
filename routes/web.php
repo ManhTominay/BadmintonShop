@@ -87,7 +87,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
     Route::get('/password-reset-sent', [AuthController::class, 'showResetSentPage'])->name('password.sent');
-    Route::get('/password-reset/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::get('/password-reset', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::get('/password-reset/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset.token');
     Route::post('/password-reset', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
@@ -100,6 +101,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Giỏ hàng
     Route::post('/gio-hang/them/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::post('/gio-hang/them-tat-ca', [CartController::class, 'addAllProducts'])->name('cart.add-all');
     Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
     Route::patch('/gio-hang/cap-nhat/{id}', [CartController::class, 'updateCart'])->name('cart.update');
     Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');

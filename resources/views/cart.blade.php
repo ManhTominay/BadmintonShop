@@ -41,12 +41,20 @@
                                 <label for="select-all" class="cursor-pointer select-none uppercase tracking-wider">Chọn tất cả sản phẩm</label>
                             </div>
 
-                            <form action="{{ route('cart.clear') }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" class="text-red-500 hover:text-red-600 font-bold uppercase tracking-wider">
-                                    Xóa tất cả
-                                </button>
-                            </form>
+                            <div class="flex items-center gap-4">
+                                <form action="{{ route('cart.add-all') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-orange-500 hover:text-orange-600 font-bold uppercase tracking-wider">
+                                        Thêm tất cả sản phẩm
+                                    </button>
+                                </form>
+                                <form action="{{ route('cart.clear') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-red-500 hover:text-red-600 font-bold uppercase tracking-wider">
+                                        Xóa tất cả
+                                    </button>
+                                </form>
+                            </div>
                         </div>
 
                         <div class="p-6 divide-y divide-gray-100">
@@ -137,6 +145,12 @@
                 <a href="{{ url('/') }}" class="inline-block bg-slate-900 text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-orange-500 transition">
                     MUA SẮM NGAY
                 </a>
+                <form action="{{ route('cart.add-all') }}" method="POST" class="mt-3">
+                    @csrf
+                    <button type="submit" class="inline-block bg-orange-500 text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-orange-600 transition">
+                        THÊM TẤT CẢ SẢN PHẨM
+                    </button>
+                </form>
             </div>
         @endif
     </main>

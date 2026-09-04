@@ -10,23 +10,21 @@ class ResetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $token;
+    public $otp;
     public $email;
 
-    public function __construct($token, $email)
+    public function __construct($otp, $email)
     {
-        $this->token = $token;
+        $this->otp = $otp;
         $this->email = $email;
     }
 
     public function build()
     {
-        $resetUrl = url('/password-reset/' . $this->token . '?email=' . urlencode($this->email));
-
         return $this->subject('Đặt lại mật khẩu - BADMINTON PRO SHOP')
                     ->view('emails.reset-password')
                     ->with([
-                        'resetUrl' => $resetUrl,
+                        'otp' => $this->otp,
                         'email' => $this->email,
                     ]);
     }

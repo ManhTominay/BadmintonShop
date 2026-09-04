@@ -25,7 +25,7 @@
                 <!-- Header -->
                 <div class="text-center mb-8">
                     <h1 class="text-2xl font-bold text-gray-800 mb-2">Quên mật khẩu?</h1>
-                    <p class="text-gray-600 text-sm">Nhập email đăng ký để nhận liên kết đặt lại mật khẩu</p>
+                    <p class="text-gray-600 text-sm">Nhập email đăng ký để nhận mã OTP đặt lại mật khẩu</p>
                 </div>
 
                 <!-- Errors -->
@@ -68,7 +68,7 @@
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
                     >
                         <i class="fa-solid fa-paper-plane"></i>
-                        Gửi liên kết đặt lại
+                        Gửi mã OTP
                     </button>
                 </form>
 

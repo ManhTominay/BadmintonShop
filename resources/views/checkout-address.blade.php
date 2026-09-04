@@ -25,7 +25,7 @@
             <h2 class="text-xl font-bold text-slate-900 uppercase">
                 {{ $isEdit ? 'Thay đổi địa chỉ' : 'Thông tin giao hàng' }}
             </h2>
-            <a href="{{ route('checkout.payment') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 hover:text-orange-600">
+            <a href="{{ route('cart.index') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 hover:text-orange-600">
                 <i class="fa-solid fa-arrow-left"></i>
                 Quay lại
             </a>
@@ -40,6 +40,9 @@
                 @method('PUT')
             @endif
             <input type="hidden" name="items" value="{{ $selectedItems ?? request()->query('items') }}">
+            @if($isEdit)
+                <input type="hidden" name="address_id" value="{{ $address->id }}">
+            @endif
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Họ tên người nhận</label>
                 <input type="text" name="ten_nguoi_nhan" value="{{ old('ten_nguoi_nhan', $address->ten_nguoi_nhan ?? '') }}" required class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-orange-500">
@@ -52,7 +55,7 @@
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Vị trí giao hàng trên bản đồ</label>
                 <div id="map" class="mt-2 w-full rounded-xl border border-gray-300" style="height: 260px;"></div>
-                <p class="mt-2 text-[11px] text-gray-500">Nhấp vào bản đồ để xác định vị trí giao hàng chính xác. Khoảng cách này sẽ được dùng để tính phí ship.</p>
+                <p id="map-status" class="mt-2 text-[11px] text-gray-500">Chọn địa chỉ để bản đồ tự định vị, hoặc nhấp trực tiếp trên bản đồ để tinh chỉnh.</p>
                 <input type="hidden" name="lat" id="lat" value="{{ old('lat', $address->lat ?? '') }}">
                 <input type="hidden" name="lng" id="lng" value="{{ old('lng', $address->lng ?? '') }}">
             </div>
@@ -156,7 +159,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const shopCoords = [10.762622, 106.660172];
+        const shopCoords = [21.0461067, 105.7620995];
         const latInput = document.getElementById('lat');
         const lngInput = document.getElementById('lng');
         const initialLat = Number(latInput.value || shopCoords[0]);
@@ -170,6 +173,39 @@
         L.marker(shopCoords).addTo(map).bindPopup('Cửa hàng BADMINTON PRO');
 
         let userMarker = null;
+        const mapStatus = document.getElementById('map-status');
+
+        function setUserLocation(lat, lng, zoom = 16) {
+            latInput.value = lat;
+            lngInput.value = lng;
+            map.setView([lat, lng], zoom);
+
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+
+            userMarker = L.marker([lat, lng]).addTo(map).bindPopup('Địa chỉ nhận hàng').openPopup();
+        }
+
+        async function geocodeLocation(query) {
+            if (!query || query.trim().length < 3) return;
+
+            if (mapStatus) mapStatus.textContent = 'Đang tìm vị trí trên bản đồ...';
+
+            try {
+                const response = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=vn&q=' + encodeURIComponent(query));
+                const results = await response.json();
+
+                if (results.length > 0) {
+                    setUserLocation(Number(results[0].lat), Number(results[0].lon));
+                    if (mapStatus) mapStatus.textContent = 'Đã tự chọn vị trí. Bạn có thể nhấp bản đồ để chỉnh chính xác hơn.';
+                } else if (mapStatus) {
+                    mapStatus.textContent = 'Không tìm thấy vị trí tự động. Hãy nhấp trực tiếp trên bản đồ.';
+                }
+            } catch (error) {
+                if (mapStatus) mapStatus.textContent = 'Không thể tìm vị trí tự động. Hãy nhấp trực tiếp trên bản đồ.';
+            }
+        }
 
         if (latInput.value && lngInput.value) {
             userMarker = L.marker([Number(latInput.value), Number(lngInput.value)]).addTo(map).bindPopup('Địa chỉ nhận hàng');
@@ -177,14 +213,8 @@
 
         map.on('click', function (event) {
             const { lat, lng } = event.latlng;
-            latInput.value = lat;
-            lngInput.value = lng;
-
-            if (userMarker) {
-                map.removeLayer(userMarker);
-            }
-
-            userMarker = L.marker([lat, lng]).addTo(map).bindPopup('Địa chỉ nhận hàng');
+            setUserLocation(lat, lng);
+            if (mapStatus) mapStatus.textContent = 'Đã chọn vị trí giao hàng trên bản đồ.';
         });
 
         const wardsByProvince = {
@@ -255,6 +285,24 @@
 
         const tinhThanh = document.getElementById('tinhThanh');
         const phuongXa = document.getElementById('phuongXa');
+        const addressForm = document.querySelector('form');
+        const detailAddressInput = document.querySelector('input[name="dia_chi_chi_tiet"]');
+
+        function clearSavedCoordinates() {
+            latInput.value = '';
+            lngInput.value = '';
+        }
+
+        tinhThanh.addEventListener('change', clearSavedCoordinates);
+        phuongXa.addEventListener('change', clearSavedCoordinates);
+        detailAddressInput.addEventListener('input', clearSavedCoordinates);
+
+        addressForm.addEventListener('submit', function (event) {
+            if (!latInput.value || !lngInput.value) {
+                event.preventDefault();
+                alert('Vui lòng nhấp vào bản đồ để chọn vị trí giao hàng.');
+            }
+        });
 
         tinhThanh.addEventListener('change', function () {
             const value = this.value;
@@ -262,6 +310,17 @@
 
             phuongXa.innerHTML = '<option value="">-- Chọn phường/xã --</option>' +
                 options.map(item => `<option value="${item}">${item}</option>`).join('');
+
+            geocodeLocation(`${value}, Việt Nam`);
+        });
+
+        phuongXa.addEventListener('change', function () {
+            geocodeLocation(`${this.value}, ${tinhThanh.value}, Việt Nam`);
+        });
+
+        detailAddressInput.addEventListener('blur', function () {
+            const query = `${this.value}, ${phuongXa.value}, ${tinhThanh.value}, Việt Nam`;
+            geocodeLocation(query);
         });
     </script>
 </body>

@@ -18,6 +18,7 @@ class SanPham extends Model
         'thuong_hieu_id', 
         'mo_ta', 
         'gia_co_ban', 
+        'so_luong',
         'anh_dai_dien', 
         'la_san_pham_noi_bat', 
         'la_san_pham_moi', 
@@ -71,11 +72,5 @@ class SanPham extends Model
     public function thongSoVot()
     {
         return $this->hasOne(ThongSoVot::class, 'san_pham_id');
-    }
-    public function index()
-    {
-        // Sắp xếp theo id giảm dần (thay cho latest vì bảng tắt timestamps)
-        $products = SanPham::orderBy('id', 'desc')->paginate(10);
-        return view('admin.products.index', compact('products'));
     }
 }

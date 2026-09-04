@@ -28,7 +28,7 @@ use App\Http\Controllers\Admin\SettingController;
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     
-    // Kiểm tra nhanh quyền Admin trước khi vào các trang quản trị
+    // Trang tổng quan Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Quản lý sản phẩm (CRUD) sử dụng AdminProductController
@@ -39,8 +39,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
-    // Quản lý tài khoản & Khóa tài khoản
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    // Quản lý tài khoản (Đã chuyển sang dùng Route::resource để đầy đủ Thêm, Sửa, Xóa)
+    Route::resource('users', UserController::class);
     Route::put('/users/{id}/lock', [UserController::class, 'toggleLock'])->name('users.lock');
 
     // Cấu hình hệ thống

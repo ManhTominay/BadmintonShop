@@ -1,44 +1,78 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý sản phẩm</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-6">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded shadow">
-        <h1 class="text-xl font-bold mb-4">Danh sách sản phẩm</h1>
+@extends('admin.layouts.app')
 
-        @if(session('success'))
-            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">{{ session('success') }}</div>
-        @endif
+@section('content')
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <span class="w-2.5 h-8 bg-orange-600 rounded-full inline-block"></span>
+                Quản lý sản phẩm
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Danh sách toàn bộ sản phẩm cầu lông trong hệ thống</p>
+        </div>
+        <a href="{{ route('admin.products.create') }}" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Thêm sản phẩm mới
+        </a>
+    </div>
 
-        <table class="w-full border-collapse border border-gray-200">
-            <thead>
-                <tr class="bg-gray-50">
-                    <th class="border p-2">ID</th>
-                    <th class="border p-2">Tên sản phẩm</th>
-                    <th class="border p-2">Giá cơ bản</th>
+    @if(session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 rounded-xl mb-6 shadow-sm flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full border-collapse text-left text-sm text-gray-600">
+            <thead class="bg-gray-50/75 border-b border-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                <tr>
+                    <th class="p-4 font-bold text-center w-16">ID</th>
+                    <th class="p-4 font-bold">Tên sản phẩm</th>
+                    <th class="p-4 font-bold">Giá cơ bản</th>
+                    <th class="p-4 font-bold text-center">Số lượng</th>
+                    <th class="p-4 font-bold text-center w-36">Hành động</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
                 @forelse($products as $product)
-                    <tr>
-                        <td class="border p-2 text-center">{{ $product->id }}</td>
-                        <td class="border p-2">{{ $product->ten_san_pham }}</td>
-                        <td class="border p-2">{{ number_format($product->gia_co_ban) }} đ</td>
+                    <tr class="hover:bg-orange-50/30 transition-colors">
+                        <td class="p-4 text-center font-semibold text-gray-500">#{{ $product->id }}</td>
+                        <td class="p-4 font-semibold text-gray-900 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                                {{ substr($product->ten_san_pham, 0, 2) }}
+                            </div>
+                            <span>{{ $product->ten_san_pham }}</span>
+                        </td>
+                        <td class="p-4 font-bold text-orange-600">{{ number_format($product->gia_co_ban) }} đ</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ ($product->so_luong ?? 0) > 10 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200' }}">
+                                {{ $product->so_luong ?? 0 }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center space-x-2">
+                            <a href="{{ route('admin.products.edit', $product->id) }}" class="inline-flex items-center px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium text-xs transition-colors">
+                                Sửa
+                            </a>
+                            <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg font-medium text-xs transition-colors">
+                                    Xóa
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="border p-4 text-center text-gray-500">Chưa có sản phẩm nào.</td>
+                        <td colspan="5" class="p-12 text-center text-gray-400 italic">Chưa có sản phẩm nào trong hệ thống.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-
-        <div class="mt-4">
-            {{ $products->links() }}
-        </div>
     </div>
-</body>
-</html>
+
+    <div class="mt-6">
+        {{ $products->links() }}
+    </div>
+</div>
+@endsection

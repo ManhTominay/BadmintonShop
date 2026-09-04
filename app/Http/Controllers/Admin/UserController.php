@@ -31,4 +31,66 @@ class UserController extends Controller
         $statusMessage = $user->trang_thai == 1 ? 'Đã mở khóa tài khoản.' : 'Đã khóa tài khoản thành công.';
         return back()->with('success', $statusMessage);
     }
+    public function create()
+{
+    return view('admin.users.create');
+}
+
+public function store(Request $request)
+{
+    $request->validate([
+        'ho_ten' => 'required|string|max:255',
+        'email' => 'required|email|unique:nguoi_dung,email',
+        'mat_khau' => 'required|min:6',
+        'vai_tro' => 'required|in:admin,khach_hang',
+    ]);
+
+    \App\Models\User::create([
+        'ho_ten' => $request->ho_ten,
+        'email' => $request->email,
+        'mat_khau_hash' => bcrypt($request->mat_khau),
+        'vai_tro' => $request->vai_tro,
+        'trang_thai' => 1, // Mặc định kích hoạt tài khoản
+    ]);
+
+    return redirect()->route('admin.users.index')->with('success', 'Thêm tài khoản thành công!');
+}
+public function edit($id)
+{
+    $user = \App\Models\User::findOrFail($id);
+    return view('admin.users.edit', compact('user'));
+}
+
+public function update(Request $request, $id)
+{
+    $user = \App\Models\User::findOrFail($id);
+
+    $request->validate([
+        'ho_ten' => 'required|string|max:255',
+        'email' => 'required|email|unique:nguoi_dung,email,' . $id,
+        'vai_tro' => 'required|in:admin,khach_hang',
+        'mat_khau' => 'nullable|min:6',
+    ]);
+
+    $data = [
+        'ho_ten' => $request->ho_ten,
+        'email' => $request->email,
+        'vai_tro' => $request->vai_tro,
+    ];
+
+    if ($request->filled('mat_khau')) {
+        $data['mat_khau_hash'] = bcrypt($request->mat_khau);
+    }
+
+    $user->update($data);
+
+    return redirect()->route('admin.users.index')->with('success', 'Cập nhật tài khoản thành công!');
+}
+public function destroy($id)
+{
+    $user = \App\Models\User::findOrFail($id);
+    $user->delete();
+
+    return redirect()->route('admin.users.index')->with('success', 'Xóa tài khoản thành công!');
+}
 }

@@ -10,32 +10,29 @@ class ProductController extends Controller
     /**
      * Hàm xử lý tìm kiếm toàn hệ thống (Độc lập với các danh mục)
      */
-    public function search(Request $request)
-    {
-        $keyword = trim((string) $request->input('keyword', ''));
+   public function search(Request $request)
+{
+    $keyword = trim($request->input('keyword'));
+    $query = SanPham::query();
 
-        if ($keyword === '') {
-            return redirect()->route('home');
-        }
+    if (!empty($keyword)) {
+    $keywordLower = mb_strtolower($keyword);
 
-        $query = SanPham::with('bienThes')->where('trang_thai_kinh_doanh', true);
-
-        $normalized = strtolower($keyword);
-
-        if (in_array($normalized, ['lining', 'li-ning', 'li ning'])) {
-            $query->where(function($q) {
-                $q->where('ten_san_pham', 'LIKE', '%Li-Ning%')
-                  ->orWhere('ten_san_pham', 'LIKE', '%Lining%')
-                  ->orWhere('ten_san_pham', 'LIKE', '%Li Ning%');
-            });
-        } else {
-            $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
-        }
-
-        $sanPhams = $query->orderBy('id', 'desc')->get();
-
-        return view('pages.search-results', compact('sanPhams', 'keyword'));
+    if (str_contains($keywordLower, 'áo') || str_contains($keywordLower, 'quan ao')) {
+        $query->where('ten_san_pham', 'LIKE', '%áo%')
+              // Chỉ loại bỏ quả cầu và ống cầu, giữ lại áo cầu lông
+              ->where('ten_san_pham', 'NOT LIKE', '%quả cầu%')
+              ->where('ten_san_pham', 'NOT LIKE', '%ống cầu%');
+    } else {
+        $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
     }
+}
+
+    $sanPhams = $query->get();
+
+    // Trả về đúng tên tệp view 'search-result' của bạn
+    return view('pages.search-results', compact('sanPhams', 'keyword'));
+}
 
     public function votCauLong(Request $request)
     {

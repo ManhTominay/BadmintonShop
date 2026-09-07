@@ -180,9 +180,24 @@
                             {{ $sp->ten_san_pham }}
                         </h3>
                     </a>
-                    <p class="text-sm font-bold text-orange-500 mt-2">
-                        {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
-                    </p>
+                    
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-sm font-bold text-orange-500">
+                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div>
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="inline-block text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $sp->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
             </div>

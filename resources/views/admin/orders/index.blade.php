@@ -243,6 +243,10 @@
                                         Theo phần trăm (%)
                                     </option>
 
+                                    <option value="shipping">
+                                        Theo phí ship
+                                    </option>
+
                                 </select>
 
                                 <span class="text-xs text-gray-400">
@@ -598,7 +602,16 @@
                                                     Theo phần trăm (%)
                                                 </option>
 
+                                                <option
+                                                    value="shipping"
+                                                    {{ $voucher->loai_giam_gia === 'shipping' ? 'selected' : '' }}
+                                                >
+                                                    Theo phí ship
+                                                </option>
+
                                             </select>
+
+                                            
 
                                             <p class="text-xs text-gray-400 mt-1">
                                                 Hình thức giảm giá
@@ -622,20 +635,20 @@
                                                     required
                                                     type="number"
                                                     min="0"
-                                                    max="100"
+                                                    max="{{ $voucher->loai_giam_gia === 'percent' ? 100 : '' }}"
                                                     step="0.01"
                                                     value="{{ $voucher->gia_tri_giam }}"
                                                     class="mt-1 w-full border rounded-lg px-3 py-2 pr-10 font-semibold"
                                                 >
 
                                                 <span class="absolute right-3 top-3 text-gray-400">
-                                                    %
+                                                    {{ $voucher->loai_giam_gia === 'shipping' ? 'đ' : '%' }}
                                                 </span>
 
                                             </div>
 
                                             <p class="text-xs text-gray-400 mt-1">
-                                                Phần trăm được giảm trên đơn hàng
+                                                {{ $voucher->loai_giam_gia === 'shipping' ? 'Miễn phí hoặc giảm theo phí vận chuyển' : 'Phần trăm được giảm trên đơn hàng' }}
                                             </p>
 
                                         </div>

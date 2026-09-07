@@ -26,6 +26,9 @@
     <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.orders*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
         <i class="fa-solid fa-shopping-cart w-5"></i> Quản lý đơn hàng
     </a>
+                <a href="{{ route('admin.vouchers.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.vouchers*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                    <i class="fa-solid fa-ticket w-5"></i> Quản lý voucher
+                </a>
     <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.users*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
         <i class="fa-solid fa-users w-5"></i> Quản lý tài khoản
     </a>

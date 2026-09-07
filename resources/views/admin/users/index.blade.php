@@ -25,6 +25,9 @@
                 <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white text-sm font-medium">
                     <i class="fa-solid fa-shopping-cart w-5"></i> Quản lý đơn hàng
                 </a>
+                <a href="{{ route('admin.vouchers.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white text-sm font-medium">
+                    <i class="fa-solid fa-ticket w-5"></i> Quản lý voucher
+                </a>
                 <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-600 text-white text-sm font-medium shadow-lg">
                     <i class="fa-solid fa-users w-5"></i> Quản lý tài khoản
                 </a>

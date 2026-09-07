@@ -34,4 +34,17 @@ class MaGiamGia extends Model
         'ngay_ket_thuc' => 'datetime',
         'trang_thai_kich_hoat' => 'boolean',
     ];
+
+    public function isExpired(): bool
+    {
+        return $this->ngay_ket_thuc !== null && now()->greaterThan($this->ngay_ket_thuc);
+    }
+
+    public function isCurrentlyActive(): bool
+    {
+        return $this->trang_thai === 'active'
+            && $this->trang_thai_kich_hoat
+            && ($this->ngay_bat_dau === null || now()->greaterThanOrEqualTo($this->ngay_bat_dau))
+            && !$this->isExpired();
+    }
 }

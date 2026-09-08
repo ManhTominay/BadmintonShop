@@ -289,10 +289,16 @@ class CheckoutController extends Controller
 
         foreach (VoucherService::definitions() as $code => $definition) {
             $status = VoucherService::getVoucherStatus($code);
+            if (!$status['enabled']) {
+                continue;
+            }
+
             $voucherOptions[$code] = [
                 'label' => $definition['label'],
                 'type' => $definition['type'],
                 'value' => $definition['value'],
+                'min_amount' => $definition['min_amount'],
+                'max_discount' => $definition['max_discount'],
                 'enabled' => $status['enabled'],
                 'remaining_uses' => $status['remaining_uses'],
                 'expired' => $status['expired'],

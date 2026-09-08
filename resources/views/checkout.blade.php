@@ -798,7 +798,9 @@
                                                        data-code="{{ $code }}"
                                                        data-label="{{ $option['label'] }}"
                                                        data-type="{{ $option['type'] }}"
-                                                       data-value="{{ $option['value'] }}">
+                                                       data-value="{{ $option['value'] }}"
+                                                       data-min-amount="{{ $option['min_amount'] }}"
+                                                       data-max-discount="{{ $option['max_discount'] }}">
                                                 <span class="voucher-option-text">
                                                     {{ $option['label'] }}
                                                     @if($option['type'] === 'shipping')
@@ -1148,10 +1150,17 @@
                 let hasShippingFree = false;
 
                 Object.values(selectedVouchers).forEach(voucher => {
+                    if (subtotalValue < voucher.minAmount) {
+                        return;
+                    }
+
                     if (voucher.type === 'shipping') {
                         hasShippingFree = true;
                     } else if (voucher.type === 'percent') {
-                        totalDiscount += subtotalValue * (Number(voucher.value) / 100);
+                        const discount = subtotalValue * (Number(voucher.value) / 100);
+                        totalDiscount += voucher.maxDiscount > 0
+                            ? Math.min(discount, voucher.maxDiscount)
+                            : discount;
                     }
                 });
 
@@ -1179,7 +1188,9 @@
                             code: code,
                             label: this.dataset.label,
                             type: this.dataset.type,
-                            value: this.dataset.value
+                            value: this.dataset.value,
+                            minAmount: Number(this.dataset.minAmount || 0),
+                            maxDiscount: Number(this.dataset.maxDiscount || 0)
                         };
                     } else {
                         delete selectedVouchers[code];

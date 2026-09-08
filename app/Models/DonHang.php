@@ -29,6 +29,14 @@ class DonHang extends Model
         'trang_thai_don_hang',
         'ma_van_don',
         'ma_giam_gia_id',
+        'sepay_transaction_id',
+        'thoi_diem_thanh_toan',
+        'qr_expires_at',
         'ngay_tao',
+    ];
+
+    protected $casts = [
+        'qr_expires_at' => 'datetime',
+        'thoi_diem_thanh_toan' => 'datetime',
     ];
 }

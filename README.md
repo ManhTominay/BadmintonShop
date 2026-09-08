@@ -31,6 +31,19 @@ If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Lar
 
 ## Laravel Sponsors
 
+## VietQR and SePay
+
+Add the following values to `.env` with the bank account connected to SePay:
+
+```dotenv
+SEPAY_WEBHOOK_API_KEY=your_sepay_webhook_api_key
+SEPAY_BANK_CODE=ACB
+SEPAY_ACCOUNT_NUMBER=your_account_number
+SEPAY_ACCOUNT_NAME=YOUR_ACCOUNT_NAME
+```
+
+Run `php artisan migrate`, then configure the SePay webhook as `POST https://your-domain.example/api/sepay/webhook` with the `Authorization: Apikey your_sepay_webhook_api_key` header. Orders paid with VietQR use the order code as the transfer content; SePay marks the order paid only when that code and the exact amount match.
+
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
 ### Premium Partners

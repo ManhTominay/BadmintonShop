@@ -25,7 +25,7 @@
             <h2 class="text-xl font-bold text-slate-900 uppercase">
                 {{ $isEdit ? 'Thay đổi địa chỉ' : 'Thông tin giao hàng' }}
             </h2>
-            <a href="{{ route('cart.index') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 hover:text-orange-600">
+            <a href="{{ $isEdit || request()->boolean('return_to_checkout') ? route('checkout.payment', ['items' => $selectedItems ?? request()->query('items')]) : route('cart.index') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 hover:text-orange-600">
                 <i class="fa-solid fa-arrow-left"></i>
                 Quay lại
             </a>

@@ -56,6 +56,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::redirect('/home', '/');
 Route::get('/vot-cau-long', [ClientProductController::class, 'votCauLong'])->name('vot-cau-long');
 Route::get('/giay-cau-long', [ClientProductController::class, 'giayCauLong'])->name('giay.index');
 Route::get('/quan-ao', [ClientProductController::class, 'quanAo'])->name('quan-ao');
@@ -121,6 +122,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Trang checkout thanh toán thực tế
     Route::get('/thanh-toan/xac-nhan', [CheckoutController::class, 'showPaymentPage'])->name('checkout.payment');
+    Route::post('/thanh-toan/dat-hang', [CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
+    Route::get('/thanh-toan/vietqr/{order}', [CheckoutController::class, 'showVietQr'])->name('payment.vietqr');
 
     // Tài khoản người dùng
     Route::get('/tai-khoan', [App\Http\Controllers\AccountController::class, 'profile'])->name('account.profile');

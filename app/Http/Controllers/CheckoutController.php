@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use App\Models\DonHang;
 use App\Models\GioHang;
 use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
@@ -315,5 +317,98 @@ class CheckoutController extends Controller
         $finalTotal = max(0, $subtotal + $shippingFee - $voucher);
 
         return view('checkout', compact('address', 'addresses', 'items', 'subtotal', 'shippingFee', 'voucher', 'finalTotal', 'voucherCode', 'voucherOptions', 'selectedVoucher', 'distanceKm'));
+    }
+
+    public function placeOrder(Request $request)
+    {
+        $user = Auth::user();
+        $validated = $request->validate([
+            'items' => 'nullable|string',
+            'address_id' => 'required|integer',
+            'payment_method' => 'required|in:VietQR,CashOnDelivery',
+            'shipping_fee' => 'required|numeric|min:0',
+            'voucher_code' => 'nullable|string|max:50',
+        ]);
+
+        $address = Address::where('nguoi_dung_id', $user->id)->findOrFail($validated['address_id']);
+        $itemIds = collect(explode(',', (string) ($validated['items'] ?? '')))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $cartQuery = GioHang::where('nguoi_dung_id', $user->id)->with(['variant.sanPham']);
+        if ($itemIds->isNotEmpty()) {
+            $cartQuery->whereIn('id', $itemIds);
+        }
+
+        $cartItems = $cartQuery->get()->filter(fn ($item) => $item->variant?->sanPham);
+        if ($cartItems->isEmpty()) {
+            return response()->json(['message' => 'Giỏ hàng không có sản phẩm.'], 422);
+        }
+
+        $subtotal = $cartItems->sum(function ($cartItem) {
+            $price = (float) ($cartItem->variant->sanPham->gia_co_ban ?? $cartItem->variant->sanPham->gia ?? 0);
+            return $price * (int) $cartItem->so_luong;
+        });
+        $shippingFee = (float) $validated['shipping_fee'];
+        $discount = 0;
+
+        if (!empty($validated['voucher_code'])) {
+            $discountResult = VoucherService::computeDiscount($validated['voucher_code'], $subtotal, $shippingFee);
+            $shippingFee = $discountResult['shipping_fee'];
+            $discount = $discountResult['discount'];
+        }
+
+        $order = DB::transaction(function () use ($user, $address, $cartItems, $subtotal, $shippingFee, $discount, $validated) {
+            $paymentMethod = $validated['payment_method'];
+            $order = DonHang::create([
+                'ma_don_hang' => 'DH' . now()->format('YmdHis') . random_int(100, 999),
+                'nguoi_dung_id' => $user->id,
+                'ten_nguoi_nhan' => $address->ten_nguoi_nhan,
+                'so_dien_thoai' => $address->so_dien_thoai,
+                'dia_chi_giao_hang' => implode(', ', array_filter([$address->dia_chi_chi_tiet, $address->phuong_xa, $address->tinh_thanh])),
+                'tong_tien_hang' => $subtotal,
+                'phi_van_chuyen' => $shippingFee,
+                'so_tien_giam' => $discount,
+                'tong_thanh_toan' => max(0, $subtotal + $shippingFee - $discount),
+                'phuong_thuc_thanh_toan' => $paymentMethod,
+                'trang_thai_thanh_toan' => 'cho_thanh_toan',
+                'qr_expires_at' => $paymentMethod === 'VietQR' ? now()->addMinutes(10) : null,
+                'trang_thai_don_hang' => 'cho_xu_ly',
+                'ngay_tao' => now(),
+            ]);
+
+            foreach ($cartItems as $cartItem) {
+                $price = (float) ($cartItem->variant->sanPham->gia_co_ban ?? $cartItem->variant->sanPham->gia ?? 0);
+                DB::table('chi_tiet_don_hang')->insert([
+                    'don_hang_id' => $order->id,
+                    'san_pham_id' => $cartItem->variant->san_pham_id,
+                    'bien_the_id' => $cartItem->bien_the_id,
+                    'so_luong' => $cartItem->so_luong,
+                    'gia' => $price,
+                    'thanh_tien' => $price * $cartItem->so_luong,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            GioHang::whereIn('id', $cartItems->pluck('id'))->delete();
+
+            return $order;
+        });
+
+        return response()->json([
+            'redirect' => $order->phuong_thuc_thanh_toan === 'VietQR'
+                ? route('payment.vietqr', $order)
+                : route('account.orders'),
+            'order_id' => $order->id,
+        ]);
+    }
+
+    public function showVietQr(DonHang $order)
+    {
+        abort_unless($order->nguoi_dung_id === Auth::id(), 403);
+
+        return view('payment.vietqr', compact('order'));
     }
 }

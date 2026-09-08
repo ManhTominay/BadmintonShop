@@ -868,19 +868,11 @@
                         </div>
 
                         <div class="payment-methods">
-                            <div class="payment-option" data-method="VietQR">
+                            <div class="payment-option active" data-method="VietQR">
                                 <span>VietQR</span>
                                 <span class="checkmark">✓</span>
                             </div>
-                            <div class="payment-option" data-method="MoMo">
-                                <span>Momo</span>
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="payment-option" data-method="ZaloPay">
-                                <span>ZaloPay</span>
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="payment-option active" data-method="CashOnDelivery">
+                            <div class="payment-option" data-method="CashOnDelivery">
                                 <span>Thanh toán khi nhận hàng</span>
                                 <span class="checkmark">✓</span>
                             </div>
@@ -920,7 +912,7 @@
                 </div>
 
                 <div class="order-button-wrap" style="grid-column: auto; margin-top: 18px;">
-                    <button type="button" class="order-button">ĐẶT HÀNG</button>
+                    <button type="button" class="order-button" id="place-order-button">ĐẶT HÀNG</button>
                 </div>
             </div>
         </div>
@@ -951,7 +943,7 @@
                                     {{ $item->dia_chi_chi_tiet }}, {{ $item->phuong_xa }}, {{ $item->tinh_thanh }}
                                 </div>
                             </div>
-                            <a href="{{ route('checkout.address.edit', ['items' => request()->query('items'), 'address_id' => $item->id]) }}" class="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">Cập nhật</a>
+                            <a href="{{ route('checkout.address.edit', ['items' => request()->query('items'), 'address_id' => $item->id]) }}" class="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">Thay đổi địa chỉ</a>
                         </label>
                     @endforeach
                 @else
@@ -962,7 +954,7 @@
             </div>
 
             <div class="flex items-center justify-between border-t border-gray-200 bg-slate-50 px-5 py-4">
-                <a href="{{ route('checkout.address', ['items' => request()->query('items')]) }}" class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange-600">+ Thêm địa chỉ mới</a>
+                <a href="{{ route('checkout.address', ['items' => request()->query('items'), 'return_to_checkout' => 1]) }}" class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange-600">+ Thêm địa chỉ mới</a>
                 <button type="button" id="confirm-address-modal" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700">Xác nhận</button>
             </div>
         </div>
@@ -989,6 +981,7 @@
             const selectedAddressPhone = document.getElementById('selected-address-phone');
             const selectedAddressText = document.getElementById('selected-address-text');
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const placeOrderButton = document.getElementById('place-order-button');
 
             function openAddressModal() {
                 if (addressModal) addressModal.classList.remove('hidden');
@@ -1198,6 +1191,52 @@
             });
 
             updateVoucherDisplay();
+
+            if (placeOrderButton) {
+                placeOrderButton.addEventListener('click', async function () {
+                    const addressId = selectedAddressSummary?.dataset.addressId;
+                    const paymentMethod = document.querySelector('.payment-option.active')?.dataset.method;
+                    const itemIds = @json(request()->query('items'));
+
+                    if (!addressId || !paymentMethod) {
+                        alert('Vui lòng kiểm tra địa chỉ và phương thức thanh toán.');
+                        return;
+                    }
+
+                    placeOrderButton.disabled = true;
+                    placeOrderButton.textContent = 'ĐANG XỬ LÝ...';
+
+                    try {
+                        const response = await fetch('{{ route('checkout.place-order') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken || '',
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                items: itemIds,
+                                address_id: addressId,
+                                payment_method: paymentMethod,
+                                shipping_fee: shippingFeeEl.dataset.shipping,
+                                voucher_code: Object.keys(selectedVouchers)[0] || null
+                            }),
+                            credentials: 'same-origin'
+                        });
+
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.message || 'Không thể tạo đơn hàng.');
+                        }
+
+                        window.location.href = result.redirect;
+                    } catch (error) {
+                        alert(error.message);
+                        placeOrderButton.disabled = false;
+                        placeOrderButton.textContent = 'ĐẶT HÀNG';
+                    }
+                });
+            }
         });
     </script>
 </body>

@@ -174,7 +174,9 @@
                             <div>
                                 <p class="text-gray-500 font-semibold">Phương thức thanh toán</p>
                                 <p class="text-gray-800">
-                                    @if ($order->phuong_thuc_thanh_toan === 'cod')
+                                    @if ($order->phuong_thuc_thanh_toan === 'VietQR')
+                                        <i class="fa-solid fa-qrcode mr-1"></i>VietQR
+                                    @elseif ($order->phuong_thuc_thanh_toan === 'cod')
                                         <i class="fa-solid fa-money-bill mr-1"></i>Thanh toán khi nhận hàng
                                     @elseif ($order->phuong_thuc_thanh_toan === 'transfer')
                                         <i class="fa-solid fa-bank mr-1"></i>Chuyển khoản ngân hàng
@@ -182,9 +184,35 @@
                                         {{ $order->phuong_thuc_thanh_toan ?? 'N/A' }}
                                     @endif
                                 </p>
+                                @if ($order->phuong_thuc_thanh_toan === 'VietQR')
+                                    <p class="mt-1 font-semibold {{ $order->trang_thai_thanh_toan === 'da_thanh_toan' ? 'text-emerald-600' : 'text-amber-600' }}">
+                                        {{ $order->trang_thai_thanh_toan === 'da_thanh_toan' ? 'Đã thanh toán' : 'Chờ thanh toán' }}
+                                    </p>
+                                @endif
                             </div>
                         </div>
                     </div>
+
+                    @if ($order->phuong_thuc_thanh_toan === 'VietQR' && $order->trang_thai_thanh_toan !== 'da_thanh_toan' && $order->qr_expires_at && $order->qr_expires_at->isFuture() && config('services.sepay.bank_code') && config('services.sepay.account_number'))
+                        @php
+                            $qrInfo = urlencode($order->ma_don_hang ?? 'DH' . $order->id);
+                            $qrAccountName = urlencode(config('services.sepay.account_name', ''));
+                            $qrUrl = 'https://img.vietqr.io/image/' . config('services.sepay.bank_code') . '-' . config('services.sepay.account_number') . '-compact2.png?amount=' . (int) ($order->tong_thanh_toan ?? 0) . '&addInfo=' . $qrInfo . '&accountName=' . $qrAccountName;
+                        @endphp
+                        <div class="mt-4 flex flex-col items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-center md:flex-row md:text-left">
+                            <img src="{{ $qrUrl }}" alt="Mã QR thanh toán đơn hàng" class="h-44 w-44 rounded bg-white p-2">
+                            <div class="text-sm text-gray-700">
+                                <p class="font-bold text-orange-700">Đang chờ thanh toán VietQR</p>
+                                <p class="mt-1">Quét mã bằng ứng dụng ngân hàng và nhập đúng số tiền.</p>
+                                <p class="mt-1">Nội dung: <strong>{{ $order->ma_don_hang }}</strong></p>
+                                <p class="mt-1 text-xs text-gray-500">Hệ thống sẽ tự cập nhật khi SePay nhận được giao dịch.</p>
+                            </div>
+                        </div>
+                    @elseif ($order->phuong_thuc_thanh_toan === 'VietQR')
+                        <div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                            Trạng thái thanh toán: {{ $order->trang_thai_thanh_toan === 'da_thanh_toan' ? 'Đã thanh toán' : 'Chờ thanh toán' }}.
+                        </div>
+                    @endif
 
                     <!-- Nút hành động -->
                     <div class="mt-4 flex gap-2">

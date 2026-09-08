@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SepayWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,3 +47,7 @@ Route::get('/products/category/{categoryId}', function (Request $request, $categ
         'total' => $products->count()
     ]);
 });
+
+Route::post('/sepay/webhook', [SepayWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1')
+    ->name('sepay.webhook');

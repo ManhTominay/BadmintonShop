@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'sepay' => [
+        'webhook_api_key' => env('SEPAY_WEBHOOK_API_KEY'),
+        'bank_code' => env('SEPAY_BANK_CODE'),
+        'account_number' => env('SEPAY_ACCOUNT_NUMBER'),
+        'account_name' => env('SEPAY_ACCOUNT_NAME'),
+    ],
+
 ];

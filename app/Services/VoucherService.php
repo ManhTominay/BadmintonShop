@@ -139,8 +139,9 @@ class VoucherService
     {
         $state = self::getState();
         $definition = self::definitions()[$code] ?? null;
+        $voucher = MaGiamGia::where('ma_code', $code)->first();
 
-        if (!$definition || !isset($state[$code])) {
+        if (!$definition || !isset($state[$code]) || ($voucher && !$voucher->isCurrentlyActive())) {
             return false;
         }
 
@@ -165,6 +166,7 @@ class VoucherService
     {
         $definition = self::definitions()[$code] ?? null;
         $state = self::getState();
+        $voucher = MaGiamGia::where('ma_code', $code)->first();
 
         if (!$definition || !isset($state[$code])) {
             return [
@@ -177,10 +179,12 @@ class VoucherService
 
         $remainingUses = (int) ($state[$code]['remaining_uses'] ?? 0);
         $expiresAt = $state[$code]['expires_at'] ?? null;
-        $expired = $expiresAt && Carbon::now()->greaterThan(Carbon::parse($expiresAt));
+        $expired = ($voucher && $voucher->isExpired())
+            || ($expiresAt && Carbon::now()->greaterThan(Carbon::parse($expiresAt)));
+        $scheduled = !$voucher || $voucher->isCurrentlyActive();
 
         return [
-            'enabled' => !$expired && $remainingUses > 0,
+            'enabled' => $scheduled && !$expired && $remainingUses > 0,
             'remaining_uses' => $remainingUses,
             'label' => $definition['label'],
             'expired' => $expired,

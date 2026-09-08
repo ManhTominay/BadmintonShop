@@ -36,6 +36,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // Quản lý đơn hàng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/vouchers', [OrderController::class, 'vouchers'])->name('vouchers.index');
+    Route::post('/vouchers', [OrderController::class, 'storeVoucher'])->name('vouchers.store');
+    Route::put('/vouchers/{id}', [OrderController::class, 'updateVoucher'])->name('vouchers.update');
+    Route::delete('/vouchers/{id}', [OrderController::class, 'destroyVoucher'])->name('vouchers.destroy');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 

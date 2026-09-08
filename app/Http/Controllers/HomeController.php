@@ -64,7 +64,14 @@ class HomeController extends Controller
             ->take(4)
             ->get();
 
-        return view('home', compact('votCaulong', 'giayCaulong', 'cuocCaulong', 'quanAo', 'phuKien'));
+        // 6. Lấy danh sách sản phẩm bán chạy/nổi bật để hiển thị đúng vòng lặp ở trang chủ
+        $sanPhamBanChay = SanPham::with(['bienThes'])
+            ->where('trang_thai_kinh_doanh', true)
+            ->orderBy('id', 'desc')
+            ->take(8)
+            ->get();
+
+        return view('home', compact('votCaulong', 'giayCaulong', 'cuocCaulong', 'quanAo', 'phuKien', 'sanPhamBanChay'));
     }
 
     // Hàm xử lý AJAX khi bấm các tab sản phẩm nổi bật/mới/sale

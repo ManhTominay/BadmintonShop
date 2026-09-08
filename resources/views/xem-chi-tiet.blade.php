@@ -60,8 +60,15 @@
                         {{ $sanPham->ten_san_pham }}
                     </h1>
                     
-                    <div class="text-2xl font-bold text-orange-500 mb-6" id="product-price">
-                        {{ number_format($sanPham->gia_co_ban, 0, ',', '.') }} VNĐ
+                    <div class="flex items-center justify-between gap-2 mb-6">
+                        <div class="text-2xl font-bold text-orange-500" id="product-price">
+                            {{ number_format($sanPham->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </div>
+                        @if(($sanPham->so_luong ?? 0) > 0)
+                            <p class="text-sm font-bold text-green-600 text-right">Còn hàng ({{ $sanPham->so_luong }})</p>
+                        @else
+                            <p class="text-sm font-bold text-red-500 text-right">Hết hàng</p>
+                        @endif
                     </div>
 
                     <!-- Lựa chọn biến thể sản phẩm (Màu sắc / Phiên bản) -->
@@ -159,7 +166,14 @@
                         </div>
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $item->ten_san_pham }}</h3>
                     </a>
-                    <p class="text-xs font-bold text-orange-500 mt-2">{{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                    <div class="flex items-center justify-between gap-2 mt-2">
+                        <p class="text-xs font-bold text-orange-500">{{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                        @if(($item->so_luong ?? 0) > 0)
+                            <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $item->so_luong }})</p>
+                        @else
+                            <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
+                        @endif
+                    </div>
                 </div>
                 @endforeach
             </div>

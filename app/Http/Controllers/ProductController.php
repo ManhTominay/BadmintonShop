@@ -10,27 +10,35 @@ class ProductController extends Controller
     /**
      * Hàm xử lý tìm kiếm toàn hệ thống (Độc lập với các danh mục)
      */
-   public function search(Request $request)
+ public function search(Request $request)
 {
     $keyword = trim($request->input('keyword'));
     $query = SanPham::query();
 
     if (!empty($keyword)) {
-    $keywordLower = mb_strtolower($keyword);
+        $keywordLower = mb_strtolower($keyword);
 
-    if (str_contains($keywordLower, 'áo') || str_contains($keywordLower, 'quan ao')) {
-        $query->where('ten_san_pham', 'LIKE', '%áo%')
-              // Chỉ loại bỏ quả cầu và ống cầu, giữ lại áo cầu lông
-              ->where('ten_san_pham', 'NOT LIKE', '%quả cầu%')
-              ->where('ten_san_pham', 'NOT LIKE', '%ống cầu%');
-    } else {
-        $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
+        // Kiểm tra xem từ khóa có phải là tìm "áo" hoặc "quần áo" một cách chính xác không
+        // Sử dụng khoảng trắng hoặc ranh giới từ để không bị nhầm với chữ "bao", "cao"...
+        $isSearchingAo = ($keywordLower === 'áo' || $keywordLower === 'quan ao' || str_contains($keywordLower, ' áo ') || str_starts_with($keywordLower, 'áo ') || str_ends_with($keywordLower, ' áo'));
+
+        if ($isSearchingAo) {
+            $query->where(function($q) {
+                $q->where('ten_san_pham', 'LIKE', '%áo%')
+                  ->orWhere('ten_san_pham', 'LIKE', '%quần áo%');
+            })
+            // Loại bỏ các sản phẩm không liên quan như quả cầu, ống cầu hoặc bao vợt bị dính từ
+            ->where('ten_san_pham', 'NOT LIKE', '%quả cầu%')
+            ->where('ten_san_pham', 'NOT LIKE', '%ống cầu%')
+            ->where('ten_san_pham', 'NOT LIKE', '%bao vợt%');
+        } else {
+            $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
+        }
     }
-}
 
     $sanPhams = $query->get();
 
-    // Trả về đúng tên tệp view 'search-result' của bạn
+    // Trả về đúng tên tệp view 'search-results' của bạn
     return view('pages.search-results', compact('sanPhams', 'keyword'));
 }
 

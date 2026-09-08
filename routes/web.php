@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 // Khai báo các Controller phía Client (User)
 use App\Http\Controllers\HomeController;
@@ -130,4 +131,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/admin/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
+})->name('admin.logout');
+    
 });

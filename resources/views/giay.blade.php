@@ -175,9 +175,16 @@
                         </a>
 
                         <!-- Giá tiền -->
-                        <p class="text-sm font-bold text-orange-500">
-                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
-                        </p>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-sm font-bold text-orange-500">
+                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                            </p>
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $sp->so_luong }})</p>
+                            @else
+                                <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
+                            @endif
+                        </div>
                     </div>
 
                 </div>

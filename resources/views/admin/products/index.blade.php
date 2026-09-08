@@ -45,9 +45,15 @@
                         </td>
                         <td class="p-4 font-bold text-orange-600">{{ number_format($product->gia_co_ban) }} đ</td>
                         <td class="p-4 text-center">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ ($product->so_luong ?? 0) > 10 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200' }}">
-                                {{ $product->so_luong ?? 0 }}
-                            </span>
+                            @if(($product->so_luong ?? 0) > 0)
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                    Còn hàng ({{ $product->so_luong }})
+                                </span>
+                            @else
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200">
+                                    Hết hàng
+                                </span>
+                            @endif
                         </td>
                         <td class="p-4 text-center space-x-2">
                             <a href="{{ route('admin.products.edit', $product->id) }}" class="inline-flex items-center px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium text-xs transition-colors">

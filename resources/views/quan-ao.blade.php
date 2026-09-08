@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
 
     <!-- Top Bar -->
     <div class="bg-slate-900 text-white text-[11px] text-center py-1.5 font-medium tracking-wide">
@@ -21,8 +21,8 @@
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             
             <!-- Logo Shop -->
-            <a href="{{ url('/') }}" class="flex items-center space-x-2">
-                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
+            <a href="{{ route('home') }}" class="flex items-center space-x-2 group">
+                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500 group-hover:rotate-12 transition-transform duration-300"></i>
                 <div class="leading-none">
                     <h1 class="font-extrabold text-xl tracking-tight text-slate-900 uppercase">BADMINTON</h1>
                     <p class="font-bold text-xs tracking-widest text-orange-500 uppercase">PRO SHOP</p>
@@ -31,7 +31,7 @@
 
             <!-- Thanh tìm kiếm Header -->
             <div class="flex-1 max-w-xl mx-8">
-                <form action="{{ url('/quan-ao') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
+                <form action="{{ url('/quan-ao') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-2 focus-within:ring-orange-300 transition">
                     <div class="flex items-center flex-1 px-3 py-1.5">
                         <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2 text-sm"></i>
                         <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm kiếm sản phẩm..." 
@@ -75,12 +75,14 @@
                     <a href="{{ route('register') }}" class="bg-orange-500 text-white px-3 py-1.5 rounded hover:bg-orange-600 transition shadow-sm">Đăng ký</a>
                 @endauth
 
-                <!-- Giỏ hàng -->
-                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
+                <!-- Giỏ hàng hiển thị số lượng tự động -->
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500 transition" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     @php
                         if (!isset($cartCount)) {
-                            $cartCount = Auth::check() ? \App\Models\GioHang::where('nguoi_dung_id', Auth::id())->sum('so_luong') : 0;
+                            $cartCount = Auth::check() 
+                                ? \App\Models\GioHang::where('nguoi_dung_id', Auth::id())->sum('so_luong') 
+                                : (session('cart') ? count(session('cart')) : 0);
                         }
                     @endphp
                     <span data-cart-count class="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
@@ -94,9 +96,9 @@
         <nav class="border-t border-gray-100">
             <div class="max-w-6xl mx-auto px-4">
                 <ul class="flex items-center justify-center space-x-8 py-2 text-xs font-bold uppercase tracking-wider">
-                    <li><a href="{{ url('/') }}" class="hover:text-orange-500 transition">TRANG CHỦ</a></li>
-                    <li><a href="{{ url('/vot-cau-long') }}" class="hover:text-orange-500 transition">VỢT CẦU LÔNG</a></li>
-                    <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
+                    <li><a href="{{ route('home') }}" class="hover:text-orange-500 transition">TRANG CHỦ</a></li>
+                    <li><a href="{{ route('vot-cau-long') }}" class="hover:text-orange-500 transition">VỢT CẦU LÔNG</a></li>
+                    <li><a href="{{ route('giay.index') }}" class="hover:text-orange-500 transition">GIÀY CẦU LÔNG</a></li>
                     <li><a href="{{ url('/quan-ao') }}" class="text-orange-500 border-b-2 border-orange-500 pb-1">QUẦN ÁO</a></li>
                     <li><a href="{{ route('cau') }}" class="hover:text-orange-500 transition">CẦU</a></li>
                     <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition">PHỤ KIỆN</a></li>
@@ -106,17 +108,19 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
         <div class="mb-6">
             <!-- Tiêu đề & Sắp xếp -->
-            <div class="flex items-start justify-between mb-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
                 <div>
                     <h1 class="text-2xl font-extrabold text-slate-900 uppercase">QUẦN ÁO CẦU LÔNG</h1>
-                    <p class="text-xs text-gray-500 mt-1">Hiển thị {{ isset($danhSachQuanAo) ? $danhSachQuanAo->count() : 0 }} sản phẩm</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Hiển thị {{ $danhSachQuanAo instanceof \Illuminate\Pagination\LengthAwarePaginator ? $danhSachQuanAo->total() : ($danhSachQuanAo->count() ?? 0) }} sản phẩm
+                    </p>
                 </div>
 
                 <!-- Bộ lọc Sắp xếp -->
-                <form action="{{ url('/quan-ao') }}" method="GET" class="flex items-center space-x-2 pt-1">
+                <form action="{{ url('/quan-ao') }}" method="GET" class="flex items-center space-x-2">
                     @if(request('keyword'))
                         <input type="hidden" name="keyword" value="{{ request('keyword') }}">
                     @endif
@@ -131,21 +135,37 @@
 
             <!-- Dòng 2: Bộ lọc Thương hiệu -->
             <div class="flex items-center space-x-2 text-xs flex-wrap gap-y-2">
-                <span class="text-gray-700 font-bold">Thương hiệu:</span>
-                <a href="{{ url('/quan-ao', ['keyword' => 'Yonex']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Yonex</a>
-                <a href="{{ url('/quan-ao', ['keyword' => 'Lining']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Lining</a>
-                <a href="{{ url('/quan-ao', ['keyword' => 'Victor']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Victor' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Victor</a>
+<<<<<<< HEAD
+    <span class="text-gray-700 font-bold">Thương hiệu:</span>
+    
+    <!-- Thay đổi phần href thành route() kèm tham số mảng -->
+    <a href="{{ route('quan-ao', ['keyword' => 'Yonex']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Yonex</a>
+    
+    <a href="{{ route('quan-ao', ['keyword' => 'Lining']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Lining</a>
+    
+    <a href="{{ route('quan-ao', ['keyword' => 'Victor']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Victor' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Victor</a>
+    
+    @if(request('keyword'))
+        <a href="{{ route('quan-ao') }}" class="text-red-500 hover:underline ml-2">Xóa lọc</a>
+    @endif
+</div>
+=======
+                <span class="text-gray-700 font-bold mr-2">Thương hiệu:</span>
+                <a href="{{ url('/quan-ao', ['keyword' => 'Yonex']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Yonex</a>
+                <a href="{{ url('/quan-ao', ['keyword' => 'Lining']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Lining</a>
+                <a href="{{ url('/quan-ao', ['keyword' => 'Victor']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Victor' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Victor</a>
                 @if(request('keyword'))
-                    <a href="{{ url('/quan-ao') }}" class="text-red-500 hover:underline ml-2">Xóa lọc</a>
+                    <a href="{{ url('/quan-ao') }}" class="text-red-500 hover:underline ml-2 font-medium">Xóa lọc</a>
                 @endif
             </div>
+>>>>>>> Manh
         </div>
 
         <!-- Grid Danh sách Quần Áo -->
         @if(isset($danhSachQuanAo) && $danhSachQuanAo->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach($danhSachQuanAo as $sp)
-                <div class="group bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
+                <div class="group bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
                         <!-- Khung ảnh sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
@@ -153,34 +173,68 @@
                                 $imageName = \App\Models\SanPham::resolveImageName($sp->anh_dai_dien ?? null);
                             @endphp
                             @if(!empty($imageName) && file_exists(public_path('images/' . $imageName)))
-                                <img src="{{ asset('images/' . $imageName) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                                <img src="{{ asset('images/' . $imageName) }}" alt="{{ $sp->ten_san_pham }}" class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300">
                             @else
-                                <i class="fa-solid fa-shirt text-5xl text-gray-300"></i>
+                                <img src="{{ asset('images/yonex_doura10.webp') }}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';" alt="{{ $sp->ten_san_pham }}" class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300">
                             @endif
                         </a>
 
                         <!-- Nút XEM CHI TIẾT -->
                         <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
-                           class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2 rounded transition-colors shadow mb-3">
+                           class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
                             XEM CHI TIẾT
                         </a>
 
                         <!-- Tên sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
-                            <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-2 h-10 leading-snug hover:text-orange-500 transition-colors">
                                 {{ $sp->ten_san_pham }}
                             </h3>
                         </a>
                         
+<<<<<<< HEAD
                         <!-- Giá tiền -->
-                        <p class="text-sm font-bold text-orange-500 mt-1">
-                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
-                        </p>
+                        <div class="flex items-center justify-between gap-2 mt-1">
+                            <p class="text-sm font-bold text-orange-500">
+                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                            </p>
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $sp->so_luong }})</p>
+                            @else
+                                <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
+                            @endif
+=======
+                        <!-- Giá tiền và trạng thái -->
+                        <div class="flex items-center justify-between mt-2">
+                            <p class="text-sm font-bold text-orange-500">
+                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                            </p>
+
+                            <div>
+                                @if(($sp->so_luong ?? 0) > 0)
+                                    <span class="inline-block text-[11px] font-bold text-green-600">
+                                        Còn hàng ({{ $sp->so_luong }})
+                                    </span>
+                                @else
+                                    <span class="inline-block text-[11px] font-bold text-red-500">
+                                        Hết hàng
+                                    </span>
+                                @endif
+                            </div>
+>>>>>>> Manh
+                        </div>
                     </div>
 
                 </div>
                 @endforeach
             </div>
+
+            <!-- Phân trang nếu có -->
+            @if($danhSachQuanAo instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                <div class="mt-8">
+                    {{ $danhSachQuanAo->appends(request()->query())->links() }}
+                </div>
+            @endif
         @else
             <div class="bg-white rounded-lg p-12 text-center border border-gray-200">
                 <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
@@ -190,6 +244,7 @@
         @endif
 
     </main>
+
     <!-- Footer -->
     <footer class="bg-amber-50/70 border-t border-amber-100 text-gray-700 text-sm mt-16 pt-10 pb-6">
         <div class="max-w-6xl mx-auto px-4">
@@ -258,6 +313,7 @@
         </div>
     </footer>
 
+    <!-- File xử lý giỏ hàng AJAX -->
     @include('partials.cart-ajax')
 </body>
 </html>

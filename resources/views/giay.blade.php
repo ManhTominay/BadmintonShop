@@ -9,10 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
 
     <!-- Top Bar -->
-    <div class="bg-slate-900 text-white text-xs py-1 text-center font-medium">
+    <div class="bg-slate-900 text-white text-[11px] py-1.5 text-center font-medium tracking-wide">
         Badminton Essential Equipment
     </div>
 
@@ -21,8 +21,8 @@
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             
             <!-- Logo Shop -->
-            <a href="{{ route('home') }}" class="flex items-center space-x-2">
-                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500"></i>
+            <a href="{{ route('home') }}" class="flex items-center space-x-2 group">
+                <i class="fa-solid fa-shuttlecock text-3xl text-orange-500 group-hover:rotate-12 transition-transform duration-300"></i>
                 <div class="leading-none">
                     <h1 class="font-extrabold text-xl tracking-tight text-slate-900 uppercase">BADMINTON</h1>
                     <p class="font-bold text-xs tracking-widest text-orange-500 uppercase">PRO SHOP</p>
@@ -31,7 +31,7 @@
 
             <!-- Thanh tìm kiếm ở Header -->
             <div class="flex-1 max-w-xl mx-8">
-                <form action="{{ route('giay.index') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm">
+                <form action="{{ route('giay.index') }}" method="GET" class="flex items-center w-full border-2 border-orange-500 rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-2 focus-within:ring-orange-300 transition">
                     <div class="flex items-center flex-1 px-3 py-1.5">
                         <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2 text-sm"></i>
                         <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Tìm kiếm sản phẩm..." 
@@ -76,7 +76,7 @@
                 @endauth
 
                 <!-- Giỏ hàng hiển thị số lượng tự động -->
-                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500" title="Giỏ hàng">
+                <a href="{{ route('cart.index') }}" class="relative text-gray-600 hover:text-orange-500 transition" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     @php
                         if (!isset($cartCount)) {
@@ -108,7 +108,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
                 <h1 class="text-2xl font-extrabold text-slate-900 uppercase">GIÀY CẦU LÔNG</h1>
@@ -123,7 +123,7 @@
                     <input type="hidden" name="keyword" value="{{ request('keyword') }}">
                 @endif
                 <label class="text-xs font-semibold text-gray-600 whitespace-nowrap">Sắp xếp:</label>
-                <select name="sort" onchange="this.form.submit()" class="border rounded px-3 py-2 text-xs bg-white focus:outline-none focus:border-orange-500 cursor-pointer">
+                <select name="sort" onchange="this.form.submit()" class="border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm">
                     <option value="">Mới nhất</option>
                     <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá: Thấp đến Cao</option>
                     <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá: Cao đến Thấp</option>
@@ -133,13 +133,13 @@
 
         <!-- Thương hiệu phổ biến -->
         <div class="flex flex-wrap gap-2 mb-8">
-            <span class="text-xs font-bold text-gray-500 self-center mr-2">Thương hiệu:</span>
-            <a href="{{ route('giay.index', ['keyword' => 'Yonex']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Yonex' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Yonex</a>
-            <a href="{{ route('giay.index', ['keyword' => 'Victor']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Victor' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Victor</a>
-            <a href="{{ route('giay.index', ['keyword' => 'Lining']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Lining' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Lining</a>
-            <a href="{{ route('giay.index', ['keyword' => 'Mizuno']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition {{ request('keyword') == 'Mizuno' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white' }}">Mizuno</a>
+            <span class="text-xs font-bold text-gray-700 self-center mr-2">Thương hiệu:</span>
+            <a href="{{ route('giay.index', ['keyword' => 'Yonex']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'bg-orange-50 text-orange-600 font-bold border-orange-500' : 'bg-white border-gray-200 text-gray-700' }}">Yonex</a>
+            <a href="{{ route('giay.index', ['keyword' => 'Victor']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Victor' ? 'bg-orange-50 text-orange-600 font-bold border-orange-500' : 'bg-white border-gray-200 text-gray-700' }}">Victor</a>
+            <a href="{{ route('giay.index', ['keyword' => 'Lining']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'bg-orange-50 text-orange-600 font-bold border-orange-500' : 'bg-white border-gray-200 text-gray-700' }}">Lining</a>
+            <a href="{{ route('giay.index', ['keyword' => 'Mizuno']) }}" class="text-xs border rounded-full px-3 py-1 hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Mizuno' ? 'bg-orange-50 text-orange-600 font-bold border-orange-500' : 'bg-white border-gray-200 text-gray-700' }}">Mizuno</a>
             @if(request('keyword'))
-                <a href="{{ route('giay.index') }}" class="text-xs text-red-500 hover:underline self-center ml-2">Xóa bộ lọc</a>
+                <a href="{{ route('giay.index') }}" class="text-xs text-red-500 hover:underline self-center ml-2 font-medium">Xóa bộ lọc</a>
             @endif
         </div>
 
@@ -147,7 +147,7 @@
         @if($danhSachGiay->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach($danhSachGiay as $sp)
-                <div class="group bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
+                <div class="group bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
                         <!-- Khung ảnh sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
@@ -155,9 +155,9 @@
                                 $imageName = \App\Models\SanPham::resolveImageName($sp->anh_dai_dien ?? null);
                             @endphp
                             @if(!empty($imageName) && file_exists(public_path('images/' . $imageName)))
-                                <img src="{{ asset('images/' . $imageName) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                                <img src="{{ asset('images/' . $imageName) }}" alt="{{ $sp->ten_san_pham }}" class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300">
                             @else
-                                <i class="fa-solid fa-shoe-prints text-5xl text-gray-300"></i>
+                                <img src="{{ asset('images/yonex_doura10.webp') }}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';" alt="{{ $sp->ten_san_pham }}" class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300">
                             @endif
                         </a>
 
@@ -169,15 +169,42 @@
 
                         <!-- Tên sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
-                            <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-2 h-10 leading-snug hover:text-orange-500 transition-colors">
                                 {{ $sp->ten_san_pham }}
                             </h3>
                         </a>
 
+<<<<<<< HEAD
                         <!-- Giá tiền -->
-                        <p class="text-sm font-bold text-orange-500">
-                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
-                        </p>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-sm font-bold text-orange-500">
+                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                            </p>
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $sp->so_luong }})</p>
+                            @else
+                                <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
+                            @endif
+=======
+                        <!-- Giá tiền và trạng thái -->
+                        <div class="flex items-center justify-between mt-2">
+                            <p class="text-sm font-bold text-orange-500">
+                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                            </p>
+
+                            <div>
+                                @if(($sp->so_luong ?? 0) > 0)
+                                    <span class="inline-block text-[11px] font-bold text-green-600">
+                                        Còn hàng ({{ $sp->so_luong }})
+                                    </span>
+                                @else
+                                    <span class="inline-block text-[11px] font-bold text-red-500">
+                                        Hết hàng
+                                    </span>
+                                @endif
+                            </div>
+>>>>>>> Manh
+                        </div>
                     </div>
 
                 </div>
@@ -199,7 +226,8 @@
         @endif
 
     </main>
-<!-- Footer -->
+
+    <!-- Footer -->
     <footer class="bg-amber-50/70 border-t border-amber-100 text-gray-700 text-sm mt-16 pt-10 pb-6">
         <div class="max-w-6xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 items-start">
@@ -267,6 +295,7 @@
         </div>
     </footer>
 
+    <!-- File xử lý giỏ hàng AJAX -->
     @include('partials.cart-ajax')
 </body>
 </html>

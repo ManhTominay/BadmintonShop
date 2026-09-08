@@ -10,32 +10,37 @@ class ProductController extends Controller
     /**
      * Hàm xử lý tìm kiếm toàn hệ thống (Độc lập với các danh mục)
      */
-    public function search(Request $request)
-    {
-        $keyword = trim((string) $request->input('keyword', ''));
+ public function search(Request $request)
+{
+    $keyword = trim($request->input('keyword'));
+    $query = SanPham::query();
 
-        if ($keyword === '') {
-            return redirect()->route('home');
-        }
+    if (!empty($keyword)) {
+        $keywordLower = mb_strtolower($keyword);
 
-        $query = SanPham::with('bienThes')->where('trang_thai_kinh_doanh', true);
+        // Kiểm tra xem từ khóa có phải là tìm "áo" hoặc "quần áo" một cách chính xác không
+        // Sử dụng khoảng trắng hoặc ranh giới từ để không bị nhầm với chữ "bao", "cao"...
+        $isSearchingAo = ($keywordLower === 'áo' || $keywordLower === 'quan ao' || str_contains($keywordLower, ' áo ') || str_starts_with($keywordLower, 'áo ') || str_ends_with($keywordLower, ' áo'));
 
-        $normalized = strtolower($keyword);
-
-        if (in_array($normalized, ['lining', 'li-ning', 'li ning'])) {
+        if ($isSearchingAo) {
             $query->where(function($q) {
-                $q->where('ten_san_pham', 'LIKE', '%Li-Ning%')
-                  ->orWhere('ten_san_pham', 'LIKE', '%Lining%')
-                  ->orWhere('ten_san_pham', 'LIKE', '%Li Ning%');
-            });
+                $q->where('ten_san_pham', 'LIKE', '%áo%')
+                  ->orWhere('ten_san_pham', 'LIKE', '%quần áo%');
+            })
+            // Loại bỏ các sản phẩm không liên quan như quả cầu, ống cầu hoặc bao vợt bị dính từ
+            ->where('ten_san_pham', 'NOT LIKE', '%quả cầu%')
+            ->where('ten_san_pham', 'NOT LIKE', '%ống cầu%')
+            ->where('ten_san_pham', 'NOT LIKE', '%bao vợt%');
         } else {
             $query->where('ten_san_pham', 'LIKE', '%' . $keyword . '%');
         }
-
-        $sanPhams = $query->orderBy('id', 'desc')->get();
-
-        return view('pages.search-results', compact('sanPhams', 'keyword'));
     }
+
+    $sanPhams = $query->get();
+
+    // Trả về đúng tên tệp view 'search-results' của bạn
+    return view('pages.search-results', compact('sanPhams', 'keyword'));
+}
 
     public function votCauLong(Request $request)
     {

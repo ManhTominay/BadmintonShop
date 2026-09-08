@@ -147,25 +147,26 @@
 
         </div>
 
-        <!-- Sản phẩm liên quan -->
-        @if(isset($sanPhamLienQuan) && $sanPhamLienQuan->count() > 0)
-        <div class="mt-16">
-            <h2 class="text-xl font-black text-slate-900 mb-6">Sản phẩm liên quan</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                @foreach($sanPhamLienQuan as $item)
-                <div class="bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition">
-                    <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
-                        <div class="h-36 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2">
-                            @php
-                                $relatedImage = \App\Models\SanPham::resolveImageName($item->anh_dai_dien ?? null);
-                            @endphp
-                            <img src="{{ asset('images/' . $relatedImage) }}"
-                                 class="h-full w-full object-contain"
-                                 alt="{{ $item->ten_san_pham }}"
-                                 onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';">
-                        </div>
-                        <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8">{{ $item->ten_san_pham }}</h3>
+     <!-- Sản phẩm liên quan -->
+    @if(isset($sanPhamLienQuan) && $sanPhamLienQuan->count() > 0)
+    <div class="mt-16">
+        <h2 class="text-xl font-black text-slate-900 mb-6 uppercase tracking-tight">Sản phẩm liên quan</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            @foreach($sanPhamLienQuan as $item)
+            <div class="group bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
+                <div>
+                    <!-- Khung ảnh sản phẩm -->
+                    <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
+                        @php
+                            $relatedImage = \App\Models\SanPham::resolveImageName($item->anh_dai_dien ?? null);
+                        @endphp
+                        @if(!empty($relatedImage) && file_exists(public_path('images/' . $relatedImage)))
+                            <img src="{{ asset('images/' . $relatedImage) }}" alt="{{ $item->ten_san_pham }}" class="h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                        @else
+                            <img src="{{ asset('images/yonex_doura10.webp') }}" alt="{{ $item->ten_san_pham }}" class="h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                        @endif
                     </a>
+<<<<<<< HEAD
                     <div class="flex items-center justify-between gap-2 mt-2">
                         <p class="text-xs font-bold text-orange-500">{{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ</p>
                         @if(($item->so_luong ?? 0) > 0)
@@ -173,13 +174,53 @@
                         @else
                             <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
                         @endif
+=======
+
+                    <!-- Nút XEM CHI TIẾT -->
+                    <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" 
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                        XEM CHI TIẾT
+                    </a>
+
+                    <!-- Tên sản phẩm -->
+                    <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
+                        <h4 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
+                            {{ $item->ten_san_pham }}
+                        </h4>
+                    </a>
+
+                    <!-- Hiển thị Size sản phẩm (nếu có) -->
+                    @if(!empty($item->size) || !empty($item->kich_thuoc))
+                        <p class="text-xs font-bold text-slate-600 mb-2">
+                            SIZE: {{ $item->size ?? $item->kich_thuoc }}
+                        </p>
+                    @endif
+
+                    <!-- Giá sản phẩm và Trạng thái nằm cùng 1 hàng ngang -->
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-sm font-bold text-orange-500">
+                            {{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div>
+                            @if(($item->so_luong ?? 0) > 0)
+                                <span class="inline-block text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $item->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+>>>>>>> Manh
                     </div>
                 </div>
-                @endforeach
             </div>
+            @endforeach
         </div>
-        @endif
     </div>
+    @endif
 
     <!-- Script xử lý tăng giảm số lượng & chọn biến thể -->
     <script>

@@ -161,9 +161,9 @@
 
     <!-- 0. DANH MỤC: SẢN PHẨM BÁN CHẠY -->
     <section class="max-w-6xl mx-auto px-4 py-10">
-        <div class="mb-8 flex items-center justify-center relative h-10">
+        <div class="mb-8 flex items-center justify-between relative h-10">
             <div class="absolute left-0 top-1/2 w-full h-[1px] bg-gray-200 z-0"></div>
-            <div class="relative z-10 bg-gray-50 px-4">
+            <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 bg-gray-50 px-4">
                 <h2 class="font-extrabold text-xl uppercase tracking-wider text-slate-900 text-center">SẢN PHẨM BÁN CHẠY</h2>
             </div>
         </div>
@@ -199,10 +199,10 @@
                 }
             @endphp
 
-            @foreach($sanPhamBanChay as $sp)
+           
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
-                    <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
+                  @foreach($sanPhamBanChay as $sp)   <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
                         <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
 
@@ -214,7 +214,24 @@
                     <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
                     </a>
-                    <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                    
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs font-bold text-orange-600">
+                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div class="min-w-[90px] text-right">
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $sp->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -249,7 +266,23 @@
                     <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
                     </a>
-                    <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs font-bold text-orange-600">
+                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div class="min-w-[90px] text-right">
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $sp->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -285,7 +318,23 @@
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
                     </a>
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 mt-1">Size: 36-43</p>
-                    <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs font-bold text-orange-600">
+                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div class="min-w-[90px] text-right">
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $sp->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -329,7 +378,23 @@
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
                     </a>
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 mt-1">Size: XS/S/M/L/XL/XXL</p>
-                    <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs font-bold text-orange-600">
+                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div class="min-w-[90px] text-right">
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $sp->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -364,7 +429,23 @@
                     <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}">
                         <h3 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 hover:text-orange-500 transition-colors">{{ $sp->ten_san_pham }}</h3>
                     </a>
-                    <p class="text-xs font-bold text-orange-600 mt-2">{{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs font-bold text-orange-600">
+                            {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
+                        </p>
+
+                        <div class="min-w-[90px] text-right">
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-green-600">
+                                    Còn hàng ({{ $sp->so_luong }})
+                                </span>
+                            @else
+                                <span class="inline-block whitespace-nowrap text-[11px] font-bold text-red-500">
+                                    Hết hàng
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -382,6 +463,7 @@
                 navigation: { nextEl: '.swiper-button-next-custom', prevEl: '.swiper-button-prev-custom' },
             });
         });
+        
     </script>
 
     @include('partials.cart-ajax')
@@ -417,7 +499,7 @@
                         <li><a href="{{ url('/vot-cau-long') }}" class="hover:text-orange-500 transition block">Vợt cầu lông</a></li>
                         <li><a href="{{ url('/giay-cau-long') }}" class="hover:text-orange-500 transition block">Giày cầu lông</a></li>
                         <li><a href="{{ url('/quan-ao') }}" class="hover:text-orange-500 transition block">Quần áo cầu lông</a></li>
-                        <li><a href="{{ url('/cau') }}" class="hover:text-orange-500 transition block">Cầu lông</a></li>
+                        <li><a href="{{ url('/cau') }}" class="hover:text-orange-500 transition block">Quả Cầu lông</a></li>
                         <li><a href="{{ route('phukien') }}" class="hover:text-orange-500 transition block">Phụ kiện cầu lông</a></li>
                     </ul>
                 </div>

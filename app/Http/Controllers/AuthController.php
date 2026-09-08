@@ -102,34 +102,28 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Email không tồn tại.']);
         }
 
-        // Generate reset token
-        $token = \Illuminate\Support\Str::random(60);
+        // Generate a short-lived one-time password.
+        $otp = (string) random_int(100000, 999999);
         
         // Store token in database
         \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
                 'email' => $user->email,
-                'token' => Hash::make($token),
+                'token' => Hash::make($otp),
                 'created_at' => now(),
             ]
         );
 
         try {
-            Mail::to($user->email)->send(new ResetPasswordMail($token, $user->email));
+            Mail::to($user->email)->send(new ResetPasswordMail($otp, $user->email));
         } catch (\Throwable $e) {
-            $resetUrl = url('/password-reset/' . $token . '?email=' . urlencode($user->email));
-            \Illuminate\Support\Facades\Log::info('Password reset link generated for local testing', [
+            \Illuminate\Support\Facades\Log::error('Could not send password reset OTP email.', [
                 'email' => $user->email,
-                'reset_url' => $resetUrl,
+                'error' => $e->getMessage(),
             ]);
 
-            session(['reset_email' => $user->email]);
-
-            return redirect('/password-reset-sent')->with([
-                'email' => $user->email,
-                'reset_url' => $resetUrl,
-            ]);
+            return back()->withErrors(['email' => 'Không thể gửi mã OTP. Vui lòng kiểm tra cấu hình Gmail và thử lại.']);
         }
 
         session(['reset_email' => $user->email]);
@@ -137,16 +131,18 @@ class AuthController extends Controller
         return redirect('/password-reset-sent')->with('email', $user->email);
     }
 
-    public function showResetPasswordForm($token)
+    public function showResetPasswordForm($token = null)
     {
-        return view('auth.reset-password', ['token' => $token]);
+        return view('auth.reset-password', [
+            'email' => session('reset_email'),
+        ]);
     }
 
     public function resetPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:nguoi_dung,email',
-            'token' => 'required',
+            'otp' => ['required', 'digits:6'],
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -155,8 +151,11 @@ class AuthController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$resetRecord || !Hash::check($request->token, $resetRecord->token)) {
-            return back()->withErrors(['token' => 'Token không hợp lệ hoặc hết hạn.']);
+        if (!$resetRecord
+            || !$resetRecord->created_at
+            || now()->greaterThan(\Carbon\Carbon::parse($resetRecord->created_at)->addMinutes(10))
+            || !Hash::check($request->otp, $resetRecord->token)) {
+            return back()->withErrors(['otp' => 'Mã OTP không hợp lệ hoặc đã hết hạn.']);
         }
 
         // Update password

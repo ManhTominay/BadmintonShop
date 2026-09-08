@@ -24,8 +24,8 @@
 
                 <!-- Header -->
                 <div class="text-center mb-8">
-                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Quên mật khẩu?</h1>
-                    <p class="text-gray-600 text-sm">Nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu qua Gmail.</p>
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Đặt lại mật khẩu</h1>
+                    <p class="text-gray-600 text-sm">Nhập mã OTP đã được gửi đến Gmail của bạn.</p>
                 </div>
 
                 <!-- Thông báo thành công -->
@@ -47,8 +47,8 @@
                     </div>
                 @endif
 
-                <!-- Form Gửi Email -->
-                <form action="{{ route('password.email') }}" method="POST" class="space-y-6">
+                <!-- Form nhập OTP và mật khẩu mới -->
+                <form action="{{ route('password.update') }}" method="POST" class="space-y-6">
                     @csrf <!-- Bảo mật chống lỗi 419 -->
 
                     <!-- Email -->
@@ -60,7 +60,7 @@
                             type="email"
                             id="email"
                             name="email"
-                            value="{{ old('email') }}"
+                            value="{{ old('email', $email) }}"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 @error('email') border-red-500 @enderror"
                             placeholder="Nhập email đã đăng ký của bạn"
                             required
@@ -71,13 +71,48 @@
                         @enderror
                     </div>
 
+                    <div>
+                        <label for="otp" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Mã OTP <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="otp"
+                            name="otp"
+                            value="{{ old('otp') }}"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 @error('otp') border-red-500 @enderror"
+                            placeholder="Nhập 6 chữ số"
+                            required
+                        />
+                        @error('otp')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Mật khẩu mới <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" id="password" name="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" minlength="6" required />
+                    </div>
+
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Xác nhận mật khẩu mới <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" minlength="6" required />
+                    </div>
+
                     <!-- Submit Button -->
                     <button
                         type="submit"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
                     >
                         <i class="fa-solid fa-paper-plane"></i>
-                        Gửi liên kết về Gmail
+                        Đổi mật khẩu
                     </button>
                 </form>
 

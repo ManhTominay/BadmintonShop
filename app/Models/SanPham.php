@@ -73,4 +73,5 @@ class SanPham extends Model
     {
         return $this->hasOne(ThongSoVot::class, 'san_pham_id');
     }
+    
 }

@@ -61,7 +61,7 @@
 
                 <!-- Thẻ thống kê nhanh -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div class="bg-white p-6 rounded-xl shadogit merge Manhw-sm border border-gray-200">
                         <p class="text-sm font-medium text-gray-500">Tổng sản phẩm</p>
                         <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ $totalProducts ?? 0 }}</h3>
                     </div>

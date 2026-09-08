@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\GioHang;
 use App\Models\BienTheSanPham;
+use App\Models\SanPham;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -97,6 +98,67 @@ class CartController extends Controller
         }
 
         return redirect()->back()->with('success', $message);
+    }
+
+    public function addAllProducts()
+    {
+        $userId = Auth::id();
+        $addedCount = 0;
+
+        DB::transaction(function () use ($userId, &$addedCount) {
+            $products = SanPham::where('trang_thai_kinh_doanh', true)->get();
+
+            foreach ($products as $product) {
+                $variant = $product->bienThes()->first();
+
+                if (!$variant) {
+                    $variant = new BienTheSanPham([
+                        'san_pham_id' => $product->id,
+                        'size' => null,
+                    ]);
+
+                    if (Schema::hasColumn('bien_the_san_pham', 'ma_sku')) {
+                        $variant->ma_sku = 'AUTO-' . $product->id;
+                    }
+
+                    if (Schema::hasColumn('bien_the_san_pham', 'so_luong_ton_kho')) {
+                        $variant->so_luong_ton_kho = 9999;
+                    } elseif (Schema::hasColumn('bien_the_san_pham', 'so_luong_ton')) {
+                        $variant->so_luong_ton = 9999;
+                    }
+
+                    $variant->save();
+                }
+
+                $cartItem = GioHang::where('nguoi_dung_id', $userId)
+                    ->where('bien_the_id', $variant->id)
+                    ->whereNull('cuoc_kem_bien_the_id')
+                    ->whereNull('so_kg_cang')
+                    ->when(Schema::hasColumn('gio_hang', 'size'), function ($query) use ($variant) {
+                        return $query->where('size', $variant->size);
+                    })
+                    ->first();
+
+                if (!$cartItem) {
+                    $data = [
+                        'nguoi_dung_id' => $userId,
+                        'bien_the_id' => $variant->id,
+                        'so_luong' => 1,
+                        'cuoc_kem_bien_the_id' => null,
+                        'so_kg_cang' => null,
+                    ];
+
+                    if (Schema::hasColumn('gio_hang', 'size')) {
+                        $data['size'] = $variant->size;
+                    }
+
+                    GioHang::create($data);
+                    $addedCount++;
+                }
+            }
+        });
+
+        return redirect()->route('cart.index')->with('success', "Đã thêm {$addedCount} sản phẩm vào giỏ hàng.");
     }
 
     public function index()

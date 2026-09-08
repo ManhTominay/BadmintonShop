@@ -110,17 +110,17 @@
         </nav>
     </header>
 
-    <!-- Content Phụ Kiện -->
-    <div class="max-w-6xl mx-auto px-4 my-6">
-        <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
-                <h2 class="text-2xl font-extrabold uppercase tracking-tight text-slate-900">PHỤ KIỆN CẦU LÔNG</h2>
-                <p class="text-gray-500 text-xs mt-1">
+                <h1 class="text-2xl font-extrabold text-slate-900 uppercase">PHỤ KIỆN CẦU LÔNG</h1>
+                <p class="text-xs text-gray-500 mt-1">
                     Hiển thị {{ $danhSachPhuKien instanceof \Illuminate\Pagination\LengthAwarePaginator ? $danhSachPhuKien->total() : count($danhSachPhuKien) }} sản phẩm
                 </p>
             </div>
 
-            <!-- Form Sắp xếp -->
+            <!-- Bộ lọc Sắp xếp -->
             <form action="{{ route('phukien') }}" method="GET" class="flex items-center gap-2">
                 @if(request('type'))
                     <input type="hidden" name="type" value="{{ request('type') }}">
@@ -129,16 +129,16 @@
                     <input type="hidden" name="keyword" value="{{ request('keyword') }}">
                 @endif
                 <label class="text-xs font-semibold text-gray-600 whitespace-nowrap">Sắp xếp:</label>
-                <select name="sort" onchange="this.form.submit()" class="border rounded px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-orange-500 text-gray-700 cursor-pointer">
+                <select name="sort" onchange="this.form.submit()" class="border rounded px-3 py-2 text-xs bg-white focus:outline-none focus:border-orange-500 cursor-pointer">
                     <option value="">Mới nhất</option>
-                    <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá: thấp đến cao</option>
-                    <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá: cao đến thấp</option>
+                    <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá: Thấp đến Cao</option>
+                    <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá: Cao đến Thấp</option>
                 </select>
             </form>
         </div>
 
-        <!-- Bộ Lọc Phụ Kiện -->
-        <div class="flex flex-wrap items-center gap-2 mb-6">
+        <!-- Bộ Lọc Loại Phụ Kiện -->
+        <div class="flex flex-wrap items-center gap-2 mb-8">
             <span class="text-xs font-bold text-gray-500 mr-1">Loại phụ kiện:</span>
             
             <a href="{{ route('phukien', array_merge(request()->except('type'), ['type' => 'tat_ca'])) }}" 
@@ -163,37 +163,38 @@
                class="px-3 py-1 text-xs border rounded-full transition {{ request('type') == 'tat' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:border-orange-500' }}">Tất / Vớ</a>
         </div>
 
-        <!-- Danh sách Phụ Kiện -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-            @forelse($danhSachPhuKien as $item)
-                <div class="group bg-white rounded-xl p-3 border border-gray-100 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-orange-500 transition-all duration-300">
+        <!-- Grid Danh sách Phụ Kiện -->
+        @if($danhSachPhuKien->count() > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                @foreach($danhSachPhuKien as $item)
+                <div class="group bg-white rounded-xl p-4 border border-gray-200 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
-                        <!-- Khung Ảnh -->
-                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block h-48 bg-gray-50 rounded-lg flex items-center justify-center p-2 mb-3 overflow-hidden relative">
+                        <!-- Khung ảnh sản phẩm -->
+                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
                             @php
                                 $imageName = \App\Models\SanPham::resolveImageName($item->anh_dai_dien ?? null);
                             @endphp
                             @if(!empty($imageName) && file_exists(public_path('images/' . $imageName)))
-                                <img src="{{ asset('images/' . $imageName) }}" 
-                                     alt="{{ $item->ten_san_pham }}" 
-                                     class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
+                                <img src="{{ asset('images/' . $imageName) }}" alt="{{ $item->ten_san_pham }}" class="h-full object-contain group-hover:scale-105 transition-transform duration-300">
                             @else
-                                <i class="fa-solid fa-box text-4xl text-gray-300"></i>
+                                <i class="fa-solid fa-box text-5xl text-gray-300"></i>
                             @endif
                         </a>
 
                         <!-- Nút XEM CHI TIẾT -->
-                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs py-2 rounded-lg uppercase tracking-wide mb-3 transition">
+                        <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" 
+                           class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
                             XEM CHI TIẾT
                         </a>
 
                         <!-- Tên sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}">
-                            <h3 class="text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] hover:text-orange-500 transition-colors">
+                            <h3 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug mb-2 hover:text-orange-500 transition-colors">
                                 {{ $item->ten_san_pham }}
                             </h3>
                         </a>
 
+<<<<<<< HEAD
                         <!-- Giá sản phẩm -->
                         <div class="flex items-center justify-between gap-2 mt-2">
                             <p class="text-xs font-bold text-orange-600">
@@ -204,24 +205,45 @@
                             @else
                                 <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
                             @endif
+=======
+                        <!-- Giá sản phẩm và Trạng thái (Căn cùng 1 hàng, giá trái, trạng thái phải) -->
+                        <div class="flex items-center justify-between mt-2">
+                            <p class="text-sm font-bold text-orange-500">
+                                {{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ
+                            </p>
+
+                            <div>
+                                @if(($item->so_luong ?? 0) > 0)
+                                    <span class="inline-block text-[11px] font-bold text-green-600">
+                                        Còn hàng ({{ $item->so_luong }})
+                                    </span>
+                                @else
+                                    <span class="inline-block text-[11px] font-bold text-red-500">
+                                        Hết hàng
+                                    </span>
+                                @endif
+                            </div>
+>>>>>>> Manh
                         </div>
                     </div>
-
                 </div>
-            @empty
-                <div class="col-span-full text-center py-12 text-gray-500 text-sm">
-                    Chưa có sản phẩm phụ kiện nào trong danh mục này.
-                </div>
-            @endforelse
-        </div>
+                @endforeach
+            </div>
 
-        <!-- Phân trang -->
-        @if($danhSachPhuKien instanceof \Illuminate\Pagination\LengthAwarePaginator)
-            <div class="mt-6">
-                {{ $danhSachPhuKien->appends(request()->query())->links() }}
+            <!-- Phân trang -->
+            @if($danhSachPhuKien instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                <div class="mt-8">
+                    {{ $danhSachPhuKien->appends(request()->query())->links() }}
+                </div>
+            @endif
+        @else
+            <div class="bg-white rounded-lg p-12 text-center border border-gray-200">
+                <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
+                <p class="text-sm text-gray-500 font-medium">Không tìm thấy sản phẩm phụ kiện nào phù hợp.</p>
+                <a href="{{ route('phukien') }}" class="inline-block mt-4 text-xs bg-orange-500 text-white font-bold px-4 py-2 rounded hover:bg-orange-600 transition">Xem tất cả phụ kiện</a>
             </div>
         @endif
-    </div>
+    </main>
 
     <!-- Footer -->
     <footer class="bg-amber-50/70 border-t border-amber-100 text-gray-700 text-sm mt-16 pt-10 pb-6">

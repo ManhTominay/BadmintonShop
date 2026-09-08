@@ -951,7 +951,7 @@
                                     {{ $item->dia_chi_chi_tiet }}, {{ $item->phuong_xa }}, {{ $item->tinh_thanh }}
                                 </div>
                             </div>
-                            <a href="{{ route('checkout.address.edit', ['items' => request()->query('items')]) }}" class="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">Cập nhật</a>
+                            <a href="{{ route('checkout.address.edit', ['items' => request()->query('items'), 'address_id' => $item->id]) }}" class="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">Cập nhật</a>
                         </label>
                     @endforeach
                 @else
@@ -1055,7 +1055,9 @@
 
                         // Reload regardless of response, to refresh the page with new default address
                         await new Promise(resolve => setTimeout(resolve, 300));
-                        window.location.reload();
+                        const checkoutUrl = new URL(window.location.href);
+                        checkoutUrl.searchParams.set('address_id', selectedId);
+                        window.location.href = checkoutUrl.toString();
                     } catch (error) {
                         console.error('Error:', error);
                         confirmAddressModalBtn.disabled = false;

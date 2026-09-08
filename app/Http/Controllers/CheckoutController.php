@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
-    private const SHOP_LAT = 10.762622;
-    private const SHOP_LNG = 106.660172;
+    private const SHOP_LAT = 21.0461067;
+    private const SHOP_LNG = 105.7620995;
 
     private function haversineKm(float $lat1, float $lng1, float $lat2, float $lng2): float
     {
@@ -120,7 +120,9 @@ class CheckoutController extends Controller
 
     public function editAddressForm(Request $request)
     {
-        $address = Address::getDefaultForUser(auth()->id());
+        $address = $request->filled('address_id')
+            ? Address::where('nguoi_dung_id', auth()->id())->find($request->integer('address_id'))
+            : Address::getDefaultForUser(auth()->id());
 
         if (!$address) {
             return redirect()->route('checkout.address', ['items' => $request->query('items')]);
@@ -141,8 +143,8 @@ class CheckoutController extends Controller
             'tinh_thanh' => 'required|string|max:255',
             'phuong_xa' => 'required|string|max:255',
             'dia_chi_chi_tiet' => 'required|string|max:255',
-            'lat' => ['nullable', 'numeric', 'between:-90,90'],
-            'lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
         ]);
 
         $address = Address::create([
@@ -174,28 +176,38 @@ class CheckoutController extends Controller
             'tinh_thanh' => 'required|string|max:255',
             'phuong_xa' => 'required|string|max:255',
             'dia_chi_chi_tiet' => 'required|string|max:255',
-            'lat' => ['nullable', 'numeric', 'between:-90,90'],
-            'lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
         ]);
 
-        $existingDefault = Address::where('nguoi_dung_id', auth()->id())
-            ->where('is_default', true)
-            ->first();
+        $address = $request->filled('address_id')
+            ? Address::where('nguoi_dung_id', auth()->id())->findOrFail($request->input('address_id'))
+            : Address::create([
+                'nguoi_dung_id' => auth()->id(),
+                'ten_nguoi_nhan' => $request->ten_nguoi_nhan,
+                'so_dien_thoai' => $request->so_dien_thoai,
+                'tinh_thanh' => $request->tinh_thanh,
+                'phuong_xa' => $request->phuong_xa,
+                'dia_chi_chi_tiet' => $request->dia_chi_chi_tiet,
+                'lat' => $request->lat,
+                'lng' => $request->lng,
+                'is_default' => false,
+            ]);
 
-        $newAddress = Address::create([
-            'nguoi_dung_id' => auth()->id(),
-            'ten_nguoi_nhan' => $request->ten_nguoi_nhan,
-            'so_dien_thoai' => $request->so_dien_thoai,
-            'tinh_thanh' => $request->tinh_thanh,
-            'phuong_xa' => $request->phuong_xa,
-            'dia_chi_chi_tiet' => $request->dia_chi_chi_tiet,
-            'lat' => $request->lat,
-            'lng' => $request->lng,
-            'is_default' => false,
-        ]);
+        if ($request->filled('address_id')) {
+            $address->update([
+                'ten_nguoi_nhan' => $request->ten_nguoi_nhan,
+                'so_dien_thoai' => $request->so_dien_thoai,
+                'tinh_thanh' => $request->tinh_thanh,
+                'phuong_xa' => $request->phuong_xa,
+                'dia_chi_chi_tiet' => $request->dia_chi_chi_tiet,
+                'lat' => $request->lat,
+                'lng' => $request->lng,
+            ]);
+        }
 
-        if ($request->boolean('is_default') || (!$existingDefault && !Address::where('nguoi_dung_id', auth()->id())->where('is_default', true)->exists())) {
-            $newAddress->setAsDefault();
+        if ($request->boolean('is_default')) {
+            $address->setAsDefault();
         }
 
         $selectedItems = $request->input('items');
@@ -206,7 +218,10 @@ class CheckoutController extends Controller
     public function showPaymentPage(Request $request)
     {
         $user = Auth::user();
-        $address = Address::getDefaultForUser($user->id);
+        $addressId = $request->integer('address_id');
+        $address = $addressId
+            ? Address::where('nguoi_dung_id', $user->id)->findOrFail($addressId)
+            : Address::getDefaultForUser($user->id);
 
         $selectedIds = $request->query('items');
         $ids = $selectedIds ? explode(',', $selectedIds) : [];

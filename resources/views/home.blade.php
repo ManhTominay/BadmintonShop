@@ -199,10 +199,10 @@
                 }
             @endphp
 
-           
+            @foreach($sanPhamBanChay as $sp)
             <div class="bg-white rounded p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition relative">
                 <div>
-                  @foreach($sanPhamBanChay as $sp)   <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
+                <div class="h-44 bg-gray-50 rounded flex items-center justify-center mb-3 p-2 relative overflow-hidden">
                         <img src="{{ $resolveProductImage($sp) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain pointer-events-none select-none">
                     </div>
 

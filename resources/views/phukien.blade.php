@@ -194,18 +194,6 @@
                             </h3>
                         </a>
 
-<<<<<<< HEAD
-                        <!-- Giá sản phẩm -->
-                        <div class="flex items-center justify-between gap-2 mt-2">
-                            <p class="text-xs font-bold text-orange-600">
-                                {{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ
-                            </p>
-                            @if(($item->so_luong ?? 0) > 0)
-                                <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $item->so_luong }})</p>
-                            @else
-                                <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
-                            @endif
-=======
                         <!-- Giá sản phẩm và Trạng thái (Căn cùng 1 hàng, giá trái, trạng thái phải) -->
                         <div class="flex items-center justify-between mt-2">
                             <p class="text-sm font-bold text-orange-500">
@@ -223,7 +211,6 @@
                                     </span>
                                 @endif
                             </div>
->>>>>>> Manh
                         </div>
                     </div>
                 </div>

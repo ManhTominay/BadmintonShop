@@ -174,18 +174,6 @@
                             </h3>
                         </a>
 
-<<<<<<< HEAD
-                        <!-- Giá tiền -->
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="text-sm font-bold text-orange-500">
-                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
-                            </p>
-                            @if(($sp->so_luong ?? 0) > 0)
-                                <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $sp->so_luong }})</p>
-                            @else
-                                <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
-                            @endif
-=======
                         <!-- Giá tiền và trạng thái -->
                         <div class="flex items-center justify-between mt-2">
                             <p class="text-sm font-bold text-orange-500">
@@ -203,7 +191,6 @@
                                     </span>
                                 @endif
                             </div>
->>>>>>> Manh
                         </div>
                     </div>
 

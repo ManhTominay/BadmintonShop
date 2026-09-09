@@ -135,21 +135,6 @@
 
             <!-- Dòng 2: Bộ lọc Thương hiệu -->
             <div class="flex items-center space-x-2 text-xs flex-wrap gap-y-2">
-<<<<<<< HEAD
-    <span class="text-gray-700 font-bold">Thương hiệu:</span>
-    
-    <!-- Thay đổi phần href thành route() kèm tham số mảng -->
-    <a href="{{ route('quan-ao', ['keyword' => 'Yonex']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Yonex</a>
-    
-    <a href="{{ route('quan-ao', ['keyword' => 'Lining']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Lining</a>
-    
-    <a href="{{ route('quan-ao', ['keyword' => 'Victor']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Victor' ? 'border-orange-500 text-orange-600 font-bold' : 'text-gray-700' }}">Victor</a>
-    
-    @if(request('keyword'))
-        <a href="{{ route('quan-ao') }}" class="text-red-500 hover:underline ml-2">Xóa lọc</a>
-    @endif
-</div>
-=======
                 <span class="text-gray-700 font-bold mr-2">Thương hiệu:</span>
                 <a href="{{ url('/quan-ao', ['keyword' => 'Yonex']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Yonex</a>
                 <a href="{{ url('/quan-ao', ['keyword' => 'Lining']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Lining</a>
@@ -158,7 +143,6 @@
                     <a href="{{ url('/quan-ao') }}" class="text-red-500 hover:underline ml-2 font-medium">Xóa lọc</a>
                 @endif
             </div>
->>>>>>> Manh
         </div>
 
         <!-- Grid Danh sách Quần Áo -->
@@ -192,18 +176,6 @@
                             </h3>
                         </a>
                         
-<<<<<<< HEAD
-                        <!-- Giá tiền -->
-                        <div class="flex items-center justify-between gap-2 mt-1">
-                            <p class="text-sm font-bold text-orange-500">
-                                {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
-                            </p>
-                            @if(($sp->so_luong ?? 0) > 0)
-                                <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $sp->so_luong }})</p>
-                            @else
-                                <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
-                            @endif
-=======
                         <!-- Giá tiền và trạng thái -->
                         <div class="flex items-center justify-between mt-2">
                             <p class="text-sm font-bold text-orange-500">
@@ -221,7 +193,6 @@
                                     </span>
                                 @endif
                             </div>
->>>>>>> Manh
                         </div>
                     </div>
 

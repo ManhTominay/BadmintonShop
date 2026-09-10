@@ -26,6 +26,9 @@
     <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.orders*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
         <i class="fa-solid fa-shopping-cart w-5"></i> Quản lý đơn hàng
     </a>
+    <a href="{{ route('admin.orders.cancellationReasons') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.orders.cancellationReasons') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+        <i class="fa-solid fa-ban w-5"></i> Lý do hủy đơn
+    </a>
                 <a href="{{ route('admin.vouchers.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.vouchers*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
                     <i class="fa-solid fa-ticket w-5"></i> Quản lý voucher
                 </a>
@@ -39,7 +42,7 @@
             <a href="{{ url('/') }}" target="_blank" class="flex items-center gap-2 text-xs text-gray-400 hover:text-white">
                 <i class="fa-solid fa-globe"></i> Xem website chính
             </a>
-            <form action="#" method="POST">
+            <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 bg-red-900/40 text-red-400 rounded hover:bg-red-900/60 text-xs font-medium">
                     <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất Admin

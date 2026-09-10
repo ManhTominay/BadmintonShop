@@ -85,7 +85,7 @@
                 Xem website chính
             </a>
 
-            <form action="#" method="POST">
+            <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
 
                 <button
@@ -943,38 +943,70 @@
 
                         <tbody class="divide-y divide-gray-200">
 
-                            @forelse($orders ?? [] as $order)
+                            @forelse($orders as $order)
 
                                 <tr class="hover:bg-gray-50/50">
 
                                     <td class="p-4 font-medium text-gray-900">
-                                        #{{ $order->id }}
+                                        #{{ $order->ma_don_hang ?? $order->id }}
                                     </td>
 
                                     <td class="p-4">
-                                        {{ $order->ten_khach_hang ?? 'Khách lẻ' }}
+                                        {{ $order->ten_nguoi_nhan ?? 'Khách lẻ' }}
                                     </td>
 
                                     <td class="p-4 font-semibold text-orange-600">
-                                        {{ number_format($order->tong_tien ?? 0) }} đ
+                                        {{ number_format($order->tong_thanh_toan ?? $order->tong_tien_hang ?? 0, 0, ',', '.') }} đ
                                     </td>
 
                                     <td class="p-4">
-
-                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
-                                            Chờ xử lý
-                                        </span>
+                                        @php
+                                            $statusLabels = [
+                                                'cho_xu_ly' => ['Chờ xác nhận', 'bg-yellow-100 text-yellow-800'],
+                                                'dang_giao' => ['Đang giao', 'bg-blue-100 text-blue-800'],
+                                                'cho_giao_hang' => ['Chờ giao hàng', 'bg-indigo-100 text-indigo-800'],
+                                                'hoan_thanh' => ['Hoàn thành', 'bg-green-100 text-green-800'],
+                                                'da_huy' => ['Đã hủy', 'bg-red-100 text-red-800'],
+                                                'tra_hang' => ['Trả hàng', 'bg-purple-100 text-purple-800'],
+                                                'hoan_tien' => ['Hoàn tiền', 'bg-purple-100 text-purple-800'],
+                                            ];
+                                            [$statusLabel, $statusClass] = $statusLabels[$order->trang_thai_don_hang] ?? ['Chờ xác nhận', 'bg-yellow-100 text-yellow-800'];
+                                        @endphp
+                                        <span class="rounded px-2 py-1 text-xs {{ $statusClass }}">{{ $statusLabel }}</span>
 
                                     </td>
 
                                     <td class="p-4 text-center">
-
-                                        <a
-                                            href="#"
-                                            class="text-blue-600 hover:text-blue-800 font-medium"
-                                        >
-                                            Chi tiết
-                                        </a>
+                                        @if($order->trang_thai_don_hang === 'cho_xu_ly')
+                                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="trang_thai" value="dang_giao">
+                                                <button type="submit" class="font-medium text-orange-600 hover:text-orange-800">
+                                                    <i class="fa-solid fa-check mr-1"></i>Xác nhận đơn
+                                                </button>
+                                            </form>
+                                        @elseif($order->trang_thai_don_hang === 'dang_giao')
+                                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="trang_thai" value="cho_giao_hang">
+                                                <button type="submit" class="font-medium text-blue-600 hover:text-blue-800">
+                                                    <i class="fa-solid fa-truck-fast mr-1"></i>Giao cho ship
+                                                </button>
+                                            </form>
+                                        @elseif($order->trang_thai_don_hang === 'cho_giao_hang')
+                                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="trang_thai" value="hoan_thanh">
+                                                <button type="submit" class="font-medium text-green-600 hover:text-green-800">
+                                                    <i class="fa-solid fa-check-double mr-1"></i>Hoàn thành
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-gray-400">Đã xử lý</span>
+                                        @endif
 
                                     </td>
 

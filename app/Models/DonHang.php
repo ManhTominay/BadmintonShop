@@ -27,6 +27,7 @@ class DonHang extends Model
         'phuong_thuc_thanh_toan',
         'trang_thai_thanh_toan',
         'trang_thai_don_hang',
+        'ly_do_huy',
         'ma_van_don',
         'ma_giam_gia_id',
         'sepay_transaction_id',
@@ -39,4 +40,9 @@ class DonHang extends Model
         'qr_expires_at' => 'datetime',
         'thoi_diem_thanh_toan' => 'datetime',
     ];
+
+    public function chiTietDonHangs()
+    {
+        return $this->hasMany(ChiTietDonHang::class, 'don_hang_id');
+    }
 }

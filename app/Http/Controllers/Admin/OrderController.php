@@ -20,6 +20,23 @@ class OrderController extends Controller
         return $this->managementView('vouchers');
     }
 
+    public function cancellationReasons()
+    {
+        $cancelledOrders = DonHang::where('trang_thai_don_hang', 'da_huy')
+            ->orderByDesc('id')
+            ->paginate(15, ['*'], 'cancelled_page');
+
+        $cancelledCount = DonHang::where('trang_thai_don_hang', 'da_huy')->count();
+        $reasonSummary = DonHang::where('trang_thai_don_hang', 'da_huy')
+            ->whereNotNull('ly_do_huy')
+            ->selectRaw('ly_do_huy, COUNT(*) as total')
+            ->groupBy('ly_do_huy')
+            ->orderByDesc('total')
+            ->get();
+
+        return view('admin.orders.cancellation-reasons', compact('cancelledOrders', 'cancelledCount', 'reasonSummary'));
+    }
+
     private function managementView(string $section)
     {
         $orders = $section === 'orders'
@@ -84,11 +101,11 @@ class OrderController extends Controller
         $order = DonHang::findOrFail($id);
         
         $request->validate([
-            'trang_thai' => 'required|in:Đang xử lý,Đang giao,Hoàn thành,Đã hủy'
+            'trang_thai' => 'required|in:cho_xu_ly,dang_giao,cho_giao_hang,hoan_thanh,da_huy,tra_hang,hoan_tien'
         ]);
 
         $order->update([
-            'trang_thai' => $request->trang_thai
+            'trang_thai_don_hang' => $request->trang_thai
         ]);
 
         return back()->with('success', 'Đã cập nhật trạng thái đơn hàng thành công!');

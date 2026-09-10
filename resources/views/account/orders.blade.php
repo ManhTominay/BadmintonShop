@@ -95,6 +95,54 @@
             <p class="text-gray-600">Xem chi tiết các đơn hàng đã đặt</p>
         </div>
 
+        @php
+            $orderTabs = [
+                'cho_thanh_toan' => 'Chờ thanh toán',
+                'van_chuyen' => 'Vận chuyển',
+                'cho_giao_hang' => 'Chờ giao hàng',
+                'hoan_thanh' => 'Hoàn thành',
+                'da_huy' => 'Đã hủy',
+                'tra_hang' => 'Trả hàng/Hoàn tiền',
+            ];
+        @endphp
+
+        <nav class="mb-8 overflow-x-auto border-b border-gray-200 bg-white" aria-label="Danh mục đơn hàng">
+            <div class="flex min-w-max">
+                @foreach($orderTabs as $tabKey => $tabLabel)
+                    <a href="{{ route('account.orders', ['status' => $tabKey]) }}" class="border-b-2 px-4 py-4 text-sm font-medium transition md:px-6 {{ $status === $tabKey ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-700 hover:border-orange-300 hover:text-orange-500' }}">
+                        {{ $tabLabel }}
+                        @if(($orderCounts[$tabKey] ?? 0) > 0)
+                            <span class="ml-1 text-xs text-gray-500">({{ $orderCounts[$tabKey] }})</span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        </nav>
+
+        @if(session('success'))
+            <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                <i class="fa-solid fa-circle-check mr-2"></i>{{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->has('order'))
+            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <i class="fa-solid fa-circle-exclamation mr-2"></i>{{ $errors->first('order') }}
+            </div>
+        @endif
+
+        @php
+            $cancelReasons = [
+                'Tôi muốn cập nhật địa chỉ/sđt nhận hàng.',
+                'Tôi muốn thêm/thay đổi Mã giảm giá',
+                'Tôi muốn thay đổi sản phẩm (kích thước, màu sắc, số lượng...)',
+                'Thủ tục thanh toán rắc rối',
+                'Tôi tìm thấy chỗ mua khác tốt hơn (Rẻ hơn, uy tín hơn, giao nhanh hơn...)',
+                'Tôi không có nhu cầu mua nữa',
+                'Tôi không tìm thấy lý do hủy phù hợp',
+            ];
+        @endphp
+
         <!-- Danh sách đơn hàng -->
     @if ($orders->count() > 0)
         <div class="space-y-4">
@@ -117,11 +165,16 @@
                                 {{ number_format($order->tong_thanh_toan ?? $order->tong_tien_hang, 0, ',', '.') }} ₫
                             </p>
                             <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full
-                                @if ($order->trang_thai_don_hang === 'hoan_thanh') bg-green-100 text-green-700
+                                @if ($order->trang_thai_thanh_toan === 'da_thanh_toan') bg-blue-100 text-blue-700
+                                @elseif ($order->trang_thai_don_hang === 'hoan_thanh') bg-green-100 text-green-700
                                 @elseif ($order->trang_thai_don_hang === 'cho_xu_ly') bg-blue-100 text-blue-700
+                                @elseif ($order->trang_thai_don_hang === 'cho_giao_hang') bg-indigo-100 text-indigo-700
                                 @elseif ($order->trang_thai_don_hang === 'da_huy') bg-red-100 text-red-700
                                 @else bg-yellow-100 text-yellow-700 @endif
                             ">
+                                @if ($order->trang_thai_thanh_toan === 'da_thanh_toan')
+                                    <i class="fa-solid fa-hourglass-half mr-1"></i>Chờ xử lý
+                                @else
                                 @switch($order->trang_thai_don_hang)
                                     @case('hoan_thanh')
                                         <i class="fa-solid fa-check-circle mr-1"></i>Hoàn thành
@@ -132,12 +185,16 @@
                                     @case('dang_giao')
                                         <i class="fa-solid fa-truck mr-1"></i>Đang giao
                                     @break
+                                    @case('cho_giao_hang')
+                                        <i class="fa-solid fa-box-open mr-1"></i>Chờ giao hàng
+                                    @break
                                     @case('da_huy')
                                         <i class="fa-solid fa-times-circle mr-1"></i>Đã hủy
                                     @break
                                     @default
                                         <i class="fa-solid fa-info-circle mr-1"></i>Chờ xử lý
                                 @endswitch
+                                @endif
                             </span>
                         </div>
                     </div>
@@ -160,6 +217,30 @@
                         </div>
                     </div>
 
+                    <!-- Sản phẩm trong đơn hàng -->
+                    @if ($order->chiTietDonHangs->isNotEmpty())
+                        <div class="mb-4 rounded border border-gray-200 bg-white p-4">
+                            <p class="mb-3 text-sm font-semibold text-gray-500">Sản phẩm đã đặt</p>
+                            <div class="space-y-3">
+                                @foreach ($order->chiTietDonHangs as $item)
+                                    @if ($item->sanPham)
+                                        <div class="flex items-center gap-3">
+                                            <img src="{{ $item->sanPham->image_url }}" alt="{{ $item->sanPham->ten_san_pham }}" class="h-16 w-16 rounded border border-gray-200 bg-gray-50 object-contain p-1">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate text-sm font-semibold text-gray-800">{{ $item->sanPham->ten_san_pham }}</p>
+                                                <p class="mt-1 text-xs text-gray-500">
+                                                    Size: {{ $item->bienThe->size ?? 'Không có' }}
+                                                    <span class="mx-1">|</span>
+                                                    Số lượng: {{ $item->so_luong }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Thông tin thanh toán -->
                     <div class="border-t pt-4">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -176,7 +257,7 @@
                                 <p class="text-gray-800">
                                     @if ($order->phuong_thuc_thanh_toan === 'VietQR')
                                         <i class="fa-solid fa-qrcode mr-1"></i>VietQR
-                                    @elseif ($order->phuong_thuc_thanh_toan === 'cod')
+                                    @elseif (in_array($order->phuong_thuc_thanh_toan, ['cod', 'CashOnDelivery', 'cash_on_delivery'], true))
                                         <i class="fa-solid fa-money-bill mr-1"></i>Thanh toán khi nhận hàng
                                     @elseif ($order->phuong_thuc_thanh_toan === 'transfer')
                                         <i class="fa-solid fa-bank mr-1"></i>Chuyển khoản ngân hàng
@@ -193,7 +274,7 @@
                         </div>
                     </div>
 
-                    @if ($order->phuong_thuc_thanh_toan === 'VietQR' && $order->trang_thai_thanh_toan !== 'da_thanh_toan' && $order->qr_expires_at && $order->qr_expires_at->isFuture() && config('services.sepay.bank_code') && config('services.sepay.account_number'))
+                    @if ($order->trang_thai_don_hang !== 'da_huy' && $order->phuong_thuc_thanh_toan === 'VietQR' && $order->trang_thai_thanh_toan !== 'da_thanh_toan' && $order->qr_expires_at && $order->qr_expires_at->isFuture() && config('services.sepay.bank_code') && config('services.sepay.account_number'))
                         @php
                             $qrInfo = urlencode($order->ma_don_hang ?? 'DH' . $order->id);
                             $qrAccountName = urlencode(config('services.sepay.account_name', ''));
@@ -208,8 +289,8 @@
                                 <p class="mt-1 text-xs text-gray-500">Hệ thống sẽ tự cập nhật khi SePay nhận được giao dịch.</p>
                             </div>
                         </div>
-                    @elseif ($order->phuong_thuc_thanh_toan === 'VietQR')
-                        <div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                    @elseif ($order->trang_thai_don_hang !== 'da_huy' && $order->phuong_thuc_thanh_toan === 'VietQR')
+                        <div class="mt-4 rounded-lg border p-4 text-sm {{ $order->trang_thai_thanh_toan === 'da_thanh_toan' ? 'border-green-200 bg-green-50 text-green-800' : 'border-yellow-200 bg-yellow-50 text-yellow-800' }}">
                             Trạng thái thanh toán: {{ $order->trang_thai_thanh_toan === 'da_thanh_toan' ? 'Đã thanh toán' : 'Chờ thanh toán' }}.
                         </div>
                     @endif
@@ -219,7 +300,44 @@
                         <a href="{{ route('san-pham.chi-tiet', 1) }}" class="text-orange-500 hover:text-orange-600 font-semibold text-sm">
                             <i class="fa-solid fa-eye mr-1"></i>Xem chi tiết
                         </a>
+                        @if ($order->trang_thai_don_hang === 'cho_xu_ly')
+                            <button type="button" onclick="openCancelModal('cancel-modal-{{ $order->id }}')" class="ml-auto rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100">
+                                <i class="fa-solid fa-ban mr-1"></i>Hủy đơn hàng
+                            </button>
+                        @elseif ($order->trang_thai_don_hang === 'da_huy' && $order->ly_do_huy)
+                            <p class="ml-auto text-sm text-red-600"><span class="font-semibold">Lý do hủy:</span> {{ $order->ly_do_huy }}</p>
+                        @endif
                     </div>
+
+                    @if ($order->trang_thai_don_hang === 'cho_xu_ly')
+                        <div id="cancel-modal-{{ $order->id }}" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-labelledby="cancel-title-{{ $order->id }}">
+                            <div class="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl">
+                                <div class="mb-5 flex items-center justify-between">
+                                    <h2 id="cancel-title-{{ $order->id }}" class="text-xl font-semibold text-gray-800">Lý do hủy đơn</h2>
+                                    <button type="button" onclick="closeCancelModal('cancel-modal-{{ $order->id }}')" class="text-2xl leading-none text-gray-400 hover:text-gray-700" aria-label="Đóng">&times;</button>
+                                </div>
+                                <div class="mb-5 rounded border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-gray-700">
+                                    <i class="fa-solid fa-circle-info mr-2 text-orange-500"></i>
+                                    Bạn có thể cập nhật thông tin nhận hàng hoặc thay đổi đơn thay vì hủy. Hãy chọn lý do phù hợp nhé!
+                                </div>
+                                <form action="{{ route('account.orders.cancel', $order->id) }}" method="POST" onsubmit="return confirmCancel(this)">
+                                    @csrf
+                                    <div class="space-y-4">
+                                        @foreach($cancelReasons as $reason)
+                                            <label class="flex cursor-pointer items-start gap-3 text-base text-gray-700">
+                                                <input type="radio" name="ly_do_huy" value="{{ $reason }}" class="cancel-reason mt-1 h-5 w-5 accent-orange-500" required>
+                                                <span>{{ $reason }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-7 flex justify-end gap-3">
+                                        <button type="button" onclick="closeCancelModal('cancel-modal-{{ $order->id }}')" class="rounded-md px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100">Không phải bây giờ</button>
+                                        <button type="submit" class="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Hủy đơn hàng</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>
@@ -285,6 +403,24 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        function openCancelModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCancelModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmCancel(form) {
+            return window.confirm('Bạn có chắc muốn hủy đơn hàng này không?');
+        }
+    </script>
 
 </body>
 </html>

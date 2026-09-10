@@ -180,6 +180,7 @@
                             {{ $sp->ten_san_pham }}
                         </h3>
                     </a>
+                    
                     <div class="flex items-center justify-between mt-2">
                         <p class="text-sm font-bold text-orange-500">
                             {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ

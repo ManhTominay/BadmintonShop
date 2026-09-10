@@ -65,7 +65,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::redirect('/home', '/');
 Route::get('/vot-cau-long', [ClientProductController::class, 'votCauLong'])->name('vot-cau-long');
 Route::get('/giay-cau-long', [ClientProductController::class, 'giayCauLong'])->name('giay.index');
-Route::get('/quan-ao', [ClientProductController::class, 'quanAo'])->name('quan-ao');
+Route::get('/quan-ao', [App\Http\Controllers\ProductController::class, 'quanAo'])->name('quan-ao');
 Route::get('/cau', [CauController::class, 'index'])->name('cau');
 Route::get('/phu-kien', [PhuKienController::class, 'index'])->name('phukien');
 

@@ -9,10 +9,34 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = SanPham::orderBy('id', 'desc')->paginate(10);
-        return view('admin.products.index', compact('products'));
+        $categoryIds = [
+            'vot' => 1,
+            'giay' => 2,
+            'cau' => 3,
+            'quan-ao' => 4,
+            'phu-kien' => 5,
+        ];
+
+        $category = $request->input('category', 'all');
+        $search = trim((string) $request->input('search', ''));
+
+        $query = SanPham::query();
+
+        if (isset($categoryIds[$category])) {
+            $query->where('danh_muc_id', $categoryIds[$category]);
+        }
+
+        if ($search !== '') {
+            $query->where('ten_san_pham', 'like', '%' . $search . '%');
+        }
+
+        $products = $query->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.products.index', compact('products', 'category', 'search'));
     }
 
     public function create()

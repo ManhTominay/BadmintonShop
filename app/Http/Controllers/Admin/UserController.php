@@ -8,10 +8,28 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('id', 'desc')->paginate(10);
-        return view('admin.users.index', compact('users'));
+        $search = trim((string) $request->input('search', ''));
+        $query = User::query();
+
+        if ($search !== '') {
+            $query->where(function ($userQuery) use ($search) {
+                $userQuery->where('ho_ten', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('so_dien_thoai', 'like', '%' . $search . '%');
+
+                if (ctype_digit($search)) {
+                    $userQuery->orWhere('id', (int) $search);
+                }
+            });
+        }
+
+        $users = $query->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.users.index', compact('users', 'search'));
     }
 
     // Chức năng khóa hoặc mở khóa tài khoản

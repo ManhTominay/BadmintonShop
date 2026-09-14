@@ -15,11 +15,11 @@
 <body class="bg-gray-100 flex h-screen overflow-hidden">
 
     <!-- SIDEBAR -->
-    <div class="w-64 bg-[#0f172a] text-white flex flex-col justify-between shrink-0">
+    <div class="w-64 bg-[#0b0b0b] text-white flex flex-col justify-between shrink-0">
 
         <div>
 
-            <div class="p-5 border-b border-gray-800">
+            <div class="p-5 border-b border-orange-900/40">
                 <h1 class="text-lg font-bold tracking-wider">
                     BADMINTON ADMIN
                 </h1>
@@ -29,57 +29,15 @@
                 </p>
             </div>
 
-            <nav class="p-4 space-y-1">
-
-                <a
-                    href="{{ url('/admin/dashboard') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white text-sm font-medium"
-                >
-                    <i class="fa-solid fa-chart-pie w-5"></i>
-                    Báo cáo thống kê
-                </a>
-
-                <a
-                    href="{{ route('admin.products.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white text-sm font-medium"
-                >
-                    <i class="fa-solid fa-box w-5"></i>
-                    Quản lý sản phẩm
-                </a>
-
-                <a
-                    href="{{ route('admin.orders.index') }}#orders"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-600 text-white text-sm font-medium shadow-lg"
-                >
-                    <i class="fa-solid fa-shopping-cart w-5"></i>
-                    Quản lý đơn hàng
-                </a>
-
-                <a
-                    href="{{ route('admin.vouchers.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.vouchers*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}"
-                >
-                    <i class="fa-solid fa-ticket w-5"></i>
-                    Quản lý voucher
-                </a>
-
-                <a
-                    href="{{ url('/admin/users') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white text-sm font-medium"
-                >
-                    <i class="fa-solid fa-users w-5"></i>
-                    Quản lý tài khoản
-                </a>
-
-            </nav>
+            @include('admin.layouts.sidebar')
         </div>
 
-        <div class="p-4 border-t border-gray-800 space-y-2">
+        <div class="p-4 border-t border-orange-900/40 space-y-2">
 
             <a
                 href="{{ url('/') }}"
                 target="_blank"
-                class="flex items-center gap-2 text-xs text-gray-400 hover:text-white"
+                class="flex items-center gap-2 text-xs text-orange-200/70 hover:text-orange-100"
             >
                 <i class="fa-solid fa-globe"></i>
                 Xem website chính
@@ -90,7 +48,7 @@
 
                 <button
                     type="submit"
-                    class="w-full flex items-center gap-2 px-3 py-2 bg-red-900/40 text-red-400 rounded hover:bg-red-900/60 text-xs font-medium"
+                    class="w-full flex items-center gap-2 px-3 py-2 bg-orange-950/70 text-orange-300 rounded hover:bg-orange-900/80 hover:text-orange-100 text-xs font-medium"
                 >
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Đăng xuất Admin

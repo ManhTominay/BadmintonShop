@@ -99,14 +99,43 @@ class AccountController extends Controller
             return back()->withErrors(['order' => 'Chỉ có thể hủy đơn hàng đang chờ xử lý.']);
         }
 
+        $wasPaid = $order->trang_thai_thanh_toan === 'da_thanh_toan';
+
         DB::transaction(function () use ($order, $validated) {
             $order->update([
-                'trang_thai_don_hang' => 'da_huy',
+                'trang_thai_don_hang' => $order->trang_thai_thanh_toan === 'da_thanh_toan'
+                    ? 'tra_hang'
+                    : 'da_huy',
                 'ly_do_huy' => $validated['ly_do_huy'],
             ]);
         });
 
-        return redirect()->route('account.orders')->with('success', 'Đã hủy đơn hàng thành công.');
+        $message = $wasPaid
+            ? 'Đã hủy đơn hàng. Đơn hàng đã được chuyển sang mục Trả hàng/Hoàn tiền.'
+            : 'Đã hủy đơn hàng thành công.';
+
+        return redirect()->route('account.orders', [
+            'status' => $wasPaid ? 'tra_hang' : 'da_huy',
+        ])->with('success', $message);
+    }
+
+    /**
+     * Confirm that the authenticated user received an order.
+     */
+    public function confirmOrderReceived($id)
+    {
+        $order = DonHang::where('nguoi_dung_id', Auth::id())->findOrFail($id);
+
+        if (!in_array($order->trang_thai_don_hang, ['cho_giao_hang', 'dang_giao'], true)) {
+            return back()->withErrors(['order' => 'Chỉ có thể xác nhận khi đơn hàng đang được giao.']);
+        }
+
+        $order->update([
+            'trang_thai_don_hang' => 'hoan_thanh',
+        ]);
+
+        return redirect()->route('account.orders', ['status' => 'hoan_thanh'])
+            ->with('success', 'Đã xác nhận nhận hàng thành công.');
     }
 
     /**

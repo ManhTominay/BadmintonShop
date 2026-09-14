@@ -172,7 +172,9 @@
                                 @elseif ($order->trang_thai_don_hang === 'da_huy') bg-red-100 text-red-700
                                 @else bg-yellow-100 text-yellow-700 @endif
                             ">
-                                @if ($order->trang_thai_thanh_toan === 'da_thanh_toan')
+                                @if ($order->trang_thai_don_hang === 'tra_hang')
+                                    <i class="fa-solid fa-money-bill-transfer mr-1"></i>Chờ hoàn tiền
+                                @elseif ($order->trang_thai_thanh_toan === 'da_thanh_toan')
                                     <i class="fa-solid fa-hourglass-half mr-1"></i>Chờ xử lý
                                 @else
                                 @switch($order->trang_thai_don_hang)
@@ -190,6 +192,9 @@
                                     @break
                                     @case('da_huy')
                                         <i class="fa-solid fa-times-circle mr-1"></i>Đã hủy
+                                    @break
+                                    @case('tra_hang')
+                                        <i class="fa-solid fa-money-bill-transfer mr-1"></i>Chờ hoàn tiền
                                     @break
                                     @default
                                         <i class="fa-solid fa-info-circle mr-1"></i>Chờ xử lý
@@ -297,15 +302,33 @@
 
                     <!-- Nút hành động -->
                     <div class="mt-4 flex gap-2">
-                        <a href="{{ route('san-pham.chi-tiet', 1) }}" class="text-orange-500 hover:text-orange-600 font-semibold text-sm">
-                            <i class="fa-solid fa-eye mr-1"></i>Xem chi tiết
-                        </a>
-                        @if ($order->trang_thai_don_hang === 'cho_xu_ly')
+                        @php($purchasedProduct = $order->chiTietDonHangs->first()?->sanPham)
+                        @if ($purchasedProduct)
+                            <a href="{{ route('san-pham.chi-tiet', $purchasedProduct->slug ?? $purchasedProduct->id) }}" class="text-orange-500 hover:text-orange-600 font-semibold text-sm">
+                                <i class="fa-solid fa-eye mr-1"></i>Xem chi tiết
+                            </a>
+                        @else
+                            <span class="text-sm font-semibold text-gray-400">
+                                <i class="fa-solid fa-eye mr-1"></i>Không còn sản phẩm
+                            </span>
+                        @endif
+                        @if (in_array($order->trang_thai_don_hang, ['cho_giao_hang', 'dang_giao'], true))
+                            <form action="{{ route('account.orders.confirm-received', $order->id) }}" method="POST" class="ml-auto" onsubmit="return confirm('Bạn xác nhận đã nhận được đơn hàng này?')">
+                                @csrf
+                                <button type="submit" class="rounded-md bg-green-50 px-3 py-2 text-sm font-semibold text-green-600 hover:bg-green-100">
+                                    <i class="fa-solid fa-check mr-1"></i>Đã nhận hàng
+                                </button>
+                            </form>
+                        @elseif ($order->trang_thai_don_hang === 'cho_xu_ly')
                             <button type="button" onclick="openCancelModal('cancel-modal-{{ $order->id }}')" class="ml-auto rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100">
                                 <i class="fa-solid fa-ban mr-1"></i>Hủy đơn hàng
                             </button>
                         @elseif ($order->trang_thai_don_hang === 'da_huy' && $order->ly_do_huy)
                             <p class="ml-auto text-sm text-red-600"><span class="font-semibold">Lý do hủy:</span> {{ $order->ly_do_huy }}</p>
+                        @elseif ($order->trang_thai_don_hang === 'hoan_thanh')
+                            <span class="ml-auto text-sm font-semibold text-green-600">
+                                <i class="fa-solid fa-circle-check mr-1"></i>Đã xác nhận nhận hàng
+                            </span>
                         @endif
                     </div>
 

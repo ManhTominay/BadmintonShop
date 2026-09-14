@@ -137,6 +137,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/tai-khoan/mat-khau', [App\Http\Controllers\AccountController::class, 'updatePassword'])->name('account.update-password');
     Route::get('/don-hang', [App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
     Route::post('/don-hang/{id}/huy', [App\Http\Controllers\AccountController::class, 'cancelOrder'])->name('account.orders.cancel');
+    Route::post('/don-hang/{id}/da-nhan-hang', [App\Http\Controllers\AccountController::class, 'confirmOrderReceived'])->name('account.orders.confirm-received');
     Route::get('/tai-khoan/dia-chi', [App\Http\Controllers\AccountController::class, 'addresses'])->name('account.addresses');
     Route::post('/tai-khoan/dia-chi/mac-dinh/{id}', [App\Http\Controllers\AccountController::class, 'setDefaultAddress'])->name('account.addresses.default');
 

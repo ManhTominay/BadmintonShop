@@ -101,7 +101,7 @@ class OrderController extends Controller
         $order = DonHang::findOrFail($id);
         
         $request->validate([
-            'trang_thai' => 'required|in:cho_xu_ly,dang_giao,cho_giao_hang,hoan_thanh,da_huy,tra_hang,hoan_tien'
+            'trang_thai' => 'required|in:cho_xu_ly,dang_giao,cho_giao_hang,da_huy,tra_hang,hoan_tien'
         ]);
 
         $order->update([

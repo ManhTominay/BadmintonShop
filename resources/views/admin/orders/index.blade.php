@@ -978,14 +978,7 @@
 
                                     <td class="p-4 text-center">
                                         @if($order->trang_thai_don_hang === 'cho_xu_ly')
-                                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="trang_thai" value="dang_giao">
-                                                <button type="submit" class="font-medium text-orange-600 hover:text-orange-800">
-                                                    <i class="fa-solid fa-check mr-1"></i>Xác nhận đơn
-                                                </button>
-                                            </form>
+                                            <span class="text-gray-400">Đang chờ xử lý</span>
                                         @elseif($order->trang_thai_don_hang === 'dang_giao')
                                             <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
                                                 @csrf
@@ -996,14 +989,9 @@
                                                 </button>
                                             </form>
                                         @elseif($order->trang_thai_don_hang === 'cho_giao_hang')
-                                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="trang_thai" value="hoan_thanh">
-                                                <button type="submit" class="font-medium text-green-600 hover:text-green-800">
-                                                    <i class="fa-solid fa-check-double mr-1"></i>Hoàn thành
-                                                </button>
-                                            </form>
+                                            <span class="font-medium text-blue-600">
+                                                <i class="fa-solid fa-truck mr-1"></i>Chờ khách xác nhận
+                                            </span>
                                         @else
                                             <span class="text-gray-400">Đã xử lý</span>
                                         @endif

@@ -166,15 +166,6 @@
                             <img src="{{ asset('images/yonex_doura10.webp') }}" alt="{{ $item->ten_san_pham }}" class="h-full object-contain group-hover:scale-105 transition-transform duration-300">
                         @endif
                     </a>
-<<<<<<< HEAD
-                    <div class="flex items-center justify-between gap-2 mt-2">
-                        <p class="text-xs font-bold text-orange-500">{{ number_format($item->gia_co_ban, 0, ',', '.') }} VNĐ</p>
-                        @if(($item->so_luong ?? 0) > 0)
-                            <p class="text-xs font-bold text-green-600 text-right">Còn hàng ({{ $item->so_luong }})</p>
-                        @else
-                            <p class="text-xs font-bold text-red-500 text-right">Hết hàng</p>
-                        @endif
-=======
 
                     <!-- Nút XEM CHI TIẾT -->
                     <a href="{{ route('san-pham.chi-tiet', $item->slug ?? $item->id) }}" 
@@ -213,7 +204,6 @@
                                 </span>
                             @endif
                         </div>
->>>>>>> Manh
                     </div>
                 </div>
             </div>

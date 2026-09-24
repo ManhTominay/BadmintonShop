@@ -133,23 +133,22 @@
                 </form>
             </div>
 
-            <!-- Dòng 2: Bộ lọc Thương hiệu -->
-            <div class="flex items-center space-x-2 text-xs flex-wrap gap-y-2">
-                <span class="text-gray-700 font-bold mr-2">Thương hiệu:</span>
-                <a href="{{ url('/quan-ao', ['keyword' => 'Yonex']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Yonex</a>
-                <a href="{{ url('/quan-ao', ['keyword' => 'Lining']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Lining</a>
-                <a href="{{ url('/quan-ao', ['keyword' => 'Victor']) }}" class="px-3 py-1 bg-white border border-gray-200 rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('keyword') == 'Victor' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'text-gray-700' }}">Victor</a>
-                @if(request('keyword'))
-                    <a href="{{ url('/quan-ao') }}" class="text-red-500 hover:underline ml-2 font-medium">Xóa lọc</a>
+            <div class="flex items-center gap-2 text-xs flex-wrap">
+                <span class="text-gray-700 font-bold mr-1">Thương hiệu:</span>
+                <a href="{{ url('/quan-ao?brand=Yonex') }}" class="px-3 py-1.5 bg-white border rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('brand') == 'Yonex' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'border-gray-200 text-gray-700' }}">Yonex</a>
+                <a href="{{ url('/quan-ao?brand=Lining') }}" class="px-3 py-1.5 bg-white border rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('brand') == 'Lining' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'border-gray-200 text-gray-700' }}">Lining</a>
+                <a href="{{ url('/quan-ao?brand=Victor') }}" class="px-3 py-1.5 bg-white border rounded-full hover:border-orange-500 hover:text-orange-500 transition shadow-sm {{ request('brand') == 'Victor' ? 'border-orange-500 text-orange-600 font-bold bg-orange-50' : 'border-gray-200 text-gray-700' }}">Victor</a>
+                @if(request('keyword') || request('brand'))
+                    <a href="{{ url('/quan-ao') }}" class="text-red-500 hover:underline ml-1 font-medium">Xóa lọc</a>
                 @endif
             </div>
         </div>
 
         <!-- Grid Danh sách Quần Áo -->
         @if(isset($danhSachQuanAo) && $danhSachQuanAo->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
                 @foreach($danhSachQuanAo as $sp)
-                <div class="group bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:border-orange-500 hover:shadow-lg transition-all duration-300">
+                <div class="group bg-white rounded-xl p-4 border border-gray-100 flex flex-col justify-between min-w-0 hover:border-orange-500 hover:shadow-lg transition-all duration-300">
                     <div>
                         <!-- Khung ảnh sản phẩm -->
                         <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" class="block h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-3 p-2 overflow-hidden">
@@ -177,22 +176,15 @@
                         </a>
                         
                         <!-- Giá tiền và trạng thái -->
-                        <div class="flex items-center justify-between mt-2">
+                        <div class="flex items-center justify-between gap-2 mt-2 min-h-10">
                             <p class="text-sm font-bold text-orange-500">
                                 {{ number_format($sp->gia_co_ban, 0, ',', '.') }} VNĐ
                             </p>
-
-                            <div>
-                                @if(($sp->so_luong ?? 0) > 0)
-                                    <span class="inline-block text-[11px] font-bold text-green-600">
-                                        Còn hàng ({{ $sp->so_luong }})
-                                    </span>
-                                @else
-                                    <span class="inline-block text-[11px] font-bold text-red-500">
-                                        Hết hàng
-                                    </span>
-                                @endif
-                            </div>
+                            @if(($sp->so_luong ?? 0) > 0)
+                                <span class="text-[11px] font-bold text-green-600 text-right">Còn hàng ({{ $sp->so_luong }})</span>
+                            @else
+                                <span class="text-[11px] font-bold text-red-500 text-right">Hết hàng</span>
+                            @endif
                         </div>
                     </div>
 

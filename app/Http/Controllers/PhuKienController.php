@@ -51,7 +51,10 @@ class PhuKienController extends Controller
                     $query->where(function($q) {
                         $q->where('ten_san_pham', 'LIKE', '%Tất%')
                           ->orWhere('ten_san_pham', 'LIKE', '%Vớ%');
-                    });
+                                        })->where(function($q) {
+                                                $q->where('ten_san_pham', 'NOT LIKE', '%Bao%')
+                                                    ->where('ten_san_pham', 'NOT LIKE', '%Vợt%');
+                                        });
                     break;
             }
         }

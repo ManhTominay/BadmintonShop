@@ -66,6 +66,11 @@ class SanPham extends Model
         return $this->hasMany(BienTheSanPham::class, 'san_pham_id');
     }
 
+    public function thuongHieu()
+    {
+        return $this->belongsTo(ThuongHieu::class, 'thuong_hieu_id');
+    }
+
     /**
      * Mối quan hệ 1-1 với thông số kỹ thuật của vợt
      */

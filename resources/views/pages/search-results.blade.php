@@ -103,16 +103,7 @@
             <h1 class="text-base font-extrabold uppercase text-slate-900 mb-2">
                 Kết quả tìm kiếm cho từ khóa: <span class="text-orange-500">"{{ $keyword ?? 'Tất cả' }}"</span>
             </h1>
-            <p class="text-xs text-gray-500 mb-4">Tìm thấy <strong class="text-slate-800">{{ isset($sanPhams) ? count($sanPhams) : 0 }}</strong> sản phẩm phù hợp trên hệ thống.</p>
-            
-            <!-- Gợi ý nhanh -->
-            <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="font-bold text-gray-600 mr-2">Từ khóa phổ biến:</span>
-                <a href="{{ url('/tim-kiem?keyword=lining') }}" class="px-3 py-1 bg-gray-100 hover:bg-orange-500 hover:text-white rounded-full transition font-medium">Lining</a>
-                <a href="{{ url('/tim-kiem?keyword=yonex') }}" class="px-3 py-1 bg-gray-100 hover:bg-orange-500 hover:text-white rounded-full transition font-medium">Yonex</a>
-                <a href="{{ url('/tim-kiem?keyword=victor') }}" class="px-3 py-1 bg-gray-100 hover:bg-orange-500 hover:text-white rounded-full transition font-medium">Victor</a>
-                <a href="{{ url('/tim-kiem?keyword=giay') }}" class="px-3 py-1 bg-gray-100 hover:bg-orange-500 hover:text-white rounded-full transition font-medium">Giày</a>
-            </div>
+            <p class="text-xs text-gray-500">Tìm thấy <strong class="text-slate-800">{{ isset($sanPhams) ? count($sanPhams) : 0 }}</strong> sản phẩm phù hợp trên hệ thống.</p>
         </div>
 
         <!-- Lưới hiển thị sản phẩm -->
@@ -127,6 +118,12 @@
                                 $imageName = \App\Models\SanPham::resolveImageName($sp->anh_dai_dien ?? null);
                             @endphp
                             <img src="{{ asset('images/' . $imageName) }}" alt="{{ $sp->ten_san_pham }}" class="h-full object-contain hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='{{ asset('images/yonex_doura10.webp') }}';">
+                        </a>
+
+                        <!-- NÚT XEM CHI TIẾT ĐÃ ĐƯỢC THÊM VÀO -->
+                        <a href="{{ route('san-pham.chi-tiet', $sp->slug ?? $sp->id) }}" 
+                           class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center font-bold text-xs uppercase py-2.5 rounded-lg transition-colors shadow mb-3">
+                            XEM CHI TIẾT
                         </a>
 
                         <!-- Tên sản phẩm có link chi tiết -->
@@ -157,7 +154,6 @@
                             @endif
                         </div>
                     </div>
-                    
                 </div>
                 @endforeach
             </div>

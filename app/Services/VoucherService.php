@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\MaGiamGia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class VoucherService
 {
     public const DISCOUNT50 = 'DISCOUNT50';
+    public const FIRST20 = 'FIRST20';
 
     public static function definitions(): array
     {
@@ -19,6 +21,8 @@ class VoucherService
                 'min_amount' => (float) $voucher->don_hang_toi_thieu,
                 'max_discount' => (float) $voucher->giam_toi_da,
                 'max_uses' => (int) $voucher->so_luong_dung,
+                'is_default' => $voucher->ma_code === self::FIRST20,
+                'default_badge' => $voucher->ma_code === self::FIRST20 ? 'Mặc định' : null,
             ]];
         })->all();
     }
@@ -68,7 +72,26 @@ class VoucherService
             ]
         );
 
+        self::grantFirstPurchaseVoucher();
         self::setState($state);
+    }
+
+    public static function grantFirstPurchaseVoucher(): void
+    {
+        MaGiamGia::updateOrCreate(
+            ['ma_code' => self::FIRST20],
+            [
+                'loai_giam_gia' => 'percent',
+                'gia_tri_giam' => 20,
+                'don_hang_toi_thieu' => 0,
+                'giam_toi_da' => 200000,
+                'so_luong_dung' => 1,
+                'ngay_bat_dau' => now(),
+                'ngay_ket_thuc' => now()->addDays(30),
+                'trang_thai' => 'active',
+                'trang_thai_kich_hoat' => true,
+            ]
+        );
     }
 
     public static function normalizeState(array $state): array
@@ -131,6 +154,7 @@ class VoucherService
                 'remaining_uses' => 0,
                 'label' => 'Không khả dụng',
                 'expired' => true,
+                'is_default' => $code === self::FIRST20,
             ];
         }
 
@@ -139,6 +163,15 @@ class VoucherService
         $expired = ($voucher && $voucher->isExpired())
             || ($expiresAt && Carbon::now()->greaterThan(Carbon::parse($expiresAt)));
         $scheduled = !$voucher || $voucher->isCurrentlyActive();
+
+        $user = Auth::user();
+        $isFirstPurchase = $user ? !\App\Models\DonHang::where('nguoi_dung_id', $user->id)->exists() : false;
+        $isDefaultVoucher = $code === self::FIRST20 && $isFirstPurchase;
+
+        if ($code === self::FIRST20) {
+            $scheduled = $scheduled && $isFirstPurchase;
+            $remainingUses = $isFirstPurchase ? max(1, $remainingUses) : 0;
+        }
 
         return [
             'enabled' => $scheduled && !$expired && $remainingUses > 0,
@@ -150,6 +183,7 @@ class VoucherService
             'max_discount' => $definition['max_discount'],
             'expired' => $expired,
             'code' => $code,
+            'is_default' => $isDefaultVoucher,
         ];
     }
 

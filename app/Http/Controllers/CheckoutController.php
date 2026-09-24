@@ -331,6 +331,8 @@ class CheckoutController extends Controller
             }
         }
 
+        VoucherService::grantFirstPurchaseVoucher();
+
         $shippingInfo = $this->calculateShippingFee($address?->lat, $address?->lng, $address?->tinh_thanh);
         $shippingFee = $shippingInfo['shipping_fee'];
         $distanceKm = $shippingInfo['distance_km'];

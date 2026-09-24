@@ -792,22 +792,43 @@
                                         <span id="voucher-dropdown-label">Chọn Voucher</span>
                                     </button>
                                     <div class="voucher-menu">
+                                        @php $defaultVoucherForUser = collect($voucherOptions)->first(fn ($option) => !empty($option['is_default'])); @endphp
+                                        @if($defaultVoucherForUser)
+                                            <div class="mb-2 flex items-center gap-2 border-b border-orange-200 pb-2 text-[11px] font-bold uppercase tracking-wide text-orange-600">
+                                                <span class="h-2 w-2 rounded-full bg-orange-500"></span>
+                                                Voucher dành cho khách hàng mới
+                                            </div>
+                                        @endif
+
                                         @foreach($voucherOptions as $code => $option)
-                                            <label class="voucher-option-label">
+                                            @php $remainingUses = (int) ($option['remaining_uses'] ?? 0); $isDefault = (bool) ($option['is_default'] ?? false); @endphp
+                                            <label class="voucher-option-label {{ $remainingUses <= 0 ? 'opacity-50' : '' }} {{ $isDefault ? 'border border-orange-300 bg-orange-50/60' : '' }}">
                                                 <input type="checkbox" class="voucher-option-checkbox" 
                                                        data-code="{{ $code }}"
                                                        data-label="{{ $option['label'] }}"
                                                        data-type="{{ $option['type'] }}"
                                                        data-value="{{ $option['value'] }}"
                                                        data-min-amount="{{ $option['min_amount'] }}"
-                                                       data-max-discount="{{ $option['max_discount'] }}">
+                                                       data-max-discount="{{ $option['max_discount'] }}"
+                                                       data-remaining-uses="{{ $remainingUses }}"
+                                                       {{ $remainingUses <= 0 ? 'disabled' : '' }}>
                                                 <span class="voucher-option-text">
-                                                    {{ $option['label'] }}
-                                                    @if($option['type'] === 'shipping')
-                                                        - Miễn phí ship
-                                                    @else
-                                                        - Giảm {{ $option['value'] }}%
-                                                    @endif
+                                                    <span class="flex items-center gap-2">
+                                                        <span class="block font-medium">{{ $option['label'] }}
+                                                            @if($option['type'] === 'shipping')
+                                                                - Miễn phí ship
+                                                            @else
+                                                                - Giảm {{ $option['value'] }}%
+                                                            @endif
+                                                        </span>
+                                                        @if($isDefault)
+                                                            <span class="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Mặc định</span>
+                                                            <span class="text-[10px] font-semibold text-orange-600">Voucher dành cho khách hàng mới</span>
+                                                        @endif
+                                                    </span>
+                                                    <span class="block text-xs text-gray-500 mt-0.5">
+                                                        Còn lại: {{ $remainingUses }} lượt
+                                                    </span>
                                                 </span>
                                             </label>
                                         @endforeach
@@ -1144,6 +1165,22 @@
                 }
             }
 
+            function getEffectiveVoucherCode() {
+                const selected = Object.values(selectedVouchers);
+                if (selected.length === 0) {
+                    return null;
+                }
+
+                const preferredOrder = ['percent', 'shipping'];
+                const sorted = [...selected].sort((a, b) => {
+                    const aPriority = preferredOrder.indexOf(a.type) === -1 ? Number.MAX_SAFE_INTEGER : preferredOrder.indexOf(a.type);
+                    const bPriority = preferredOrder.indexOf(b.type) === -1 ? Number.MAX_SAFE_INTEGER : preferredOrder.indexOf(b.type);
+                    return aPriority - bPriority;
+                });
+
+                return sorted[0]?.code || null;
+            }
+
             function calculateTotals() {
                 let shippingFee = selectedShippingFee;
                 let totalDiscount = 0;
@@ -1182,12 +1219,23 @@
             voucherCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     const code = this.dataset.code;
+                    const type = this.dataset.type;
                     
                     if (this.checked) {
+                        Object.keys(selectedVouchers).forEach(existingCode => {
+                            if (selectedVouchers[existingCode].type === type && existingCode !== code) {
+                                const existingCheckbox = document.querySelector(`input[data-code="${existingCode}"]`);
+                                if (existingCheckbox) {
+                                    existingCheckbox.checked = false;
+                                }
+                                delete selectedVouchers[existingCode];
+                            }
+                        });
+
                         selectedVouchers[code] = {
                             code: code,
                             label: this.dataset.label,
-                            type: this.dataset.type,
+                            type: type,
                             value: this.dataset.value,
                             minAmount: Number(this.dataset.minAmount || 0),
                             maxDiscount: Number(this.dataset.maxDiscount || 0)
@@ -1232,7 +1280,7 @@
                                 address_id: addressId,
                                 payment_method: paymentMethod,
                                 shipping_fee: shippingFeeEl.dataset.shipping,
-                                voucher_code: Object.keys(selectedVouchers)[0] || null
+                                voucher_code: getEffectiveVoucherCode()
                             }),
                             credentials: 'same-origin'
                         });

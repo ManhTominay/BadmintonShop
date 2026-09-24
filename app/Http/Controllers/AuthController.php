@@ -36,6 +36,8 @@ class AuthController extends Controller
                 return redirect()->intended('/admin/dashboard');
             }
 
+            VoucherService::grantFirstPurchaseVoucher();
+
             // Nếu là khách hàng bình thường thì về trang chủ
             return redirect()->intended('/');
         }
@@ -69,6 +71,7 @@ class AuthController extends Controller
         ]);
 
         VoucherService::grantWelcomeVoucher();
+        VoucherService::grantFirstPurchaseVoucher();
         Auth::login($user);
 
         return redirect('/');

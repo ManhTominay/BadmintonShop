@@ -60,7 +60,7 @@
                                 <i class="fa-solid fa-user-pen text-[11px]"></i> Chỉnh sửa tài khoản
                             </a>
                             <a href="{{ route('account.orders') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                                <i class="fa-solid fa-box-open text-[11px]"></i> Đơn hàng
+                                <i class="fa-solid fa-box-open text-[11px]"></i> Quản lý đơn hàng
                             </a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

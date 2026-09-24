@@ -17,7 +17,7 @@
     @endphp
 
     <main class="mx-auto max-w-lg rounded-2xl bg-white p-6 text-center shadow-sm">
-        <a href="{{ route('account.orders') }}" class="mb-5 inline-block text-sm font-semibold text-orange-600">&larr; Xem đơn hàng</a>
+        <a href="{{ route('account.orders') }}" class="mb-5 inline-block text-sm font-semibold text-orange-600">&larr; Quản lý đơn hàng</a>
         <h1 class="text-2xl font-bold">Quét mã VietQR để thanh toán</h1>
         <p class="mt-2 text-sm text-slate-500">Đơn hàng <strong>{{ $order->ma_don_hang }}</strong></p>
 

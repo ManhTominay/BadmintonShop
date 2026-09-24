@@ -61,9 +61,11 @@
                             <a href="{{ route('account.profile') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                                 <i class="fa-solid fa-user-pen text-[11px]"></i> Chỉnh sửa tài khoản
                             </a>
-                            <a href="{{ route('account.orders') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                                <i class="fa-solid fa-box-open text-[11px]"></i> Đơn hàng
-                            </a>
+                            @if(Auth::user()->vai_tro === 'nhan_vien')
+                                <a href="{{ route('employee.orders.index') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                    <i class="fa-solid fa-clipboard-list text-[11px]"></i> Quản lý
+                                </a>
+                            @endif
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-t border-gray-100">
@@ -535,6 +537,98 @@
             </div>
         </div>
     </footer>
+
+    @auth
+        @if(Auth::user()->vai_tro !== 'nhan_vien')
+            <div class="fixed bottom-5 right-5 z-50">
+                <button id="supportChatToggle" type="button" aria-label="Mở hỗ trợ khách hàng" class="w-14 h-14 rounded-full bg-orange-600 text-white shadow-lg hover:bg-orange-700 transition flex items-center justify-center">
+                    <i class="fa-solid fa-headset text-xl"></i>
+                </button>
+                <section id="supportChatBox" class="hidden absolute bottom-16 right-0 w-[min(360px,calc(100vw-2rem))] bg-white rounded-xl border border-gray-200 shadow-2xl overflow-hidden">
+                    <div class="bg-[#0f172a] text-white px-4 py-3 flex items-center justify-between">
+                        <div>
+                            <h2 class="font-semibold text-sm">Hỗ trợ khách hàng</h2>
+                            <p class="text-xs text-gray-300">Nhắn tin với nhân viên</p>
+                        </div>
+                        <button id="supportChatClose" type="button" aria-label="Đóng hỗ trợ" class="text-gray-300 hover:text-white">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div id="supportChatMessages" class="h-64 overflow-y-auto bg-gray-50 p-3 space-y-3" aria-live="polite">
+                        <p class="text-center text-xs text-gray-400">Đang tải cuộc trò chuyện...</p>
+                    </div>
+                    <form id="supportChatForm" class="p-3 border-t border-gray-200 flex items-center gap-2">
+                        @csrf
+                        <input id="supportChatInput" type="text" maxlength="1000" autocomplete="off" placeholder="Nhập tin nhắn..." class="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                        <button type="submit" aria-label="Gửi tin nhắn" class="w-9 h-9 shrink-0 rounded-lg bg-orange-600 text-white hover:bg-orange-700">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </form>
+                </section>
+            </div>
+            <script>
+                (() => {
+                    const toggle = document.getElementById('supportChatToggle');
+                    const close = document.getElementById('supportChatClose');
+                    const box = document.getElementById('supportChatBox');
+                    const form = document.getElementById('supportChatForm');
+                    const input = document.getElementById('supportChatInput');
+                    const messages = document.getElementById('supportChatMessages');
+                    const csrf = '{{ csrf_token() }}';
+
+                    const renderMessages = (items) => {
+                        messages.innerHTML = '';
+                        if (!items.length) {
+                            messages.innerHTML = '<p class="text-center text-xs text-gray-400">Hãy gửi tin nhắn để được hỗ trợ.</p>';
+                            return;
+                        }
+                        items.forEach((item) => {
+                            const mine = item.sender_role === 'khach_hang';
+                            const wrapper = document.createElement('div');
+                            wrapper.className = mine ? 'flex justify-end' : 'flex justify-start';
+                            const bubble = document.createElement('div');
+                            bubble.className = `max-w-[82%] rounded-lg px-3 py-2 text-sm ${mine ? 'rounded-tr-none bg-orange-600 text-white' : 'rounded-tl-none bg-white border border-gray-200 text-gray-700'}`;
+                            bubble.textContent = item.message;
+                            wrapper.appendChild(bubble);
+                            messages.appendChild(wrapper);
+                        });
+                        messages.scrollTop = messages.scrollHeight;
+                    };
+
+                    const loadMessages = () => fetch('{{ route('support.messages') }}', { headers: { Accept: 'application/json' } })
+                        .then((response) => response.json())
+                        .then(renderMessages)
+                        .catch(() => { messages.innerHTML = '<p class="text-center text-xs text-red-500">Không thể tải tin nhắn.</p>'; });
+
+                    toggle.addEventListener('click', () => {
+                        box.classList.toggle('hidden');
+                        if (!box.classList.contains('hidden')) {
+                            input.focus();
+                            loadMessages();
+                        }
+                    });
+                    close.addEventListener('click', () => box.classList.add('hidden'));
+                    form.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        const message = input.value.trim();
+                        if (!message) return;
+                        fetch('{{ route('support.send-user') }}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf },
+                            body: JSON.stringify({ message })
+                        }).then((response) => {
+                            if (!response.ok) throw new Error();
+                            input.value = '';
+                            return loadMessages();
+                        });
+                    });
+                    setInterval(() => {
+                        if (!box.classList.contains('hidden')) loadMessages();
+                    }, 5000);
+                })();
+            </script>
+        @endif
+    @endauth
 
     <script>
         // Update cart count on page load to reflect items added on other pages

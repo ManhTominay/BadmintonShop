@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -24,25 +26,39 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // Cần truyền 'password' cho Auth::attempt để Laravel tự gọi hàm getAuthPassword() trong Model User
-        if (Auth::attempt([
-            'email' => $credentials['email'],
-            'password' => $credentials['password'],
-        ])) {
-            $request->session()->regenerate();
+        $user = User::where('email', $credentials['email'])->first();
 
-            // KIỂM TRA QUYỀN: Nếu là admin thì chuyển hướng thẳng vào dashboard
-            if (Auth::user()->vai_tro === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            }
-
-            // Nếu là khách hàng bình thường thì về trang chủ
-            return redirect()->intended('/');
+        // Debug trực tiếp xem hệ thống đang đọc được gì từ database
+        if (!$user) {
+            dd('Không tìm thấy user với email này trong bảng nguoi_dung!');
         }
 
-        return back()->withErrors([
-            'email' => 'Thông tin đăng nhập không chính xác.',
-        ]);
+        // Kiểm tra xem Hash có khớp không
+        $isPasswordMatch = Hash::check($credentials['password'], $user->mat_khau_hash);
+        
+        if (!$isPasswordMatch) {
+            dd([
+                'Lỗi' => 'Mật khẩu không khớp!',
+                'Email nhập vào' => $credentials['email'],
+                'Mật khẩu nhập vào' => $credentials['password'],
+                'Hash trong DB' => $user->mat_khau_hash,
+                'Kết quả Hash::make của 123456' => Hash::make('123456')
+            ]);
+        }
+
+        if ($user->trang_thai != 1) {
+            dd('Tài khoản bị khóa hoặc trang_thai khác 1 (trang_thai hiện tại là: ' . $user->trang_thai . ')');
+        }
+
+        // Nếu qua hết các bước trên mà vẫn đăng nhập được thì tiến hành bình thường
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        if ($user->vai_tro === 'admin') {
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        return redirect()->intended('/');
     }
 
     public function showRegisterForm()
@@ -59,13 +75,13 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // Sử dụng trực tiếp class namespace đầy đủ để đảm bảo gọi đúng Model
         $user = \App\Models\User::create([
             'ho_ten' => $request->ho_ten,
             'email' => $request->email,
             'so_dien_thoai' => $request->so_dien_thoai,
             'mat_khau_hash' => Hash::make($request->password),
             'vai_tro' => 'khach_hang',
+            'trang_thai' => 1, // Mặc định tài khoản đăng ký mới sẽ ở trạng thái hoạt động
         ]);
 
         VoucherService::grantWelcomeVoucher();
@@ -102,11 +118,9 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Email không tồn tại.']);
         }
 
-        // Generate a short-lived one-time password.
         $otp = (string) random_int(100000, 999999);
         
-        // Store token in database
-        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
+        DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
                 'email' => $user->email,
@@ -118,7 +132,7 @@ class AuthController extends Controller
         try {
             Mail::to($user->email)->send(new ResetPasswordMail($otp, $user->email));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Could not send password reset OTP email.', [
+            Log::error('Could not send password reset OTP email.', [
                 'email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
@@ -146,8 +160,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // Find the reset token record
-        $resetRecord = \Illuminate\Support\Facades\DB::table('password_reset_tokens')
+        $resetRecord = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();
 
@@ -158,14 +171,12 @@ class AuthController extends Controller
             return back()->withErrors(['otp' => 'Mã OTP không hợp lệ hoặc đã hết hạn.']);
         }
 
-        // Update password
         $user = User::where('email', $request->email)->first();
         $user->update([
             'mat_khau_hash' => Hash::make($request->password),
         ]);
 
-        // Delete the token
-        \Illuminate\Support\Facades\DB::table('password_reset_tokens')
+        DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->delete();
 

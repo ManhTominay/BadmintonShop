@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->mat_khau_hash;
     }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'nguoi_dung_id');
+    }
 }

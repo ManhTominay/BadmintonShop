@@ -42,7 +42,7 @@ public function store(Request $request)
         'ho_ten' => 'required|string|max:255',
         'email' => 'required|email|unique:nguoi_dung,email',
         'mat_khau' => 'required|min:6',
-        'vai_tro' => 'required|in:admin,khach_hang',
+        'vai_tro' => 'required|in:admin,nhan_vien,khach_hang',
     ]);
 
     \App\Models\User::create([
@@ -68,7 +68,7 @@ public function update(Request $request, $id)
     $request->validate([
         'ho_ten' => 'required|string|max:255',
         'email' => 'required|email|unique:nguoi_dung,email,' . $id,
-        'vai_tro' => 'required|in:admin,khach_hang',
+        'vai_tro' => 'required|in:admin,nhan_vien,khach_hang',
         'mat_khau' => 'nullable|min:6',
     ]);
 

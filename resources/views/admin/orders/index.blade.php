@@ -936,7 +936,14 @@
 
                                     <td class="p-4 text-center">
                                         @if($order->trang_thai_don_hang === 'cho_xu_ly')
-                                            <span class="text-gray-400">Đang chờ xử lý</span>
+                                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="trang_thai" value="dang_giao">
+                                                <button type="submit" class="rounded-lg bg-orange-50 px-3 py-2 font-medium text-orange-600 hover:bg-orange-100 hover:text-orange-800">
+                                                    <i class="fa-solid fa-check mr-1"></i>Xác nhận đơn
+                                                </button>
+                                            </form>
                                         @elseif($order->trang_thai_don_hang === 'dang_giao')
                                             <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
                                                 @csrf

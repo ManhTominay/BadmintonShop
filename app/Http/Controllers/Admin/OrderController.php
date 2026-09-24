@@ -71,8 +71,11 @@ class OrderController extends Controller
         }
 
         $orders = $section === 'orders'
-            ? $ordersQuery->orderBy('id', 'desc')->paginate(10)->withQueryString()
+            ? $ordersQuery->orderBy('id', 'desc')->paginate(10)
             : collect();
+        if ($section === 'orders' && $request) {
+            $orders->appends($request->query());
+        }
         $statusCounts = $section === 'orders'
             ? DonHang::selectRaw('trang_thai_don_hang, COUNT(*) as total')->groupBy('trang_thai_don_hang')->pluck('total', 'trang_thai_don_hang')
             : collect();

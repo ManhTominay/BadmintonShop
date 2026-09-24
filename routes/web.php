@@ -38,6 +38,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // Quản lý đơn hàng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/cancellation-reasons', [OrderController::class, 'cancellationReasons'])->name('orders.cancellationReasons');
+    Route::get('/reviews', [OrderController::class, 'reviews'])->name('orders.reviews');
     Route::get('/vouchers', [OrderController::class, 'vouchers'])->name('vouchers.index');
     Route::post('/vouchers', [OrderController::class, 'storeVoucher'])->name('vouchers.store');
     Route::put('/vouchers/{id}', [OrderController::class, 'updateVoucher'])->name('vouchers.update');
@@ -137,7 +138,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/tai-khoan/mat-khau', [App\Http\Controllers\AccountController::class, 'updatePassword'])->name('account.update-password');
     Route::get('/don-hang', [App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
     Route::post('/don-hang/{id}/huy', [App\Http\Controllers\AccountController::class, 'cancelOrder'])->name('account.orders.cancel');
+    Route::delete('/don-hang/{id}', [App\Http\Controllers\AccountController::class, 'deleteOrder'])->name('account.orders.delete');
+    Route::post('/don-hang/{id}/mua-lai', [App\Http\Controllers\AccountController::class, 'reorder'])->name('account.orders.reorder');
     Route::post('/don-hang/{id}/da-nhan-hang', [App\Http\Controllers\AccountController::class, 'confirmOrderReceived'])->name('account.orders.confirm-received');
+    Route::post('/don-hang/{id}/danh-gia', [App\Http\Controllers\AccountController::class, 'reviewOrderProduct'])->name('account.orders.review');
     Route::get('/tai-khoan/dia-chi', [App\Http\Controllers\AccountController::class, 'addresses'])->name('account.addresses');
     Route::post('/tai-khoan/dia-chi/mac-dinh/{id}', [App\Http\Controllers\AccountController::class, 'setDefaultAddress'])->name('account.addresses.default');
 

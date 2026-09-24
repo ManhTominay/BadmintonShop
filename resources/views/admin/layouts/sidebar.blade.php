@@ -15,6 +15,10 @@
         <i class="fa-solid fa-ban w-5"></i>
         <span>Lý do hủy đơn</span>
     </a>
+    <a href="{{ route('admin.orders.reviews') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.orders.reviews') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-orange-950/60 hover:text-orange-100' }}">
+        <i class="fa-solid fa-star w-5"></i>
+        <span>Đánh giá khách hàng</span>
+    </a>
     <a href="{{ route('admin.vouchers.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium {{ request()->routeIs('admin.vouchers*') ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-300 hover:bg-orange-950/60 hover:text-orange-100' }}">
         <i class="fa-solid fa-ticket w-5"></i>
         <span>Quản lý voucher</span>

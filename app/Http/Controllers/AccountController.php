@@ -6,9 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use App\Models\Address;
+use App\Models\DanhGia;
 use App\Models\DonHang;
+use App\Models\GioHang;
 
 class AccountController extends Controller
 {
@@ -38,7 +41,11 @@ class AccountController extends Controller
         }
 
         $baseQuery = DonHang::where('nguoi_dung_id', $user->id)
-            ->with(['chiTietDonHangs.sanPham', 'chiTietDonHangs.bienThe']);
+            ->with([
+                'chiTietDonHangs.sanPham',
+                'chiTietDonHangs.bienThe',
+                'danhGias' => fn ($query) => $query->where('nguoi_dung_id', $user->id),
+            ]);
         $ordersQuery = (clone $baseQuery);
 
         match ($status) {
@@ -120,6 +127,60 @@ class AccountController extends Controller
     }
 
     /**
+     * Permanently remove one of the authenticated user's finished orders.
+     */
+    public function deleteOrder($id)
+    {
+        $order = DonHang::where('nguoi_dung_id', Auth::id())->findOrFail($id);
+
+        if (!in_array($order->trang_thai_don_hang, ['da_huy', 'hoan_thanh'], true)) {
+            return back()->withErrors(['order' => 'Chỉ có thể xóa đơn hàng đã hủy hoặc hoàn thành.']);
+        }
+
+        DB::transaction(function () use ($order) {
+            $order->chiTietDonHangs()->delete();
+            $order->delete();
+        });
+
+        return redirect()->route('account.orders', [
+            'status' => $order->trang_thai_don_hang === 'hoan_thanh' ? 'hoan_thanh' : 'da_huy',
+        ])
+            ->with('success', 'Đã xóa đơn hàng khỏi lịch sử.');
+    }
+
+    /**
+     * Add the products from a cancelled order back to the cart.
+     */
+    public function reorder($id)
+    {
+        $order = DonHang::where('nguoi_dung_id', Auth::id())
+            ->with('chiTietDonHangs.bienThe')
+            ->findOrFail($id);
+
+        if (!in_array($order->trang_thai_don_hang, ['da_huy', 'hoan_thanh'], true)) {
+            return back()->withErrors(['order' => 'Chỉ có thể mua lại đơn hàng đã hủy hoặc hoàn thành.']);
+        }
+
+        $reorderItems = $order->chiTietDonHangs
+            ->filter(fn ($item) => $item->bienThe && $item->bienThe->san_pham_id)
+            ->mapWithKeys(fn ($item) => [$item->bienThe->id => (int) $item->so_luong])
+            ->all();
+
+        if (empty($reorderItems)) {
+            return back()->withErrors(['order' => 'Các sản phẩm trong đơn không còn khả dụng.']);
+        }
+
+        session(['reorder_items' => $reorderItems]);
+
+        return redirect()->route('checkout', [
+            'return_to_orders' => 1,
+            'order_status' => $order->trang_thai_don_hang === 'hoan_thanh' ? 'hoan_thanh' : 'da_huy',
+            'reorder' => 1,
+        ])
+            ->with('success', 'Đã tải lại sản phẩm vào trang thanh toán.');
+    }
+
+    /**
      * Confirm that the authenticated user received an order.
      */
     public function confirmOrderReceived($id)
@@ -136,6 +197,51 @@ class AccountController extends Controller
 
         return redirect()->route('account.orders', ['status' => 'hoan_thanh'])
             ->with('success', 'Đã xác nhận nhận hàng thành công.');
+    }
+
+    /**
+     * Store or update a review for a product from a completed order.
+     */
+    public function reviewOrderProduct(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'san_pham_id' => ['required', 'integer'],
+            'so_sao' => ['required', 'integer', 'between:1,5'],
+            'noi_dung' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'so_sao.required' => 'Vui lòng chọn số sao đánh giá.',
+            'so_sao.between' => 'Số sao đánh giá phải từ 1 đến 5.',
+            'noi_dung.max' => 'Nội dung đánh giá không được vượt quá 1000 ký tự.',
+        ]);
+
+        $order = DonHang::where('nguoi_dung_id', Auth::id())->findOrFail($id);
+
+        if ($order->trang_thai_don_hang !== 'hoan_thanh') {
+            return back()->withErrors(['review' => 'Chỉ có thể đánh giá đơn hàng đã hoàn thành.']);
+        }
+
+        $hasProduct = $order->chiTietDonHangs()
+            ->where('san_pham_id', $validated['san_pham_id'])
+            ->exists();
+
+        if (!$hasProduct) {
+            return back()->withErrors(['review' => 'Sản phẩm không thuộc đơn hàng này.']);
+        }
+
+        DanhGia::updateOrCreate(
+            [
+                'nguoi_dung_id' => Auth::id(),
+                'don_hang_id' => $order->id,
+                'san_pham_id' => $validated['san_pham_id'],
+            ],
+            [
+                'so_sao' => $validated['so_sao'],
+                'noi_dung' => $validated['noi_dung'] ?? null,
+            ]
+        );
+
+        return redirect()->route('account.orders', ['status' => 'hoan_thanh'])
+            ->with('success', 'Đã gửi đánh giá sản phẩm.');
     }
 
     /**

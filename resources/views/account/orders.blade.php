@@ -97,7 +97,7 @@
 
         @php
             $orderTabs = [
-                'cho_thanh_toan' => 'Chờ thanh toán',
+                'cho_thanh_toan' => 'Chờ xác nhận',
                 'van_chuyen' => 'Vận chuyển',
                 'cho_giao_hang' => 'Chờ giao hàng',
                 'hoan_thanh' => 'Hoàn thành',
@@ -147,7 +147,16 @@
     @if ($orders->count() > 0)
         <div class="space-y-4">
             @foreach ($orders as $order)
-                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition">
+                <div class="relative bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition">
+                    @if (in_array($order->trang_thai_don_hang, ['da_huy', 'hoan_thanh'], true))
+                        <form action="{{ route('account.orders.delete', $order->id) }}" method="POST" class="absolute right-3 top-3" onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này khỏi lịch sử?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-gray-400 hover:bg-red-50 hover:text-red-600" title="Xóa đơn hàng" aria-label="Xóa đơn hàng">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </form>
+                    @endif
                     <!-- Thông tin đơn hàng -->
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -160,7 +169,7 @@
                                 {{ $order->ngay_tao ? date('d/m/Y H:i', strtotime($order->ngay_tao)) : 'N/A' }}
                             </p>
                         </div>
-                        <div class="text-right">
+                        <div class="pr-8 text-right">
                             <p class="text-xl font-bold text-orange-500">
                                 {{ number_format($order->tong_thanh_toan ?? $order->tong_tien_hang, 0, ',', '.') }} ₫
                             </p>
@@ -323,12 +332,26 @@
                             <button type="button" onclick="openCancelModal('cancel-modal-{{ $order->id }}')" class="ml-auto rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100">
                                 <i class="fa-solid fa-ban mr-1"></i>Hủy đơn hàng
                             </button>
-                        @elseif ($order->trang_thai_don_hang === 'da_huy' && $order->ly_do_huy)
-                            <p class="ml-auto text-sm text-red-600"><span class="font-semibold">Lý do hủy:</span> {{ $order->ly_do_huy }}</p>
-                        @elseif ($order->trang_thai_don_hang === 'hoan_thanh')
-                            <span class="ml-auto text-sm font-semibold text-green-600">
-                                <i class="fa-solid fa-circle-check mr-1"></i>Đã xác nhận nhận hàng
-                            </span>
+                        @elseif (in_array($order->trang_thai_don_hang, ['da_huy', 'hoan_thanh'], true))
+                            <div class="ml-auto flex flex-wrap items-center justify-end gap-3">
+                                <form action="{{ route('account.orders.reorder', $order->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600">
+                                        <i class="fa-solid fa-cart-shopping mr-1"></i>Mua lại
+                                    </button>
+                                </form>
+                                @php($hasReviewedProduct = $purchasedProduct && $order->danhGias->contains('san_pham_id', $purchasedProduct->id))
+                                @if ($order->trang_thai_don_hang === 'hoan_thanh' && $purchasedProduct && !$hasReviewedProduct)
+                                    <button type="button" onclick="openReviewModal('review-modal-{{ $order->id }}')" class="rounded-md bg-yellow-50 px-3 py-2 text-sm font-semibold text-yellow-700 hover:bg-yellow-100">
+                                        <i class="fa-solid fa-star mr-1"></i>Đánh giá
+                                    </button>
+                                @endif
+                                @if ($order->trang_thai_don_hang === 'hoan_thanh')
+                                    <span class="text-sm font-semibold text-green-600">
+                                        <i class="fa-solid fa-circle-check mr-1"></i>Đã xác nhận nhận hàng
+                                    </span>
+                                @endif
+                            </div>
                         @endif
                     </div>
 
@@ -356,6 +379,45 @@
                                     <div class="mt-7 flex justify-end gap-3">
                                         <button type="button" onclick="closeCancelModal('cancel-modal-{{ $order->id }}')" class="rounded-md px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100">Không phải bây giờ</button>
                                         <button type="submit" class="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Hủy đơn hàng</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($order->trang_thai_don_hang === 'hoan_thanh' && $purchasedProduct)
+                        <div id="review-modal-{{ $order->id }}" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-labelledby="review-title-{{ $order->id }}">
+                            <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                                <div class="mb-5 flex items-center justify-between">
+                                    <h2 id="review-title-{{ $order->id }}" class="text-xl font-semibold text-gray-800">Đánh giá sản phẩm</h2>
+                                    <button type="button" onclick="closeReviewModal('review-modal-{{ $order->id }}')" class="text-2xl leading-none text-gray-400 hover:text-gray-700" aria-label="Đóng">&times;</button>
+                                </div>
+
+                                <div class="mb-5 flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <img src="{{ $purchasedProduct->image_url }}" alt="{{ $purchasedProduct->ten_san_pham }}" class="h-20 w-20 rounded border border-gray-200 bg-white object-contain p-1">
+                                    <p class="text-sm font-semibold text-gray-800">{{ $purchasedProduct->ten_san_pham }}</p>
+                                </div>
+
+                                <form action="{{ route('account.orders.review', $order->id) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="san_pham_id" value="{{ $purchasedProduct->id }}">
+                                    <fieldset>
+                                        <div class="flex justify-end gap-1" aria-label="Chọn số sao đánh giá">
+                                            @for ($rating = 1; $rating <= 5; $rating++)
+                                                <label data-rating="{{ $rating }}" class="review-star cursor-pointer text-3xl text-gray-300 transition hover:text-yellow-400" title="{{ $rating }} sao">
+                                                    <input type="radio" name="so_sao" value="{{ $rating }}" class="sr-only" onchange="updateReviewStars(this)" required>
+                                                    <i class="fa-solid fa-star"></i>
+                                                </label>
+                                            @endfor
+                                        </div>
+                                    </fieldset>
+                                    <label for="review-content-{{ $order->id }}" class="mt-5 mb-2 block text-sm font-semibold text-gray-700">Nội dung đánh giá</label>
+                                    <textarea id="review-content-{{ $order->id }}" name="noi_dung" rows="4" maxlength="1000" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"></textarea>
+                                    <div class="mt-5 flex justify-end gap-3">
+                                        <button type="button" onclick="closeReviewModal('review-modal-{{ $order->id }}')" class="rounded-md px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100">Để sau</button>
+                                        <button type="submit" class="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">
+                                            <i class="fa-solid fa-paper-plane mr-1"></i>Gửi đánh giá
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -442,6 +504,28 @@
 
         function confirmCancel(form) {
             return window.confirm('Bạn có chắc muốn hủy đơn hàng này không?');
+        }
+
+        function openReviewModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeReviewModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function updateReviewStars(input) {
+            const selectedRating = Number(input.value);
+            const stars = input.closest('fieldset').querySelectorAll('.review-star');
+
+            stars.forEach((star) => {
+                star.classList.toggle('text-yellow-400', Number(star.dataset.rating) <= selectedRating);
+                star.classList.toggle('text-gray-300', Number(star.dataset.rating) > selectedRating);
+            });
         }
     </script>
 

@@ -101,12 +101,25 @@ class CheckoutController extends Controller
         $address = Address::getDefaultForUser($user->id);
 
         $items = $request->query('items');
+        $returnToOrders = $request->boolean('return_to_orders');
+        $reorder = $request->boolean('reorder');
+        $orderStatus = $request->query('order_status', 'da_huy');
 
         if (!$address) {
-            return redirect()->route('checkout.address', ['items' => $items]);
+            return redirect()->route('checkout.address', [
+                'items' => $items,
+                'return_to_orders' => $returnToOrders ? 1 : null,
+                'order_status' => $returnToOrders ? $orderStatus : null,
+                'reorder' => $reorder ? 1 : null,
+            ]);
         }
 
-        return redirect()->route('checkout.payment', ['items' => $items]);
+        return redirect()->route('checkout.payment', [
+            'items' => $items,
+            'return_to_orders' => $returnToOrders ? 1 : null,
+            'order_status' => $returnToOrders ? $orderStatus : null,
+            'reorder' => $reorder ? 1 : null,
+        ]);
     }
 
     public function showAddressForm(Request $request)
@@ -167,7 +180,12 @@ class CheckoutController extends Controller
 
         $selectedItems = $request->input('items');
 
-        return redirect()->route('checkout.payment', ['items' => $selectedItems]);
+        return redirect()->route('checkout.payment', [
+            'items' => $selectedItems,
+            'return_to_orders' => $request->boolean('return_to_orders') ? 1 : null,
+            'order_status' => $request->boolean('return_to_orders') ? $request->input('order_status', 'da_huy') : null,
+            'reorder' => $request->boolean('reorder') ? 1 : null,
+        ]);
     }
 
     public function updateAddress(Request $request)
@@ -214,7 +232,12 @@ class CheckoutController extends Controller
 
         $selectedItems = $request->input('items');
 
-        return redirect()->route('checkout.payment', ['items' => $selectedItems]);
+        return redirect()->route('checkout.payment', [
+            'items' => $selectedItems,
+            'return_to_orders' => $request->boolean('return_to_orders') ? 1 : null,
+            'order_status' => $request->boolean('return_to_orders') ? $request->input('order_status', 'da_huy') : null,
+            'reorder' => $request->boolean('reorder') ? 1 : null,
+        ]);
     }
 
     public function showPaymentPage(Request $request)
@@ -227,6 +250,7 @@ class CheckoutController extends Controller
 
         $selectedIds = $request->query('items');
         $ids = $selectedIds ? explode(',', $selectedIds) : [];
+        $reorderItems = $request->boolean('reorder') ? session('reorder_items', []) : [];
         $items = [];
         $subtotal = 0;
         $addresses = Address::where('nguoi_dung_id', $user->id)
@@ -234,7 +258,33 @@ class CheckoutController extends Controller
             ->orderBy('id')
             ->get();
 
-        if (!empty($ids)) {
+        if ($request->boolean('reorder')) {
+            $variants = \App\Models\BienTheSanPham::with('sanPham')
+                ->whereIn('id', array_keys($reorderItems))
+                ->get();
+
+            foreach ($variants as $variant) {
+                if (!$variant->sanPham) {
+                    continue;
+                }
+
+                $product = $variant->sanPham;
+                $price = (float) ($product->gia_co_ban ?? $product->gia ?? 0);
+                $qty = (int) $reorderItems[$variant->id];
+                $lineTotal = $price * $qty;
+                $subtotal += $lineTotal;
+                $items[] = [
+                    'id' => null,
+                    'bien_the_id' => $variant->id,
+                    'ten' => $product->ten_san_pham ?? 'Sản phẩm',
+                    'anh' => $product->anh_dai_dien ?? 'default.png',
+                    'gia' => $price,
+                    'so_luong' => $qty,
+                    'line_total' => $lineTotal,
+                    'size' => $variant->size,
+                ];
+            }
+        } elseif (!empty($ids)) {
             $cartItems = GioHang::where('nguoi_dung_id', $user->id)
                 ->whereIn('id', $ids)
                 ->get();
@@ -330,6 +380,7 @@ class CheckoutController extends Controller
         $user = Auth::user();
         $validated = $request->validate([
             'items' => 'nullable|string',
+            'reorder' => 'nullable|boolean',
             'address_id' => 'required|integer',
             'payment_method' => 'required|in:VietQR,CashOnDelivery',
             'shipping_fee' => 'required|numeric|min:0',
@@ -337,17 +388,32 @@ class CheckoutController extends Controller
         ]);
 
         $address = Address::where('nguoi_dung_id', $user->id)->findOrFail($validated['address_id']);
+        $isReorder = (bool) ($validated['reorder'] ?? false);
+        $reorderItems = $isReorder ? session('reorder_items', []) : [];
         $itemIds = collect(explode(',', (string) ($validated['items'] ?? '')))
             ->filter(fn ($id) => is_numeric($id))
             ->map(fn ($id) => (int) $id)
             ->values();
 
-        $cartQuery = GioHang::where('nguoi_dung_id', $user->id)->with(['variant.sanPham']);
-        if ($itemIds->isNotEmpty()) {
-            $cartQuery->whereIn('id', $itemIds);
+        if ($isReorder) {
+            $variants = \App\Models\BienTheSanPham::with('sanPham')
+                ->whereIn('id', array_keys($reorderItems))
+                ->get();
+            $cartItems = $variants->map(function ($variant) use ($reorderItems) {
+                $item = new GioHang([
+                    'bien_the_id' => $variant->id,
+                    'so_luong' => (int) $reorderItems[$variant->id],
+                ]);
+                $item->setRelation('variant', $variant);
+                return $item;
+            })->filter(fn ($item) => $item->variant?->sanPham);
+        } else {
+            $cartQuery = GioHang::where('nguoi_dung_id', $user->id)->with(['variant.sanPham']);
+            if ($itemIds->isNotEmpty()) {
+                $cartQuery->whereIn('id', $itemIds);
+            }
+            $cartItems = $cartQuery->get()->filter(fn ($item) => $item->variant?->sanPham);
         }
-
-        $cartItems = $cartQuery->get()->filter(fn ($item) => $item->variant?->sanPham);
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Giỏ hàng không có sản phẩm.'], 422);
         }
@@ -365,7 +431,7 @@ class CheckoutController extends Controller
             $discount = $discountResult['discount'];
         }
 
-        $order = DB::transaction(function () use ($user, $address, $cartItems, $subtotal, $shippingFee, $discount, $validated) {
+        $order = DB::transaction(function () use ($user, $address, $cartItems, $subtotal, $shippingFee, $discount, $validated, $isReorder) {
             $paymentMethod = $validated['payment_method'];
             $order = DonHang::create([
                 'ma_don_hang' => 'DH' . now()->format('YmdHis') . random_int(100, 999),
@@ -398,10 +464,16 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            GioHang::whereIn('id', $cartItems->pluck('id'))->delete();
+            if (!$isReorder) {
+                GioHang::whereIn('id', $cartItems->pluck('id'))->delete();
+            }
 
             return $order;
         });
+
+        if ($isReorder) {
+            session()->forget('reorder_items');
+        }
 
         return response()->json([
             'redirect' => $order->phuong_thuc_thanh_toan === 'VietQR'

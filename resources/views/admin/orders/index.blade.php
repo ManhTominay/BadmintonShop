@@ -978,6 +978,22 @@
                     </table>
 
                 </div>
+
+                <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
+                    <p class="mb-3 text-sm font-semibold text-gray-700">Lọc theo trạng thái đơn hàng</p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('admin.orders.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ !$selectedStatus ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
+                            Tất cả
+                            <span class="ml-1 text-xs opacity-75">({{ $statusCounts->sum() }})</span>
+                        </a>
+                        @foreach($statusOptions as $statusKey => $statusLabel)
+                            <a href="{{ route('admin.orders.index', ['status' => $statusKey]) }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ $selectedStatus === $statusKey ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
+                                {{ $statusLabel }}
+                                <span class="ml-1 text-xs opacity-75">({{ $statusCounts[$statusKey] ?? 0 }})</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
                 @endif
 
             </div>

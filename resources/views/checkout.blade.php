@@ -715,7 +715,7 @@
 <body>
     <div class="checkout-shell">
         <div class="topbar">
-            <a href="{{ route('cart.index') }}" class="back-link">
+            <a href="{{ request()->boolean('return_to_orders') ? route('account.orders', ['status' => request()->query('order_status', 'da_huy')]) : route('cart.index') }}" class="back-link">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span>Quay lại</span>
             </a>
@@ -1208,6 +1208,7 @@
                     const addressId = selectedAddressSummary?.dataset.addressId;
                     const paymentMethod = document.querySelector('.payment-option.active')?.dataset.method;
                     const itemIds = @json(request()->query('items'));
+                    const isReorder = @json(request()->boolean('reorder'));
 
                     if (!addressId || !paymentMethod) {
                         alert('Vui lòng kiểm tra địa chỉ và phương thức thanh toán.');
@@ -1227,6 +1228,7 @@
                             },
                             body: JSON.stringify({
                                 items: itemIds,
+                                reorder: isReorder,
                                 address_id: addressId,
                                 payment_method: paymentMethod,
                                 shipping_fee: shippingFeeEl.dataset.shipping,

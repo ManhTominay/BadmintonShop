@@ -25,7 +25,7 @@
             <h2 class="text-xl font-bold text-slate-900 uppercase">
                 {{ $isEdit ? 'Thay đổi địa chỉ' : 'Thông tin giao hàng' }}
             </h2>
-            <a href="{{ $isEdit || request()->boolean('return_to_checkout') ? route('checkout.payment', ['items' => $selectedItems ?? request()->query('items')]) : route('cart.index') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 hover:text-orange-600">
+            <a href="{{ request()->boolean('return_to_orders') ? route('account.orders', ['status' => request()->query('order_status', 'da_huy')]) : ($isEdit || request()->boolean('return_to_checkout') ? route('checkout.payment', ['items' => $selectedItems ?? request()->query('items')]) : route('cart.index')) }}" class="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 hover:text-orange-600">
                 <i class="fa-solid fa-arrow-left"></i>
                 Quay lại
             </a>
@@ -40,6 +40,13 @@
                 @method('PUT')
             @endif
             <input type="hidden" name="items" value="{{ $selectedItems ?? request()->query('items') }}">
+            @if(request()->boolean('return_to_orders'))
+                <input type="hidden" name="return_to_orders" value="1">
+                <input type="hidden" name="order_status" value="{{ request()->query('order_status', 'da_huy') }}">
+            @endif
+            @if(request()->boolean('reorder'))
+                <input type="hidden" name="reorder" value="1">
+            @endif
             @if($isEdit)
                 <input type="hidden" name="address_id" value="{{ $address->id }}">
             @endif

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đơn hàng - BADMINTON PRO SHOP</title>
+    <title>Quản lý đơn hàng - BADMINTON PRO SHOP</title>
     <base href="{{ asset('/') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -52,7 +52,7 @@
                                 <i class="fa-solid fa-user-pen text-[11px]"></i> Chỉnh sửa tài khoản
                             </a>
                             <a href="{{ route('account.orders') }}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                                <i class="fa-solid fa-box-open text-[11px]"></i> Đơn hàng
+                                <i class="fa-solid fa-box-open text-[11px]"></i> Quản lý đơn hàng
                             </a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -91,7 +91,7 @@
     <main class="max-w-6xl mx-auto px-4 py-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Đơn hàng của tôi</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Quản lý đơn hàng của tôi</h1>
             <p class="text-gray-600">Xem chi tiết các đơn hàng đã đặt</p>
         </div>
 

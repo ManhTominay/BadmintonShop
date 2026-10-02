@@ -21,7 +21,7 @@
             <a href="{{ url('/') }}" target="_blank" class="flex items-center gap-2 text-xs text-orange-200/70 hover:text-orange-100">
                 <i class="fa-solid fa-globe"></i> Xem website chính
             </a>
-            <form action="#" method="POST">
+            <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 bg-orange-950/70 text-orange-300 rounded hover:bg-orange-900/80 hover:text-orange-100 text-xs font-medium">
                     <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất Admin

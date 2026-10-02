@@ -20,6 +20,8 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\EmployeeOrderController;
+use App\Http\Controllers\ChatController;
 
 
 /*
@@ -27,7 +29,7 @@ use App\Http\Controllers\Admin\SettingController;
 | 1. KHU VỰC QUẢN TRỊ ADMIN (Yêu cầu đăng nhập + Check phân quyền admin)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     
     // Trang tổng quan Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -54,6 +56,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 
+});
+
+Route::prefix('nhan-vien')->name('employee.')->middleware(['auth', 'role:nhan_vien'])->group(function () {
+    Route::get('/quan-ly-don-hang', [EmployeeOrderController::class, 'index'])->name('orders.index');
+    Route::put('/quan-ly-don-hang/{id}/status', [EmployeeOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/ho-tro', [EmployeeOrderController::class, 'support'])->name('support.index');
+    Route::post('/ho-tro/{userId}', [ChatController::class, 'employeeSend'])->name('support.send');
 });
 
 
@@ -107,6 +116,8 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    Route::get('/api/ho-tro/tin-nhan', [ChatController::class, 'userMessages'])->name('support.messages');
+    Route::post('/api/ho-tro/tin-nhan', [ChatController::class, 'userSend'])->name('support.send-user');
     // Giỏ hàng
     Route::post('/gio-hang/them/{id}', [CartController::class, 'addToCart'])->name('cart.add');
     Route::post('/gio-hang/them-tat-ca', [CartController::class, 'addAllProducts'])->name('cart.add-all');
@@ -130,6 +141,7 @@ Route::middleware(['auth'])->group(function () {
     // Trang checkout thanh toán thực tế
     Route::get('/thanh-toan/xac-nhan', [CheckoutController::class, 'showPaymentPage'])->name('checkout.payment');
     Route::post('/thanh-toan/dat-hang', [CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
+    Route::get('/thanh-toan/thanh-cong/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
     Route::get('/thanh-toan/vietqr/{order}', [CheckoutController::class, 'showVietQr'])->name('payment.vietqr');
 
     // Tài khoản người dùng
@@ -147,11 +159,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::post('/admin/logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/login');
-})->name('admin.logout');
+    Route::post('/admin/logout', [AuthController::class, 'adminLogout'])->name('admin.logout');
     
 });

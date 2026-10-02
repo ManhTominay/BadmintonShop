@@ -31,6 +31,7 @@ class User extends Authenticatable
         'so_dien_thoai',
         'mat_khau_hash',
         'vai_tro',
+        'trang_thai',
     ];
 
     /**
@@ -47,5 +48,10 @@ class User extends Authenticatable
     public function getAuthPassword()
     {
         return $this->mat_khau_hash;
+    }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'nguoi_dung_id');
     }
 }

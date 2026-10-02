@@ -80,7 +80,7 @@
                     </label>
                 </div>
 
-                <button type="hidden" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase py-3 rounded-lg shadow-lg shadow-orange-500/30 transition-all duration-200">
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase py-3 rounded-lg shadow-lg shadow-orange-500/30 transition-all duration-200">
                     Đăng Nhập
                 </button>
             </form>

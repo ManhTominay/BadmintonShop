@@ -377,6 +377,15 @@ class CheckoutController extends Controller
         return view('checkout', compact('address', 'addresses', 'items', 'subtotal', 'shippingFee', 'voucher', 'finalTotal', 'voucherCode', 'voucherOptions', 'selectedVoucher', 'distanceKm'));
     }
 
+    public function success(DonHang $order)
+    {
+        abort_unless($order->nguoi_dung_id === Auth::id(), 403);
+
+        $order->load('chiTietDonHangs.sanPham');
+
+        return view('checkout-success', compact('order'));
+    }
+
     public function placeOrder(Request $request)
     {
         $user = Auth::user();
@@ -480,7 +489,7 @@ class CheckoutController extends Controller
         return response()->json([
             'redirect' => $order->phuong_thuc_thanh_toan === 'VietQR'
                 ? route('payment.vietqr', $order)
-                : route('account.orders'),
+                : route('checkout.success', $order),
             'order_id' => $order->id,
         ]);
     }

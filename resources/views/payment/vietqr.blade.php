@@ -17,12 +17,15 @@
     @endphp
 
     <main class="mx-auto max-w-lg rounded-2xl bg-white p-6 text-center shadow-sm">
-        <a href="{{ route('account.orders') }}" class="mb-5 inline-block text-sm font-semibold text-orange-600">&larr; Xem đơn hàng</a>
+        <a href="{{ route('account.orders') }}" class="mb-5 inline-block text-sm font-semibold text-orange-600">&larr; Quản lý đơn hàng</a>
         <h1 class="text-2xl font-bold">Quét mã VietQR để thanh toán</h1>
         <p class="mt-2 text-sm text-slate-500">Đơn hàng <strong>{{ $order->ma_don_hang }}</strong></p>
 
         @if ($order->trang_thai_thanh_toan === 'da_thanh_toan')
             <div class="mt-6 rounded-lg bg-emerald-50 p-4 font-semibold text-emerald-700">Đã thanh toán thành công.</div>
+            <a href="{{ route('checkout.success', $order) }}" class="mt-5 inline-block rounded-lg bg-orange-500 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-600">
+                <i class="fa-solid fa-check mr-1"></i>Hoàn tất đơn hàng
+            </a>
         @elseif (!$order->qr_expires_at || $order->qr_expires_at->isPast())
             <div class="mt-6 rounded-lg bg-amber-50 p-4 text-amber-700">Mã QR đã hết hiệu lực. Đơn hàng vẫn đang ở trạng thái chờ thanh toán.</div>
         @elseif (!$qrConfigured)

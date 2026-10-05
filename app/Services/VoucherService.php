@@ -16,6 +16,7 @@ class VoucherService
         return MaGiamGia::query()->get()->mapWithKeys(function (MaGiamGia $voucher) {
             return [$voucher->ma_code => [
                 'label' => $voucher->ma_code,
+                'note' => $voucher->ghi_chu,
                 'type' => $voucher->loai_giam_gia,
                 'value' => (float) $voucher->gia_tri_giam,
                 'min_amount' => (float) $voucher->don_hang_toi_thieu,

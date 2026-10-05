@@ -405,6 +405,12 @@
 
                             </label>
 
+                            <label class="text-sm text-gray-700 md:col-span-5">
+                                <span class="font-medium">Ghi chú voucher</span>
+                                <textarea name="ghi_chu" rows="2" maxlength="1000" class="mt-1 w-full border rounded-lg px-3 py-2" placeholder="Ví dụ: Áp dụng cho khách hàng thân thiết">{{ old('ghi_chu') }}</textarea>
+                                <span class="text-xs text-gray-400">Khách hàng sẽ thấy ghi chú này khi chọn voucher</span>
+                            </label>
+
                         </div>
 
 
@@ -766,6 +772,14 @@
 
                                         </div>
 
+                                        <div class="md:col-span-3">
+                                            <label for="voucher-note-{{ $voucher->id }}" class="text-xs font-semibold text-gray-500 uppercase">
+                                                Ghi chú voucher
+                                            </label>
+                                            <textarea id="voucher-note-{{ $voucher->id }}" name="ghi_chu" rows="2" maxlength="1000" class="mt-1 w-full border rounded-lg px-3 py-2" placeholder="Ví dụ: Áp dụng cho khách hàng thân thiết">{{ old('ghi_chu', $voucher->ghi_chu) }}</textarea>
+                                            <p class="text-xs text-gray-400 mt-1">Khách hàng sẽ thấy ghi chú này khi chọn voucher</p>
+                                        </div>
+
 
                                     </div>
 
@@ -864,6 +878,22 @@
                 <!-- ========================= -->
 
                 @if(($section ?? 'orders') === 'orders')
+                <div class="mb-4 rounded-xl border border-gray-200 bg-white p-4">
+                    <p class="mb-3 text-sm font-semibold text-gray-700">Lọc theo trạng thái đơn hàng</p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('admin.orders.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ !$selectedStatus ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
+                            Tất cả
+                            <span class="ml-1 text-xs opacity-75">({{ $statusCounts->sum() }})</span>
+                        </a>
+                        @foreach($statusOptions as $statusKey => $statusLabel)
+                            <a href="{{ route('admin.orders.index', ['status' => $statusKey]) }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ $selectedStatus === $statusKey ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
+                                {{ $statusLabel }}
+                                <span class="ml-1 text-xs opacity-75">({{ $statusCounts[$statusKey] ?? 0 }})</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div id="orders" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
 
                     <table class="w-full border-collapse text-left text-sm text-gray-600">
@@ -889,6 +919,12 @@
                                 <th class="p-4 font-semibold">
                                     Trạng thái
                                 </th>
+
+                                @if($selectedStatus === 'da_huy')
+                                    <th class="p-4 font-semibold">
+                                        Lý do hủy
+                                    </th>
+                                @endif
 
                                 <th class="p-4 font-semibold text-center">
                                     Thao tác
@@ -934,6 +970,12 @@
 
                                     </td>
 
+                                    @if($selectedStatus === 'da_huy')
+                                        <td class="p-4 text-gray-700">
+                                            {{ $order->ly_do_huy ?: 'Không có lý do' }}
+                                        </td>
+                                    @endif
+
                                     <td class="p-4 text-center">
                                         @if($order->trang_thai_don_hang === 'cho_xu_ly')
                                             <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline">
@@ -958,7 +1000,7 @@
                                                 <i class="fa-solid fa-truck mr-1"></i>Chờ khách xác nhận
                                             </span>
                                         @else
-                                            <span class="text-gray-400">Đã xử lý</span>
+                                            <span class="text-gray-400">Đã hoàn thành</span>
                                         @endif
 
                                     </td>
@@ -970,7 +1012,7 @@
                                 <tr>
 
                                     <td
-                                        colspan="5"
+                                        colspan="{{ $selectedStatus === 'da_huy' ? 6 : 5 }}"
                                         class="p-8 text-center text-gray-400 italic"
                                     >
                                         Chưa có đơn hàng nào trong hệ thống.
@@ -986,20 +1028,8 @@
 
                 </div>
 
-                <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
-                    <p class="mb-3 text-sm font-semibold text-gray-700">Lọc theo trạng thái đơn hàng</p>
-                    <div class="flex flex-wrap gap-2">
-                        <a href="{{ route('admin.orders.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ !$selectedStatus ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
-                            Tất cả
-                            <span class="ml-1 text-xs opacity-75">({{ $statusCounts->sum() }})</span>
-                        </a>
-                        @foreach($statusOptions as $statusKey => $statusLabel)
-                            <a href="{{ route('admin.orders.index', ['status' => $statusKey]) }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ $selectedStatus === $statusKey ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
-                                {{ $statusLabel }}
-                                <span class="ml-1 text-xs opacity-75">({{ $statusCounts[$statusKey] ?? 0 }})</span>
-                            </a>
-                        @endforeach
-                    </div>
+                <div class="mt-4">
+                    {{ $orders->links() }}
                 </div>
                 @endif
 

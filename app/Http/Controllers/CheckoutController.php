@@ -347,6 +347,7 @@ class CheckoutController extends Controller
 
             $voucherOptions[$code] = [
                 'label' => $definition['label'],
+                'note' => $definition['note'] ?? null,
                 'type' => $definition['type'],
                 'value' => $definition['value'],
                 'min_amount' => $definition['min_amount'],

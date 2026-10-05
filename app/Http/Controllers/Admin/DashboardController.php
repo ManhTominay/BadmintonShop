@@ -83,16 +83,30 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $monthStart = now()->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+        $chartMonth = $monthStart->format('m/Y');
         $revenueByDay = (clone $donHangQuery)
             ->select(
                 DB::raw('DATE(ngay_tao) as ngay'),
                 DB::raw('SUM(CASE WHEN (trang_thai_thanh_toan IN ("da_thanh_toan", "DA_THANH_TOAN") OR trang_thai_don_hang IN ("hoan_thanh", "dang_giao", "cho_giao_hang", "van_chuyen")) THEN tong_thanh_toan ELSE 0 END) as doanh_thu')
             )
             ->whereNotNull('ngay_tao')
-            ->where('ngay_tao', '>=', now()->subDays(6)->startOfDay())
+            ->whereBetween('ngay_tao', [$monthStart->copy()->startOfDay(), $monthEnd->copy()->endOfDay()])
             ->groupBy(DB::raw('DATE(ngay_tao)'))
             ->orderBy('ngay', 'asc')
             ->get();
+
+        $revenueByDate = $revenueByDay->keyBy('ngay');
+        $revenueByDay = collect(\Carbon\CarbonPeriod::create($monthStart, $monthEnd))
+            ->map(function ($date) use ($revenueByDate) {
+                $dateKey = $date->toDateString();
+
+                return (object) [
+                    'ngay' => $dateKey,
+                    'doanh_thu' => (float) ($revenueByDate->get($dateKey)->doanh_thu ?? 0),
+                ];
+            });
 
         $recentOrders = DB::table('don_hang as dh')
             ->leftJoin('nguoi_dung as nd', 'nd.id', '=', 'dh.nguoi_dung_id')
@@ -133,6 +147,7 @@ class DashboardController extends Controller
             'paymentCounts',
             'bestProducts',
             'revenueByDay',
+            'chartMonth',
             'recentOrders',
             'statusLabels',
             'paymentLabels'

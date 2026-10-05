@@ -63,11 +63,11 @@
 
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-medium text-gray-500">Thành viên</p>
+                            <p class="text-sm font-medium text-gray-500">Tài Khoản</p>
                             <span class="text-xl text-green-500"><i class="fa-solid fa-users"></i></span>
                         </div>
                         <h3 class="text-3xl font-bold text-gray-900 mt-3">{{ number_format($tongSoNguoiDung ?? 0) }}</h3>
-                    </div>
+                    </div>  
 
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                         <div class="flex items-center justify-between">
@@ -96,28 +96,30 @@
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 xl:col-span-2">
                         <div class="flex justify-between items-center mb-5">
-                            <h3 class="text-lg font-bold text-gray-800">Doanh thu theo 7 ngày gần nhất</h3>
-                            <span class="text-xs font-medium text-gray-500">Từ đơn hàng đã thanh toán</span>
+                            <h3 class="text-lg font-bold text-gray-800">Doanh thu từng ngày trong tháng</h3>
+                            <span class="text-xs font-medium text-gray-500">Tháng {{ $chartMonth }}</span>
                         </div>
 
                         @php
                             $maxRevenue = collect($revenueByDay ?? [])->max('doanh_thu') ?? 0;
                         @endphp
 
-                        <div class="flex items-end gap-3 h-52">
-                            @foreach ($revenueByDay ?? [] as $day)
-                                @php
-                                    $height = $maxRevenue > 0 ? max(12, ($day->doanh_thu / $maxRevenue) * 100) : 0;
-                                    $label = \Carbon\Carbon::parse($day->ngay)->format('d/m');
-                                @endphp
-                                <div class="flex-1 flex flex-col items-center gap-2">
-                                    <div class="w-full flex items-end justify-center h-40">
-                                        <div class="w-full rounded-t-lg bg-gradient-to-t from-orange-500 to-orange-300" style="height: {{ $height }}%; min-height: 8px;"></div>
+                        <div class="overflow-x-auto pb-2">
+                            <div class="flex items-end gap-2 h-52 min-w-max" role="img" aria-label="Biểu đồ doanh thu từng ngày trong tháng {{ $chartMonth }}">
+                                @foreach ($revenueByDay ?? [] as $day)
+                                    @php
+                                        $height = $maxRevenue > 0 && $day->doanh_thu > 0 ? max(4, ($day->doanh_thu / $maxRevenue) * 100) : 0;
+                                        $date = \Carbon\Carbon::parse($day->ngay);
+                                        $label = $date->format('d');
+                                    @endphp
+                                    <div class="w-10 shrink-0 flex flex-col items-center gap-2" title="{{ $date->format('d/m/Y') }}: {{ number_format($day->doanh_thu, 0, ',', '.') }} đ">
+                                        <div class="w-full flex items-end justify-center h-40">
+                                            <div class="w-7 rounded-t-md bg-gradient-to-t from-orange-500 to-orange-300" style="height: {{ $height }}%; min-height: 3px;"></div>
+                                        </div>
+                                        <span class="text-xs text-gray-600">{{ $label }}</span>
                                     </div>
-                                    <span class="text-xs text-gray-500">{{ $label }}</span>
-                                    <span class="text-[10px] text-gray-400">{{ number_format($day->doanh_thu ?? 0, 0, ',', '.') }}đ</span>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 

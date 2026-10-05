@@ -39,7 +39,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Quản lý đơn hàng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/cancellation-reasons', [OrderController::class, 'cancellationReasons'])->name('orders.cancellationReasons');
     Route::get('/reviews', [OrderController::class, 'reviews'])->name('orders.reviews');
     Route::get('/vouchers', [OrderController::class, 'vouchers'])->name('vouchers.index');
     Route::post('/vouchers', [OrderController::class, 'storeVoucher'])->name('vouchers.store');

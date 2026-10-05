@@ -829,6 +829,11 @@
                                                     <span class="block text-xs text-gray-500 mt-0.5">
                                                         Còn lại: {{ $remainingUses }} lượt
                                                     </span>
+                                                    @if(!empty($option['note']))
+                                                        <span class="block break-words text-xs font-semibold text-gray-600 mt-1" title="{{ $option['note'] }}">
+                                                            Ghi chú: {{ $option['note'] }}
+                                                        </span>
+                                                    @endif
                                                 </span>
                                             </label>
                                         @endforeach

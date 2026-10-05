@@ -21,23 +21,6 @@ class OrderController extends Controller
         return $this->managementView('vouchers');
     }
 
-    public function cancellationReasons()
-    {
-        $cancelledOrders = DonHang::where('trang_thai_don_hang', 'da_huy')
-            ->orderByDesc('id')
-            ->paginate(15, ['*'], 'cancelled_page');
-
-        $cancelledCount = DonHang::where('trang_thai_don_hang', 'da_huy')->count();
-        $reasonSummary = DonHang::where('trang_thai_don_hang', 'da_huy')
-            ->whereNotNull('ly_do_huy')
-            ->selectRaw('ly_do_huy, COUNT(*) as total')
-            ->groupBy('ly_do_huy')
-            ->orderByDesc('total')
-            ->get();
-
-        return view('admin.orders.cancellation-reasons', compact('cancelledOrders', 'cancelledCount', 'reasonSummary'));
-    }
-
     public function reviews()
     {
         $reviews = DanhGia::with(['sanPham', 'nguoiDung', 'donHang'])
@@ -111,6 +94,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'ma_code' => ['required', 'string', 'max:50', Rule::unique('ma_giam_gia', 'ma_code')->ignore($voucherId)],
+            'ghi_chu' => ['nullable', 'string', 'max:1000'],
             'loai_giam_gia' => 'required|string|max:50',
             'gia_tri_giam' => 'required|numeric|min:0',
             'don_hang_toi_thieu' => 'required|numeric|min:0',

@@ -40,7 +40,7 @@ class OrderController extends Controller
             'cho_giao_hang' => 'Chờ giao hàng',
             'hoan_thanh' => 'Hoàn thành',
             'da_huy' => 'Đã hủy',
-            'tra_hang_hoan_tien' => 'Trả hàng/Hoàn tiền',
+            'hoan_tien' => 'Hoàn tiền',
         ];
         $selectedStatus = $request?->query('status');
         if (!array_key_exists($selectedStatus, $statusOptions)) {
@@ -49,7 +49,7 @@ class OrderController extends Controller
 
         $ordersQuery = DonHang::query();
         if ($section === 'orders' && $selectedStatus) {
-            if ($selectedStatus === 'tra_hang_hoan_tien') {
+            if ($selectedStatus === 'hoan_tien') {
                 $ordersQuery->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien']);
             } else {
                 $ordersQuery->where('trang_thai_don_hang', $selectedStatus);
@@ -66,7 +66,7 @@ class OrderController extends Controller
             ? DonHang::selectRaw('trang_thai_don_hang, COUNT(*) as total')->groupBy('trang_thai_don_hang')->pluck('total', 'trang_thai_don_hang')
             : collect();
         if ($section === 'orders') {
-            $statusCounts->put('tra_hang_hoan_tien', ($statusCounts['tra_hang'] ?? 0) + ($statusCounts['hoan_tien'] ?? 0));
+            $statusCounts->put('hoan_tien', ($statusCounts['tra_hang'] ?? 0) + ($statusCounts['hoan_tien'] ?? 0));
         }
         $vouchers = MaGiamGia::orderBy('id', 'desc')->get();
 
@@ -126,15 +126,37 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $order = DonHang::findOrFail($id);
-        
+
         $request->validate([
             'trang_thai' => 'required|in:cho_xu_ly,dang_giao,cho_giao_hang,hoan_thanh,da_huy,tra_hang,hoan_tien'
         ]);
+
+        if ($request->input('trang_thai') === 'hoan_tien') {
+            if (
+                $order->trang_thai_don_hang !== 'tra_hang'
+                || $order->trang_thai_thanh_toan !== 'da_thanh_toan'
+            ) {
+                return back()->withErrors(['order' => 'Chỉ có thể xác nhận hoàn tiền cho đơn đã thanh toán đang chờ hoàn tiền.']);
+            }
+
+            if (
+                !$order->ngan_hang_hoan_tien
+                || !$order->ten_chu_tai_khoan_hoan_tien
+                || !$order->so_tai_khoan_hoan_tien
+            ) {
+                return back()->withErrors(['order' => 'Khách hàng cần cung cấp đầy đủ thông tin tài khoản trước khi xác nhận hoàn tiền.']);
+            }
+        }
 
         $order->update([
             'trang_thai_don_hang' => $request->trang_thai
         ]);
 
-        return back()->with('success', 'Đã cập nhật trạng thái đơn hàng thành công!');
+        return back()->with(
+            'success',
+            $request->input('trang_thai') === 'hoan_tien'
+                ? 'Đã xác nhận chuyển tiền hoàn lại cho khách hàng.'
+                : 'Đã cập nhật trạng thái đơn hàng thành công!'
+        );
     }
 }

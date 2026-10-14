@@ -35,7 +35,7 @@ class AccountController extends Controller
         $user = Auth::user();
 
         $status = $request->query('status', 'cho_thanh_toan');
-        $allowedStatuses = ['cho_thanh_toan', 'cho_giao_hang', 'van_chuyen', 'hoan_thanh', 'da_huy', 'tra_hang'];
+        $allowedStatuses = ['cho_thanh_toan', 'cho_giao_hang', 'van_chuyen', 'hoan_thanh', 'da_huy', 'hoan_tien'];
         if (!in_array($status, $allowedStatuses, true)) {
             $status = 'cho_thanh_toan';
         }
@@ -54,7 +54,7 @@ class AccountController extends Controller
             'van_chuyen' => $ordersQuery->where('trang_thai_don_hang', 'dang_giao'),
             'hoan_thanh' => $ordersQuery->where('trang_thai_don_hang', 'hoan_thanh'),
             'da_huy' => $ordersQuery->where('trang_thai_don_hang', 'da_huy'),
-            'tra_hang' => $ordersQuery->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien']),
+            'hoan_tien' => $ordersQuery->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien']),
         };
 
         $orders = $ordersQuery
@@ -68,7 +68,7 @@ class AccountController extends Controller
             'van_chuyen' => (clone $baseQuery)->where('trang_thai_don_hang', 'dang_giao')->count(),
             'hoan_thanh' => (clone $baseQuery)->where('trang_thai_don_hang', 'hoan_thanh')->count(),
             'da_huy' => (clone $baseQuery)->where('trang_thai_don_hang', 'da_huy')->count(),
-            'tra_hang' => (clone $baseQuery)->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien'])->count(),
+            'hoan_tien' => (clone $baseQuery)->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien'])->count(),
         ];
 
         return view('account.orders', [
@@ -118,11 +118,11 @@ class AccountController extends Controller
         });
 
         $message = $wasPaid
-            ? 'Đã hủy đơn hàng. Đơn hàng đã được chuyển sang mục Trả hàng/Hoàn tiền.'
+            ? 'Đã hủy đơn hàng. Đơn hàng đã được chuyển sang mục Hoàn tiền.'
             : 'Đã hủy đơn hàng thành công.';
 
         return redirect()->route('account.orders', [
-            'status' => $wasPaid ? 'tra_hang' : 'da_huy',
+            'status' => $wasPaid ? 'hoan_tien' : 'da_huy',
         ])->with('success', $message);
     }
 
@@ -152,7 +152,7 @@ class AccountController extends Controller
 
         $order->update($validated);
 
-        return redirect()->route('account.orders', ['status' => 'tra_hang'])
+        return redirect()->route('account.orders', ['status' => 'hoan_tien'])
             ->with('success', 'Đã gửi thông tin tài khoản nhận hoàn tiền.');
     }
 

@@ -878,6 +878,16 @@
                 <!-- ========================= -->
 
                 @if(($section ?? 'orders') === 'orders')
+                @if(session('success'))
+                    <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if($errors->has('order'))
+                    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ $errors->first('order') }}
+                    </div>
+                @endif
                 <div class="mb-4 rounded-xl border border-gray-200 bg-white p-4">
                     <p class="mb-3 text-sm font-semibold text-gray-700">Lọc theo trạng thái đơn hàng</p>
                     <div class="flex flex-wrap gap-2">
@@ -925,7 +935,7 @@
                                         Lý do hủy
                                     </th>
                                 @endif
-                                @if($selectedStatus === 'tra_hang_hoan_tien')
+                                @if($selectedStatus === 'hoan_tien')
                                     <th class="p-4 font-semibold">
                                         Thông tin hoàn tiền
                                     </th>
@@ -966,8 +976,8 @@
                                                 'cho_giao_hang' => ['Chờ giao hàng', 'bg-indigo-100 text-indigo-800'],
                                                 'hoan_thanh' => ['Hoàn thành', 'bg-green-100 text-green-800'],
                                                 'da_huy' => ['Đã hủy', 'bg-red-100 text-red-800'],
-                                                'tra_hang' => ['Trả hàng', 'bg-purple-100 text-purple-800'],
-                                                'hoan_tien' => ['Hoàn tiền', 'bg-purple-100 text-purple-800'],
+                                                'tra_hang' => ['Chờ hoàn tiền', 'bg-purple-100 text-purple-800'],
+                                                'hoan_tien' => ['Đã hoàn tiền', 'bg-green-100 text-green-800'],
                                             ];
                                             [$statusLabel, $statusClass] = $statusLabels[$order->trang_thai_don_hang] ?? ['Chờ xác nhận', 'bg-yellow-100 text-yellow-800'];
                                         @endphp
@@ -980,7 +990,7 @@
                                             {{ $order->ly_do_huy ?: 'Không có lý do' }}
                                         </td>
                                     @endif
-                                    @if($selectedStatus === 'tra_hang_hoan_tien')
+                                    @if($selectedStatus === 'hoan_tien')
                                         <td class="p-4 text-gray-700">
                                             @if($order->so_tai_khoan_hoan_tien)
                                                 <div><span class="font-medium">Ngân hàng:</span> {{ $order->ngan_hang_hoan_tien }}</div>
@@ -1017,6 +1027,23 @@
                                             <span class="font-medium text-blue-600">
                                                 <i class="fa-solid fa-truck mr-1"></i>Chờ khách xác nhận
                                             </span>
+                                        @elseif($order->trang_thai_don_hang === 'tra_hang' && $selectedStatus === 'hoan_tien')
+                                            @if($order->trang_thai_thanh_toan === 'da_thanh_toan' && $order->ngan_hang_hoan_tien && $order->ten_chu_tai_khoan_hoan_tien && $order->so_tai_khoan_hoan_tien)
+                                                <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="inline" onsubmit="return confirm('Xác nhận bạn đã chuyển tiền hoàn lại cho khách hàng?')">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="trang_thai" value="hoan_tien">
+                                                    <button type="submit" class="rounded-lg bg-green-50 px-3 py-2 font-medium text-green-700 hover:bg-green-100">
+                                                        <i class="fa-solid fa-check mr-1"></i>Đã chuyển tiền
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-amber-700">Chờ khách cung cấp TK</span>
+                                            @endif
+                                        @elseif($order->trang_thai_don_hang === 'hoan_tien' && $selectedStatus === 'hoan_tien')
+                                            <span class="font-medium text-green-700">
+                                                <i class="fa-solid fa-circle-check mr-1"></i>Đã chuyển tiền
+                                            </span>
                                         @else
                                             <span class="text-gray-400">Đã hoàn thành</span>
                                         @endif
@@ -1030,7 +1057,7 @@
                                 <tr>
 
                                     <td
-                                        colspan="{{ in_array($selectedStatus, ['da_huy', 'tra_hang_hoan_tien'], true) ? 6 : 5 }}"
+                                        colspan="{{ in_array($selectedStatus, ['da_huy', 'hoan_tien'], true) ? 6 : 5 }}"
                                         class="p-8 text-center text-gray-400 italic"
                                     >
                                         Chưa có đơn hàng nào trong hệ thống.

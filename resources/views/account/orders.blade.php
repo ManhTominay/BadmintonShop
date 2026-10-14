@@ -102,7 +102,7 @@
                 'cho_giao_hang' => 'Chờ giao hàng',
                 'hoan_thanh' => 'Hoàn thành',
                 'da_huy' => 'Đã hủy',
-                'tra_hang' => 'Trả hàng/Hoàn tiền',
+                'hoan_tien' => 'Hoàn tiền',
             ];
         @endphp
 
@@ -174,15 +174,19 @@
                                 {{ number_format($order->tong_thanh_toan ?? $order->tong_tien_hang, 0, ',', '.') }} ₫
                             </p>
                             <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full
-                                @if ($order->trang_thai_thanh_toan === 'da_thanh_toan') bg-blue-100 text-blue-700
+                                @if ($order->trang_thai_don_hang === 'hoan_tien') bg-green-100 text-green-700
+                                @elseif ($order->trang_thai_don_hang === 'tra_hang') bg-purple-100 text-purple-700
+                                @elseif ($order->trang_thai_thanh_toan === 'da_thanh_toan') bg-blue-100 text-blue-700
                                 @elseif ($order->trang_thai_don_hang === 'hoan_thanh') bg-green-100 text-green-700
                                 @elseif ($order->trang_thai_don_hang === 'cho_xu_ly') bg-blue-100 text-blue-700
                                 @elseif ($order->trang_thai_don_hang === 'cho_giao_hang') bg-indigo-100 text-indigo-700
                                 @elseif ($order->trang_thai_don_hang === 'da_huy') bg-red-100 text-red-700
                                 @else bg-yellow-100 text-yellow-700 @endif
                             ">
-                                @if (in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true))
+                                @if ($order->trang_thai_don_hang === 'tra_hang')
                                     <i class="fa-solid fa-money-bill-transfer mr-1"></i>Chờ hoàn tiền
+                                @elseif ($order->trang_thai_don_hang === 'hoan_tien')
+                                    <i class="fa-solid fa-circle-check mr-1"></i>Đã hoàn tiền
                                 @elseif ($order->trang_thai_thanh_toan === 'da_thanh_toan')
                                     <i class="fa-solid fa-hourglass-half mr-1"></i>Chờ xử lý
                                 @else
@@ -353,14 +357,24 @@
                                 @endif
                             </div>
                         @endif
-                        @if (in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true) && $order->trang_thai_thanh_toan === 'da_thanh_toan')
-                            <button type="button" onclick="openCancelModal('refund-modal-{{ $order->id }}')" class="ml-auto rounded-md bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-600 hover:bg-orange-100">
-                                <i class="fa-solid fa-building-columns mr-1"></i>{{ $order->so_tai_khoan_hoan_tien ? 'Cập nhật số TK' : 'Ghi số TK vào đây' }}
-                            </button>
+                        @if ($order->trang_thai_don_hang === 'tra_hang' && $order->trang_thai_thanh_toan === 'da_thanh_toan')
+                            @if ($order->so_tai_khoan_hoan_tien)
+                                <span class="ml-auto rounded-md bg-purple-50 px-3 py-2 text-sm font-semibold text-purple-700">
+                                    <i class="fa-solid fa-hourglass-half mr-1"></i>Chờ hoàn tiền
+                                </span>
+                            @else
+                                <button type="button" onclick="openCancelModal('refund-modal-{{ $order->id }}')" class="ml-auto rounded-md bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-600 hover:bg-orange-100">
+                                    <i class="fa-solid fa-building-columns mr-1"></i>Ghi số TK vào đây
+                                </button>
+                            @endif
+                        @elseif ($order->trang_thai_don_hang === 'hoan_tien')
+                            <span class="ml-auto rounded-md bg-green-50 px-3 py-2 text-sm font-semibold text-green-700">
+                                <i class="fa-solid fa-circle-check mr-1"></i>Đã hoàn tiền
+                            </span>
                         @endif
                     </div>
 
-                    @if (in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true) && $order->trang_thai_thanh_toan === 'da_thanh_toan')
+                    @if ($order->trang_thai_don_hang === 'tra_hang' && $order->trang_thai_thanh_toan === 'da_thanh_toan')
                         <div id="refund-modal-{{ $order->id }}" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-labelledby="refund-title-{{ $order->id }}">
                             <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
                                 <div class="mb-5 flex items-center justify-between">

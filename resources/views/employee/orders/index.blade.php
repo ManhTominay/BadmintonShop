@@ -77,8 +77,8 @@
                                 'cho_giao_hang' => ['Chờ giao hàng', 'bg-indigo-100 text-indigo-800'],
                                 'hoan_thanh' => ['Hoàn thành', 'bg-green-100 text-green-800'],
                                 'da_huy' => ['Đã hủy', 'bg-red-100 text-red-800'],
-                                'tra_hang' => ['Trả hàng', 'bg-purple-100 text-purple-800'],
-                                'hoan_tien' => ['Hoàn tiền', 'bg-purple-100 text-purple-800'],
+                                'tra_hang' => ['Chờ hoàn tiền', 'bg-purple-100 text-purple-800'],
+                                'hoan_tien' => ['Đã hoàn tiền', 'bg-green-100 text-green-800'],
                             ];
                             [$statusLabel, $statusClass] = $statusLabels[$order->trang_thai_don_hang] ?? ['Chờ xác nhận', 'bg-yellow-100 text-yellow-800'];
                         @endphp

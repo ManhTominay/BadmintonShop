@@ -121,8 +121,8 @@ class DashboardController extends Controller
             'cho_giao_hang' => 'Chờ giao hàng',
             'hoan_thanh' => 'Hoàn thành',
             'da_huy' => 'Đã hủy',
-            'tra_hang' => 'Trả hàng',
-            'hoan_tien' => 'Hoàn tiền',
+            'tra_hang' => 'Chờ hoàn tiền',
+            'hoan_tien' => 'Đã hoàn tiền',
         ];
 
         $paymentLabels = [

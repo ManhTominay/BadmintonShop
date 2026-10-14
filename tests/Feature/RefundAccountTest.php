@@ -35,7 +35,7 @@ class RefundAccountTest extends TestCase
                 'ten_chu_tai_khoan_hoan_tien' => 'NGUYEN VAN A',
                 'so_tai_khoan_hoan_tien' => '0123456789',
             ])
-            ->assertRedirect(route('account.orders', ['status' => 'tra_hang']));
+            ->assertRedirect(route('account.orders', ['status' => 'hoan_tien']));
 
         $this->assertDatabaseHas('don_hang', [
             'id' => $order->id,
@@ -43,6 +43,15 @@ class RefundAccountTest extends TestCase
             'ten_chu_tai_khoan_hoan_tien' => 'NGUYEN VAN A',
             'so_tai_khoan_hoan_tien' => '0123456789',
         ]);
+
+        $this->actingAs($user)
+            ->get(route('account.orders', ['status' => 'hoan_tien']))
+            ->assertOk()
+            ->assertSee('Hoàn tiền')
+            ->assertDontSee('Trả hàng')
+            ->assertSee('Chờ hoàn tiền')
+            ->assertDontSee('Cập nhật số TK')
+            ->assertDontSee('Ghi số TK vào đây');
 
         $admin = new User([
             'ho_ten' => 'Quản trị viên',
@@ -52,11 +61,37 @@ class RefundAccountTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('admin.orders.index', ['status' => 'tra_hang_hoan_tien']))
+            ->get(route('admin.orders.index', ['status' => 'hoan_tien']))
             ->assertOk()
-            ->assertSee('Trả hàng/Hoàn tiền')
+            ->assertSee('Hoàn tiền')
+            ->assertDontSee('Trả hàng')
+            ->assertSee('Chờ hoàn tiền')
             ->assertSee('0123456789')
-            ->assertSee('NGUYEN VAN A');
+            ->assertSee('NGUYEN VAN A')
+            ->assertSee('Đã chuyển tiền');
+
+        $this->actingAs($admin)
+            ->put(route('admin.orders.updateStatus', $order->id), [
+                'trang_thai' => 'hoan_tien',
+            ])
+            ->assertSessionHas('success', 'Đã xác nhận chuyển tiền hoàn lại cho khách hàng.');
+
+        $this->assertDatabaseHas('don_hang', [
+            'id' => $order->id,
+            'trang_thai_don_hang' => 'hoan_tien',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.orders', ['status' => 'hoan_tien']))
+            ->assertOk()
+            ->assertSee('Đã hoàn tiền')
+            ->assertDontSee('Cập nhật số TK');
+
+        $this->actingAs($admin)
+            ->get(route('admin.orders.index', ['status' => 'hoan_tien']))
+            ->assertOk()
+            ->assertSee('Đã hoàn tiền')
+            ->assertSee('Đã chuyển tiền');
     }
 
     public function test_customer_cannot_submit_refund_details_for_an_unpaid_order(): void
@@ -77,7 +112,7 @@ class RefundAccountTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->from(route('account.orders', ['status' => 'tra_hang']))
+            ->from(route('account.orders', ['status' => 'hoan_tien']))
             ->post(route('account.orders.refund-account', $order->id), [
                 'ngan_hang_hoan_tien' => 'Ngân hàng A',
                 'ten_chu_tai_khoan_hoan_tien' => 'NGUYEN VAN A',
@@ -88,6 +123,36 @@ class RefundAccountTest extends TestCase
         $this->assertDatabaseMissing('don_hang', [
             'id' => $order->id,
             'so_tai_khoan_hoan_tien' => '0123456789',
+        ]);
+    }
+
+    public function test_admin_cannot_confirm_refund_without_customer_bank_details(): void
+    {
+        $this->withoutMiddleware(UpdateUserLastActivity::class);
+
+        $admin = new User([
+            'ho_ten' => 'Quản trị viên',
+            'email' => 'refund-admin-without-details@example.com',
+            'mat_khau_hash' => 'password',
+            'vai_tro' => 'admin',
+        ]);
+        $order = DonHang::create([
+            'ma_don_hang' => 'DH-REFUND-3',
+            'phuong_thuc_thanh_toan' => 'VietQR',
+            'trang_thai_thanh_toan' => 'da_thanh_toan',
+            'trang_thai_don_hang' => 'tra_hang',
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.orders.index', ['status' => 'hoan_tien']))
+            ->put(route('admin.orders.updateStatus', $order->id), [
+                'trang_thai' => 'hoan_tien',
+            ])
+            ->assertSessionHasErrors('order');
+
+        $this->assertDatabaseHas('don_hang', [
+            'id' => $order->id,
+            'trang_thai_don_hang' => 'tra_hang',
         ]);
     }
 }

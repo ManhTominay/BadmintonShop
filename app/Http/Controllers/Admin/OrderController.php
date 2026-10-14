@@ -40,8 +40,7 @@ class OrderController extends Controller
             'cho_giao_hang' => 'Chờ giao hàng',
             'hoan_thanh' => 'Hoàn thành',
             'da_huy' => 'Đã hủy',
-            'tra_hang' => 'Trả hàng',
-            'hoan_tien' => 'Hoàn tiền',
+            'tra_hang_hoan_tien' => 'Trả hàng/Hoàn tiền',
         ];
         $selectedStatus = $request?->query('status');
         if (!array_key_exists($selectedStatus, $statusOptions)) {
@@ -50,7 +49,11 @@ class OrderController extends Controller
 
         $ordersQuery = DonHang::query();
         if ($section === 'orders' && $selectedStatus) {
-            $ordersQuery->where('trang_thai_don_hang', $selectedStatus);
+            if ($selectedStatus === 'tra_hang_hoan_tien') {
+                $ordersQuery->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien']);
+            } else {
+                $ordersQuery->where('trang_thai_don_hang', $selectedStatus);
+            }
         }
 
         $orders = $section === 'orders'
@@ -62,6 +65,9 @@ class OrderController extends Controller
         $statusCounts = $section === 'orders'
             ? DonHang::selectRaw('trang_thai_don_hang, COUNT(*) as total')->groupBy('trang_thai_don_hang')->pluck('total', 'trang_thai_don_hang')
             : collect();
+        if ($section === 'orders') {
+            $statusCounts->put('tra_hang_hoan_tien', ($statusCounts['tra_hang'] ?? 0) + ($statusCounts['hoan_tien'] ?? 0));
+        }
         $vouchers = MaGiamGia::orderBy('id', 'desc')->get();
 
         return view('admin.orders.index', compact('orders', 'vouchers', 'section', 'statusOptions', 'selectedStatus', 'statusCounts'));

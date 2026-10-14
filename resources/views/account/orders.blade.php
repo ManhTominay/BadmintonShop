@@ -181,7 +181,7 @@
                                 @elseif ($order->trang_thai_don_hang === 'da_huy') bg-red-100 text-red-700
                                 @else bg-yellow-100 text-yellow-700 @endif
                             ">
-                                @if ($order->trang_thai_don_hang === 'tra_hang')
+                                @if (in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true))
                                     <i class="fa-solid fa-money-bill-transfer mr-1"></i>Chờ hoàn tiền
                                 @elseif ($order->trang_thai_thanh_toan === 'da_thanh_toan')
                                     <i class="fa-solid fa-hourglass-half mr-1"></i>Chờ xử lý
@@ -321,7 +321,7 @@
                                 <i class="fa-solid fa-eye mr-1"></i>Không còn sản phẩm
                             </span>
                         @endif
-                        @if (in_array($order->trang_thai_don_hang, ['cho_giao_hang', 'dang_giao'], true))
+                        @if ($order->trang_thai_don_hang === 'cho_giao_hang')
                             <form action="{{ route('account.orders.confirm-received', $order->id) }}" method="POST" class="ml-auto" onsubmit="return confirm('Bạn xác nhận đã nhận được đơn hàng này?')">
                                 @csrf
                                 <button type="submit" class="rounded-md bg-green-50 px-3 py-2 text-sm font-semibold text-green-600 hover:bg-green-100">
@@ -353,7 +353,42 @@
                                 @endif
                             </div>
                         @endif
+                        @if (in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true) && $order->trang_thai_thanh_toan === 'da_thanh_toan')
+                            <button type="button" onclick="openCancelModal('refund-modal-{{ $order->id }}')" class="ml-auto rounded-md bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-600 hover:bg-orange-100">
+                                <i class="fa-solid fa-building-columns mr-1"></i>{{ $order->so_tai_khoan_hoan_tien ? 'Cập nhật số TK' : 'Ghi số TK vào đây' }}
+                            </button>
+                        @endif
                     </div>
+
+                    @if (in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true) && $order->trang_thai_thanh_toan === 'da_thanh_toan')
+                        <div id="refund-modal-{{ $order->id }}" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-labelledby="refund-title-{{ $order->id }}">
+                            <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+                                <div class="mb-5 flex items-center justify-between">
+                                    <h2 id="refund-title-{{ $order->id }}" class="text-xl font-semibold text-gray-800">Thông tin tài khoản nhận hoàn tiền</h2>
+                                    <button type="button" onclick="closeCancelModal('refund-modal-{{ $order->id }}')" class="text-2xl leading-none text-gray-400 hover:text-gray-700" aria-label="Đóng">&times;</button>
+                                </div>
+                                <form action="{{ route('account.orders.refund-account', $order->id) }}" method="POST" class="space-y-4">
+                                    @csrf
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Ngân hàng
+                                        <input type="text" name="ngan_hang_hoan_tien" maxlength="100" required value="{{ old('ngan_hang_hoan_tien', $order->ngan_hang_hoan_tien) }}" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2">
+                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Tên chủ tài khoản
+                                        <input type="text" name="ten_chu_tai_khoan_hoan_tien" maxlength="100" required value="{{ old('ten_chu_tai_khoan_hoan_tien', $order->ten_chu_tai_khoan_hoan_tien) }}" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2">
+                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Số tài khoản
+                                        <input type="text" name="so_tai_khoan_hoan_tien" maxlength="34" required value="{{ old('so_tai_khoan_hoan_tien', $order->so_tai_khoan_hoan_tien) }}" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2">
+                                    </label>
+                                    <div class="flex justify-end gap-3 pt-2">
+                                        <button type="button" onclick="closeCancelModal('refund-modal-{{ $order->id }}')" class="rounded-md px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100">Để sau</button>
+                                        <button type="submit" class="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Gửi thông tin</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
 
                     @if ($order->trang_thai_don_hang === 'cho_xu_ly')
                         <div id="cancel-modal-{{ $order->id }}" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-labelledby="cancel-title-{{ $order->id }}">

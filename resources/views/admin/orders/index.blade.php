@@ -925,6 +925,11 @@
                                         Lý do hủy
                                     </th>
                                 @endif
+                                @if($selectedStatus === 'tra_hang_hoan_tien')
+                                    <th class="p-4 font-semibold">
+                                        Thông tin hoàn tiền
+                                    </th>
+                                @endif
 
                                 <th class="p-4 font-semibold text-center">
                                     Thao tác
@@ -975,6 +980,19 @@
                                             {{ $order->ly_do_huy ?: 'Không có lý do' }}
                                         </td>
                                     @endif
+                                    @if($selectedStatus === 'tra_hang_hoan_tien')
+                                        <td class="p-4 text-gray-700">
+                                            @if($order->so_tai_khoan_hoan_tien)
+                                                <div><span class="font-medium">Ngân hàng:</span> {{ $order->ngan_hang_hoan_tien }}</div>
+                                                <div><span class="font-medium">Chủ TK:</span> {{ $order->ten_chu_tai_khoan_hoan_tien }}</div>
+                                                <div><span class="font-medium">Số TK:</span> {{ $order->so_tai_khoan_hoan_tien }}</div>
+                                                <div class="mt-1 text-xs text-gray-500">Lý do: {{ $order->ly_do_huy ?: 'Không có lý do' }}</div>
+                                            @else
+                                                <span class="text-amber-700">Khách chưa cung cấp thông tin</span>
+                                                <div class="mt-1 text-xs text-gray-500">Lý do: {{ $order->ly_do_huy ?: 'Không có lý do' }}</div>
+                                            @endif
+                                        </td>
+                                    @endif
 
                                     <td class="p-4 text-center">
                                         @if($order->trang_thai_don_hang === 'cho_xu_ly')
@@ -1012,7 +1030,7 @@
                                 <tr>
 
                                     <td
-                                        colspan="{{ $selectedStatus === 'da_huy' ? 6 : 5 }}"
+                                        colspan="{{ in_array($selectedStatus, ['da_huy', 'tra_hang_hoan_tien'], true) ? 6 : 5 }}"
                                         class="p-8 text-center text-gray-400 italic"
                                     >
                                         Chưa có đơn hàng nào trong hệ thống.

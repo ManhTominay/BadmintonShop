@@ -149,6 +149,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/tai-khoan/mat-khau', [App\Http\Controllers\AccountController::class, 'updatePassword'])->name('account.update-password');
     Route::get('/don-hang', [App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
     Route::post('/don-hang/{id}/huy', [App\Http\Controllers\AccountController::class, 'cancelOrder'])->name('account.orders.cancel');
+    Route::post('/don-hang/{id}/tai-khoan-hoan-tien', [App\Http\Controllers\AccountController::class, 'submitRefundAccount'])->name('account.orders.refund-account');
     Route::delete('/don-hang/{id}', [App\Http\Controllers\AccountController::class, 'deleteOrder'])->name('account.orders.delete');
     Route::post('/don-hang/{id}/mua-lai', [App\Http\Controllers\AccountController::class, 'reorder'])->name('account.orders.reorder');
     Route::post('/don-hang/{id}/da-nhan-hang', [App\Http\Controllers\AccountController::class, 'confirmOrderReceived'])->name('account.orders.confirm-received');

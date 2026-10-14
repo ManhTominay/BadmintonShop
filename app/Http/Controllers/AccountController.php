@@ -127,6 +127,36 @@ class AccountController extends Controller
     }
 
     /**
+     * Save bank details for refunding a paid order that the customer cancelled.
+     */
+    public function submitRefundAccount(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'ngan_hang_hoan_tien' => ['required', 'string', 'max:100'],
+            'ten_chu_tai_khoan_hoan_tien' => ['required', 'string', 'max:100'],
+            'so_tai_khoan_hoan_tien' => ['required', 'string', 'max:34'],
+        ], [
+            'ngan_hang_hoan_tien.required' => 'Vui lòng nhập tên ngân hàng.',
+            'ten_chu_tai_khoan_hoan_tien.required' => 'Vui lòng nhập tên chủ tài khoản.',
+            'so_tai_khoan_hoan_tien.required' => 'Vui lòng nhập số tài khoản.',
+        ]);
+
+        $order = DonHang::where('nguoi_dung_id', Auth::id())->findOrFail($id);
+
+        if (
+            !in_array($order->trang_thai_don_hang, ['tra_hang', 'hoan_tien'], true)
+            || $order->trang_thai_thanh_toan !== 'da_thanh_toan'
+        ) {
+            return back()->withErrors(['order' => 'Đơn hàng này không thuộc diện yêu cầu hoàn tiền.']);
+        }
+
+        $order->update($validated);
+
+        return redirect()->route('account.orders', ['status' => 'tra_hang'])
+            ->with('success', 'Đã gửi thông tin tài khoản nhận hoàn tiền.');
+    }
+
+    /**
      * Permanently remove one of the authenticated user's finished orders.
      */
     public function deleteOrder($id)
@@ -187,8 +217,8 @@ class AccountController extends Controller
     {
         $order = DonHang::where('nguoi_dung_id', Auth::id())->findOrFail($id);
 
-        if (!in_array($order->trang_thai_don_hang, ['cho_giao_hang', 'dang_giao'], true)) {
-            return back()->withErrors(['order' => 'Chỉ có thể xác nhận khi đơn hàng đang được giao.']);
+        if ($order->trang_thai_don_hang !== 'cho_giao_hang') {
+            return back()->withErrors(['order' => 'Chỉ có thể xác nhận khi đơn hàng đang chờ giao hàng.']);
         }
 
         $order->update([

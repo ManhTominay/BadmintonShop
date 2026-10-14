@@ -8,11 +8,35 @@ use Illuminate\Http\Request;
 
 class EmployeeOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = DonHang::orderByDesc('id')->paginate(15);
+        $statusOptions = [
+            'cho_xu_ly' => 'Chờ xác nhận',
+            'dang_giao' => 'Đang giao',
+            'cho_giao_hang' => 'Chờ giao hàng',
+            'hoan_thanh' => 'Hoàn thành',
+            'da_huy' => 'Đã hủy',
+            'hoan_tien' => 'Hoàn tiền',
+        ];
+        $selectedStatus = $request->query('status');
+        if (!array_key_exists($selectedStatus, $statusOptions)) {
+            $selectedStatus = null;
+        }
 
-        return view('employee.orders.index', compact('orders'));
+        $ordersQuery = DonHang::query();
+        if ($selectedStatus === 'hoan_tien') {
+            $ordersQuery->whereIn('trang_thai_don_hang', ['tra_hang', 'hoan_tien']);
+        } elseif ($selectedStatus) {
+            $ordersQuery->where('trang_thai_don_hang', $selectedStatus);
+        }
+
+        $orders = $ordersQuery->orderByDesc('id')->paginate(10)->appends($request->query());
+        $statusCounts = DonHang::selectRaw('trang_thai_don_hang, COUNT(*) as total')
+            ->groupBy('trang_thai_don_hang')
+            ->pluck('total', 'trang_thai_don_hang');
+        $statusCounts->put('hoan_tien', ($statusCounts['tra_hang'] ?? 0) + ($statusCounts['hoan_tien'] ?? 0));
+
+        return view('employee.orders.index', compact('orders', 'statusOptions', 'selectedStatus', 'statusCounts'));
     }
 
     public function support()
